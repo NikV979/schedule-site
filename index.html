@@ -10,12 +10,14 @@
 <meta name="theme-color" content="#1A1A2E">
 <link rel="manifest" href='data:application/manifest+json,{"name":"Дневник Р144С","short_name":"Дневник","start_url":"./","display":"standalone","orientation":"any","background_color":"%230F0F1E","theme_color":"%231A1A2E"}'>
 <link rel="apple-touch-icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="%236C5CE7"/><text x="90" y="118" font-size="90" font-family="Arial" fill="white" text-anchor="middle" font-weight="bold">Р</text></svg>'>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>Дневник Р144С</title>
 <style>
   :root {
     --bg-page:        #E8EAF2;
     --bg-surface:     #FFFFFF;
     --bg-surface-2:   #F5F6FA;
+    --bg-surface-3:   #FAFBFF;
     --border-main:    #3A3A7A;
     --border-light:   #B8BCCE;
     --text-primary:   #1A1A5A;
@@ -36,6 +38,7 @@
     --bg-page:        #0F0F1E;
     --bg-surface:     #1A1A2E;
     --bg-surface-2:   #22223A;
+    --bg-surface-3:   #262642;
     --border-main:    #55558A;
     --border-light:   #3A3A5A;
     --text-primary:   #E5E5F2;
@@ -64,8 +67,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Шапка с вкладками. Паддинги слева/справа симметричны,
-     поэтому justify-content: center даёт идеальный центр. */
   .tabs {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -111,10 +112,33 @@
     color: #fff;
   }
   .tab-today:active:not(:disabled) { filter: brightness(0.92); }
-  .tab-today:disabled {
-    opacity: 0.4;
-    cursor: default;
+  .tab-today:disabled { opacity: 0.4; cursor: default; }
+
+  .menu-btn {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--tab-bg);
+    color: var(--tab-text);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 22;
+    transition: filter 0.15s, background 0.25s, color 0.25s;
   }
+  .menu-btn:hover { filter: brightness(0.95); }
+  .menu-btn:active { transform: translateY(-50%) scale(0.92); }
 
   .top-actions {
     position: absolute;
@@ -141,19 +165,32 @@
     justify-content: center;
   }
 
-  .btn-theme, .btn-fs {
+  .btn-theme, .btn-fs, .btn-auth {
     font-size: 16px;
     background: var(--tab-bg);
     color: var(--tab-text);
     line-height: 1;
     width: 36px;
   }
-  .btn-theme:hover, .btn-fs:hover { filter: brightness(0.95); }
+  .btn-theme:hover, .btn-fs:hover, .btn-auth:hover { filter: brightness(0.95); }
 
-  /* Кнопка «Во весь экран» — только для ПК. На тач-устройствах скрываем. */
+  .btn-auth.logged-in {
+    background: #E4F7EE;
+    color: #00876A;
+  }
+  [data-theme="dark"] .btn-auth.logged-in {
+    background: #123A2E;
+    color: #4FE0B8;
+  }
+
   @media (hover: none) and (pointer: coarse) {
     .btn-fs { display: none !important; }
   }
+
+  body.view-homework .tab[data-view],
+  body.view-homework .tab-today { display: none !important; }
+  body.view-homework .week-nav { display: none !important; }
+  body.view-homework .banner { display: none !important; }
 
   .week-nav {
     position: fixed;
@@ -204,19 +241,13 @@
   }
 
   .nav-btn:active { transform: scale(0.94); }
-
-  .nav-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .nav-btn:disabled:hover,
   .week-nav.odd .nav-btn:disabled:hover {
     background: var(--bg-surface-2);
     color: var(--text-primary);
     border-color: var(--border-light);
   }
-
   .nav-btn:disabled:active { transform: none; }
 
   .nav-info {
@@ -487,174 +518,6 @@
     transition: color 0.25s;
   }
 
-  /* ============== МОБИЛЬНЫЙ ДЕНЬ ============== */
-
-  .diary-wrap[data-view="mobile"] {
-    display: none;
-  }
-  .diary-wrap[data-view="mobile"].active {
-    display: flex;
-  }
-
-  .mobile-day-page {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .mobile-day-nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: var(--bg-surface);
-    border: 2px solid var(--border-main);
-    border-radius: 10px;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: background 0.25s, border-color 0.25s;
-  }
-
-  .mob-nav-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 2px solid var(--border-light);
-    background: var(--bg-surface-2);
-    color: var(--text-primary);
-    font-size: 24px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    font-family: inherit;
-    padding: 0;
-    line-height: 1;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .mob-nav-btn:active:not(:disabled) { transform: scale(0.92); }
-  .mob-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .mob-day-title {
-    flex: 1;
-    text-align: center;
-    color: var(--text-primary);
-    line-height: 1.25;
-    min-width: 0;
-  }
-  .mob-day-title .mob-title-day {
-    display: block;
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-  .mob-day-title .mob-title-date {
-    display: block;
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-top: 2px;
-    letter-spacing: 0.3px;
-  }
-
-  .mobile-day-body {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-bottom: 12px;
-  }
-
-  .mob-pair {
-    background: var(--bg-surface);
-    border: 2px solid var(--border-main);
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: background 0.25s, border-color 0.25s;
-  }
-
-  .mob-pair-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .mob-pair-num {
-    color: var(--accent-even);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-  }
-
-  .mobile-day-page.is-odd .mob-pair-num {
-    color: var(--accent-odd);
-  }
-
-  .mob-pair-time {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-
-  .mob-pair-room {
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: var(--bg-surface-2);
-    border: 1px solid var(--border-light);
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-  }
-
-  .mob-pair-subj {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.3;
-  }
-
-  .mob-pair-type {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 12px;
-  }
-
-  .mob-pair-teacher {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-top: -2px;
-  }
-
-  .mob-empty {
-    padding: 50px 20px;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-style: italic;
-    border: 2px dashed var(--border-light);
-    border-radius: 10px;
-    background: var(--bg-surface);
-  }
-
-  /* ============== РАСПИСАНИЕ ЗВОНКОВ ============== */
-
   .bell-page {
     width: 1700px;
     height: 1000px;
@@ -744,49 +607,783 @@
   .bell-row > div:last-child { border-right: none; }
 
   .bell-num-cell {
-    font-size: 34px;
-    font-weight: 800;
+    font-size: 34px; font-weight: 800;
     color: var(--text-primary);
     letter-spacing: 1px;
     transition: color 0.25s;
   }
 
   .bell-time-cell {
-    font-size: 32px;
-    font-weight: 800;
+    font-size: 32px; font-weight: 800;
     color: var(--text-primary);
-    letter-spacing: 1px;
-    white-space: nowrap;
+    letter-spacing: 1px; white-space: nowrap;
     transition: color 0.25s;
   }
 
   .bell-break-cell {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 22px; font-weight: 700;
     color: var(--accent-even);
     letter-spacing: 0.5px;
     transition: color 0.25s;
   }
-
   .bell-break-cell.none {
     color: var(--text-secondary);
-    font-style: italic;
+    font-style: italic; font-weight: 600;
+  }
+
+  .bell-row.bell-current { background: rgba(0, 184, 148, 0.12); }
+  [data-theme="dark"] .bell-row.bell-current { background: rgba(0, 209, 167, 0.14); }
+  .bell-row.bell-current .bell-time-cell { color: #00B894; }
+  [data-theme="dark"] .bell-row.bell-current .bell-time-cell { color: #00D1A7; }
+
+  .mobile-day-page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .mobile-day-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .mob-nav-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    font-size: 24px; font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-family: inherit;
+    padding: 0; line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .mob-nav-btn:active:not(:disabled) { transform: scale(0.92); }
+  .mob-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .mob-day-title {
+    flex: 1;
+    text-align: center;
+    color: var(--text-primary);
+    line-height: 1.25;
+    min-width: 0;
+  }
+  .mob-day-title .mob-title-day {
+    display: block;
+    font-size: 17px; font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .mob-day-title .mob-title-date {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
     font-weight: 600;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
   }
 
-  .bell-row.bell-current {
-    background: rgba(0, 184, 148, 0.12);
-  }
-  [data-theme="dark"] .bell-row.bell-current {
-    background: rgba(0, 209, 167, 0.14);
+  .mobile-day-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
   }
 
-  .bell-row.bell-current .bell-time-cell {
-    color: #00B894;
+  .mob-pair {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: background 0.25s, border-color 0.25s;
   }
-  [data-theme="dark"] .bell-row.bell-current .bell-time-cell {
-    color: #00D1A7;
+
+  .mob-pair-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+
+  .mob-pair-num {
+    color: var(--accent-even);
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.3px; white-space: nowrap;
+  }
+
+  .mobile-day-page.is-odd .mob-pair-num { color: var(--accent-odd); }
+
+  .mob-pair-time {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 14px; font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  .mob-pair-room {
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border-light);
+    font-size: 12px; font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .mob-pair-subj {
+    font-size: 15px; font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .mob-pair-type {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .mob-pair-teacher {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-top: -2px;
+  }
+
+  .mob-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-style: italic;
+    border: 2px dashed var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-surface);
+  }
+
+  /* ============== БОКОВОЕ МЕНЮ ============== */
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 190;
+  }
+  .sidebar-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    background: var(--bg-surface);
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 4px 0 30px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-head {
+    padding: 20px 22px 16px;
+    border-bottom: 2px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.25s;
+  }
+  .sidebar-logo {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: #6C5CE7;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .sidebar-title-wrap {
+    display: flex; flex-direction: column; gap: 2px;
+    min-width: 0;
+  }
+  .sidebar-title {
+    font-size: 17px; font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+  }
+  .sidebar-subtitle {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .sidebar-user {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00876A;
+    display: none;
+  }
+  .sidebar-user.visible { display: block; }
+  [data-theme="dark"] .sidebar-user { color: #4FE0B8; }
+
+  .sidebar-nav {
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.15s, color 0.15s;
+    width: 100%;
+  }
+  .sidebar-item:hover { background: var(--bg-surface-2); }
+  .sidebar-item.active {
+    background: #6C5CE7;
+    color: #fff;
+  }
+  .sidebar-icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 16px 22px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border-top: 2px solid var(--border-light);
+    transition: border-color 0.25s;
+  }
+
+  /* ============== ДОМАШКА ============== */
+
+  .diary-wrap[data-view="homework"] {
+    display: none;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-items: flex-start;
+    justify-content: center;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+  }
+  .diary-wrap[data-view="homework"].active { display: flex; }
+
+  .homework-page {
+    width: 100%;
+    max-width: 1300px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .hw-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .hw-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hw-title-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--bg-surface-2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+  }
+  .hw-add-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #6C5CE7;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .hw-add-btn:hover { filter: brightness(1.1); }
+  .hw-add-btn:active { transform: scale(0.96); }
+  .hw-add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+  }
+
+  .hw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .hw-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100px;
+    transition: background 0.25s, border-color 0.25s, transform 0.15s;
+  }
+  .hw-card:hover { transform: translateY(-2px); }
+
+  .hw-card-head {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--hw-accent, #6C5CE7);
+    color: #fff;
+  }
+  .hw-card-subject {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  .hw-card-count {
+    background: rgba(255,255,255,0.22);
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .hw-card-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .hw-item {
+    padding: 10px 12px;
+    background: var(--bg-surface-2);
+    border-radius: 8px;
+    position: relative;
+    border-left: 3px solid var(--hw-accent, #6C5CE7);
+    transition: background 0.15s;
+  }
+  .hw-item:hover { background: var(--bg-surface-3); }
+
+  .hw-item-task {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-primary);
+    font-weight: 600;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding-right: 22px;
+  }
+  .hw-item-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .hw-item-deadline.soon { color: #E17055; font-weight: 800; }
+
+  .hw-item-del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    opacity: 0.45;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+  }
+  .hw-item-del:hover {
+    opacity: 1;
+    background: #FFF0EB;
+    color: #E17055;
+  }
+  [data-theme="dark"] .hw-item-del:hover {
+    background: #3A2A22;
+  }
+
+  .hw-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .hw-empty.active { display: flex; }
+  .hw-empty-icon {
+    font-size: 56px;
+    opacity: 0.5;
+    line-height: 1;
+  }
+  .hw-empty-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .hw-empty-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+  }
+
+  /* ============== МОДАЛКИ ============== */
+
+  .hw-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.55);
+    z-index: 300;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .hw-modal-overlay.active { display: flex; }
+
+  .hw-modal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    animation: hwModalPop 0.2s ease-out;
+    transition: background 0.25s;
+  }
+  @keyframes hwModalPop {
+    from { transform: scale(0.94); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+
+  .hw-modal-head {
+    padding: 18px 22px;
+    background: #6C5CE7;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .hw-modal-head h2 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+  .hw-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s;
+  }
+  .hw-modal-close:hover { background: rgba(255,255,255,0.35); }
+
+  .hw-modal-body {
+    padding: 20px 22px 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  .hw-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin: 14px 0 6px;
+  }
+  .hw-field-label:first-child { margin-top: 0; }
+
+  .hw-input, .hw-textarea, .hw-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--bg-surface-2);
+    outline: none;
+    transition: border-color 0.15s, background 0.25s;
+  }
+  .hw-input:focus, .hw-textarea:focus, .hw-select:focus {
+    border-color: #6C5CE7;
+    background: var(--bg-surface);
+  }
+  .hw-textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.4;
+    font-family: inherit;
+  }
+  .hw-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236A6A8A' d='M6 8L0 0h12z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .hw-modal-foot {
+    padding: 14px 22px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .hw-btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .hw-btn:active { transform: scale(0.96); }
+  .hw-btn-cancel {
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    border: 2px solid var(--border-light);
+  }
+  .hw-btn-cancel:hover { filter: brightness(0.95); }
+  .hw-btn-save {
+    background: #6C5CE7;
+    color: #fff;
+  }
+  .hw-btn-save:hover { filter: brightness(1.1); }
+
+  /* ============== МОДАЛКА ВХОДА ============== */
+
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.65);
+    z-index: 500;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .auth-overlay.active { display: flex; }
+
+  .auth-modal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    overflow: hidden;
+    animation: hwModalPop 0.2s ease-out;
+  }
+
+  .auth-head {
+    padding: 18px 22px;
+    background: #6C5CE7;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .auth-title { font-size: 18px; font-weight: 800; letter-spacing: 0.3px; }
+  .auth-close {
+    width: 32px; height: 32px;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .auth-close:hover { background: rgba(255,255,255,0.35); }
+
+  .auth-body {
+    padding: 20px 22px 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  .auth-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin: 12px 0 6px;
+  }
+  .auth-label:first-child { margin-top: 0; }
+  .auth-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--bg-surface-2);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .auth-input:focus { border-color: #6C5CE7; background: var(--bg-surface); }
+
+  .auth-error {
+    min-height: 18px;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #E17055;
+    line-height: 1.3;
+  }
+  .auth-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .auth-foot {
+    padding: 14px 22px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .auth-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .auth-btn:active { transform: scale(0.96); }
+  .auth-btn-skip {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-light);
+  }
+  .auth-btn-skip:hover { filter: brightness(0.96); }
+  .auth-btn-submit {
+    background: #6C5CE7;
+    color: #fff;
+  }
+  .auth-btn-submit:hover { filter: brightness(1.1); }
+  .auth-btn-submit:disabled,
+  .auth-btn-skip:disabled { opacity: 0.6; cursor: default; }
+
+  /* ============== TOAST ============== */
 
   .toast {
     position: fixed;
@@ -804,11 +1401,10 @@
     opacity: 0;
     pointer-events: none;
     transition: all 0.25s;
-    z-index: 200;
+    z-index: 600;
     max-width: 90vw;
     text-align: center;
   }
-
   .toast.active {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -819,40 +1415,29 @@
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
     .tab-mobile  { display: inline-block; }
-
-    /* Дополнительная страховка: на мобильной ширине кнопка ⛶ скрыта */
     .btn-fs { display: none !important; }
 
     .week-nav { display: none !important; }
     .banner { display: none !important; }
 
-    /* Симметричные паддинги сохраняют центр экрана центром;
-       если вкладки шире — обрезаются одинаково с обеих сторон. */
     .tabs {
       justify-content: center;
       flex-wrap: nowrap;
       overflow-x: hidden;
+      padding: 10px 52px;
       height: auto;
       min-height: calc(60px + env(safe-area-inset-top));
       padding-top: max(10px, env(safe-area-inset-top));
       padding-bottom: 10px;
       gap: 6px;
     }
+    .menu-btn { left: 10px; }
+    .top-actions { right: 10px; }
+
     .tab {
-      padding: 8px 12px;
-      font-size: 13px;
+      padding: 8px 11px;
+      font-size: 12px;
       flex-shrink: 0;
-    }
-    .top-actions {
-      position: fixed;
-      right: 8px;
-      top: max(12px, env(safe-area-inset-top));
-      transform: none;
-      background: var(--bg-surface);
-      padding: 4px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 25;
     }
 
     .viewport {
@@ -912,10 +1497,24 @@
     .bell-num-cell { font-size: 20px; }
     .bell-time-cell { font-size: 16px; }
     .bell-break-cell { font-size: 12px; }
+
+    .homework-page {
+      padding: 12px;
+      gap: 14px;
+    }
+    .hw-title { font-size: 20px; }
+    .hw-toolbar { gap: 10px; }
+    .hw-add-btn { padding: 9px 14px; font-size: 13px; }
+    .hw-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .hw-card-subject { font-size: 13px; }
+    .hw-item-task { font-size: 13px; }
   }
 
   @media (max-width: 500px) {
-    .tab { padding: 7px 10px; font-size: 12px; }
+    .tab { padding: 7px 9px; font-size: 11px; }
     .mob-day-title .mob-title-day { font-size: 15px; }
     .mob-pair-subj { font-size: 14px; }
     .mob-nav-btn { width: 40px; height: 40px; font-size: 22px; }
@@ -924,27 +1523,56 @@
 </head>
 <body>
 
+  <!-- ============== БОКОВОЕ МЕНЮ ============== -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-logo">Р144С</div>
+      <div class="sidebar-title-wrap">
+        <div class="sidebar-title">Дневник</div>
+        <div class="sidebar-subtitle">Группа Р144С</div>
+        <div class="sidebar-user" id="sidebarUser"></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item" data-page="schedule" type="button">
+        <span class="sidebar-icon">📅</span>
+        <span>Расписание</span>
+      </button>
+      <button class="sidebar-item" data-page="homework" type="button">
+        <span class="sidebar-icon">📝</span>
+        <span>Домашка</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">Р144С · дневник и расписание</div>
+  </aside>
+
+  <!-- ============== ШАПКА С ВКЛАДКАМИ ============== -->
   <div class="tabs">
+    <button class="menu-btn" id="menuBtn" title="Меню" type="button">☰</button>
     <div class="tab tab-desktop" data-view="even">Чётная неделя</div>
     <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
     <div class="tab tab-mobile" data-view="mobile">День</div>
     <div class="tab" data-view="bell">Расписание звонков</div>
     <div class="top-actions">
-      <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
-      <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
+      <button class="action-btn btn-auth" id="authBtn" title="Войти" type="button">🔐</button>
+      <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран" type="button">⛶</button>
+      <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему" type="button">🌙</button>
     </div>
   </div>
 
+  <!-- ============== НАВИГАЦИЯ ПО НЕДЕЛЯМ ============== -->
   <div class="week-nav" id="weekNav">
-    <button class="nav-btn" id="navPrev" title="Предыдущая неделя">‹</button>
+    <button class="nav-btn" id="navPrev" title="Предыдущая неделя" type="button">‹</button>
     <div class="nav-info" id="navInfo">—</div>
-    <button class="nav-btn" id="navNext" title="Следующая неделя">›</button>
+    <button class="nav-btn" id="navNext" title="Следующая неделя" type="button">›</button>
   </div>
 
+  <!-- ============== ОСНОВНОЙ КОНТЕНТ ============== -->
   <div class="viewport">
     <div class="banner" id="banner">
       <span class="banner-text" id="bannerText">—</span>
-      <button class="banner-btn" id="bannerBtn" style="display:none">К текущей неделе</button>
+      <button class="banner-btn" id="bannerBtn" style="display:none" type="button">К текущей неделе</button>
     </div>
 
     <div class="diary-wrap" data-view="even">
@@ -957,9 +1585,9 @@
     <div class="diary-wrap" data-view="mobile">
       <div class="mobile-day-page" id="mobileDayPage">
         <div class="mobile-day-nav">
-          <button class="mob-nav-btn" id="mobPrev" title="Предыдущий день">‹</button>
+          <button class="mob-nav-btn" id="mobPrev" title="Предыдущий день" type="button">‹</button>
           <div class="mob-day-title" id="mobDayTitle">—</div>
-          <button class="mob-nav-btn" id="mobNext" title="Следующий день">›</button>
+          <button class="mob-nav-btn" id="mobNext" title="Следующий день" type="button">›</button>
         </div>
         <div class="mobile-day-body" id="mobileDayBody"></div>
       </div>
@@ -981,11 +1609,91 @@
         </div>
       </div>
     </div>
+
+    <!-- ============== ДОМАШКА ============== -->
+    <div class="diary-wrap" data-view="homework">
+      <div class="homework-page">
+        <div class="hw-toolbar">
+          <div class="hw-title">
+            Домашка
+            <span class="hw-title-count" id="hwTotalCount">0 заданий</span>
+          </div>
+          <button class="hw-add-btn" id="hwAddBtn" type="button">
+            <span>+</span> Добавить задание
+          </button>
+        </div>
+        <div class="hw-grid" id="hwGrid"></div>
+        <div class="hw-empty" id="hwEmpty">
+          <div class="hw-empty-icon">📝</div>
+          <div class="hw-empty-text">Пока нет ни одного задания</div>
+          <div class="hw-empty-hint">Нажмите «Добавить задание», чтобы создать первое. Задания сохраняются на этом устройстве.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== МОДАЛКА ДОБАВЛЕНИЯ ДЗ ============== -->
+  <div class="hw-modal-overlay" id="hwModal">
+    <div class="hw-modal">
+      <div class="hw-modal-head">
+        <h2>Новое задание</h2>
+        <button class="hw-modal-close" id="hwModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="hw-modal-body">
+        <label class="hw-field-label" for="hwSubject">Предмет</label>
+        <select class="hw-select" id="hwSubject"></select>
+
+        <label class="hw-field-label" for="hwTask">Что задали</label>
+        <textarea class="hw-textarea" id="hwTask" placeholder="Например: §3, задачи 1-5, читать стр. 45" spellcheck="false"></textarea>
+
+        <label class="hw-field-label" for="hwDeadline">Срок сдачи (необязательно)</label>
+        <input class="hw-input" id="hwDeadline" type="date">
+
+        <label class="hw-field-label" for="hwAuthor">Ваше имя</label>
+        <input class="hw-input" id="hwAuthor" type="text" placeholder="Например, Иван" autocomplete="off" maxlength="30">
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-cancel" id="hwCancel" type="button">Отмена</button>
+        <button class="hw-btn hw-btn-save" id="hwSave" type="button">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== МОДАЛКА ВХОДА ============== -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <div class="auth-head">
+        <div class="auth-title">Вход в дневник</div>
+        <button class="auth-close" id="authClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="auth-body">
+        <label class="auth-label" for="authLogin">Логин</label>
+        <input class="auth-input" id="authLogin" type="text" autocomplete="username" spellcheck="false" placeholder="Например: user01">
+
+        <label class="auth-label" for="authPassword">Пароль</label>
+        <input class="auth-input" id="authPassword" type="password" autocomplete="current-password" spellcheck="false" placeholder="10 символов">
+
+        <div class="auth-error" id="authError"></div>
+        <div class="auth-hint">Логин и пароль выдаёт администратор группы. Регистрация не требуется.</div>
+      </div>
+      <div class="auth-foot">
+        <button class="auth-btn auth-btn-skip" id="authSkip" type="button">Смотреть без входа</button>
+        <button class="auth-btn auth-btn-submit" id="authSubmit" type="button">Войти</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
 <script>
+// ================== SUPABASE ==================
+// ⚠️ ЗАМЕНИ ЭТИ ДВЕ СТРОКИ НА СВОИ ЗНАЧЕНИЯ
+const SUPABASE_URL = 'https://dwfapqhigqabentacdnw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_xpzny5LK3MiVYMS7XBIZoQ_Yt7fiS8p';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
 // ================== FULLSCREEN ==================
 const fsBtn = document.getElementById('fsBtn');
 
@@ -1038,7 +1746,7 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('active');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('active'), 2200);
+  toastTimer = setTimeout(() => t.classList.remove('active'), 2400);
 }
 
 // ================== ЗВОНКИ ==================
@@ -1135,6 +1843,7 @@ function getTodayDate() {
 // ================== НАВИГАЦИЯ ==================
 let weekOffset = 0;
 let currentView = 'even';
+let previousScheduleView = null;
 
 function getBaseMonday() {
   return getMonday(getReferenceDate());
@@ -1163,9 +1872,7 @@ function isMobileLayout() {
 function isTouchPrimary() {
   try {
     return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  } catch (_) {
-    return false;
-  }
+  } catch (_) { return false; }
 }
 
 // ================== ДАННЫЕ ==================
@@ -1333,7 +2040,7 @@ function renderBellPage() {
 }
 
 function renderActiveDiary() {
-  if (currentView === 'bell' || currentView === 'mobile') return;
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') return;
   const monday = getCurrentMonday();
   const thursday = addDays(monday, 3);
   const type = getCurrentType();
@@ -1351,10 +2058,7 @@ function renderActiveDiary() {
 // ================== МОБИЛЬНЫЙ ДЕНЬ ==================
 let mobileDate = null;
 
-function initMobileDate() {
-  mobileDate = getTodayDate();
-}
-
+function initMobileDate() { mobileDate = getTodayDate(); }
 function nextDay(date) { return addDays(date, 1); }
 function prevDay(date) { return addDays(date, -1); }
 
@@ -1368,7 +2072,6 @@ function canGoNextDay() {
   const next = nextDay(mobileDate);
   return getMonday(next).getTime() <= MAX_MONDAY.getTime();
 }
-
 function syncWeekOffsetFromMobileDate() {
   if (!mobileDate) return;
   const monday = getMonday(mobileDate);
@@ -1377,7 +2080,6 @@ function syncWeekOffsetFromMobileDate() {
   weekOffset = weeks;
   saveWeekOffset();
 }
-
 function updateTabTodayState() {
   const btn = document.getElementById('tabToday');
   if (!btn) return;
@@ -1390,7 +2092,6 @@ function renderMobileDay() {
   if (!mobileDate) initMobileDate();
   const date = mobileDate;
   const dow = date.getDay();
-
   const dayKey = DAY_KEYS[dow];
   const type = isOddWeek(date) ? 'odd' : 'even';
   const lessons = schedule[type][dayKey] || [];
@@ -1435,7 +2136,6 @@ function renderMobileDay() {
   const nextBtn = document.getElementById('mobNext');
   if (prevBtn) prevBtn.disabled = !canGoPrevDay();
   if (nextBtn) nextBtn.disabled = !canGoNextDay();
-
   updateTabTodayState();
 }
 
@@ -1457,11 +2157,9 @@ function goToTodayMobile() {
   updateBanner();
 }
 
-// ================== СОЗДАНИЕ КНОПКИ «СЕГОДНЯ» ==================
 function ensureTodayButton() {
   const existing = document.getElementById('tabToday');
   const shouldShow = isTouchPrimary();
-
   if (shouldShow && !existing) {
     const tabsBar = document.querySelector('.tabs');
     const topActions = tabsBar.querySelector('.top-actions');
@@ -1484,7 +2182,6 @@ function ensureTodayButton() {
 document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
 document.getElementById('mobNext').addEventListener('click', () => navigateMobileDay(1));
 
-// Свайпы
 (function setupSwipe() {
   const body = document.getElementById('mobileDayBody');
   if (!body) return;
@@ -1506,14 +2203,14 @@ document.getElementById('mobNext').addEventListener('click', () => navigateMobil
   }, { passive: true });
 })();
 
-// ================== НАВИГАЦИЯ (UI) ==================
+// ================== UI ==================
 function updateNavInfo() {
   const nav = document.getElementById('weekNav');
   const info = document.getElementById('navInfo');
   const prevBtn = document.getElementById('navPrev');
   const nextBtn = document.getElementById('navNext');
 
-  if (currentView === 'bell' || currentView === 'mobile') {
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') {
     nav.classList.add('hidden');
     return;
   }
@@ -1532,7 +2229,7 @@ function updateBanner() {
   const bannerText = document.getElementById('bannerText');
   const bannerBtn = document.getElementById('bannerBtn');
 
-  if (currentView === 'bell' || currentView === 'mobile') {
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') {
     banner.classList.remove('active');
     return;
   }
@@ -1583,6 +2280,22 @@ function setViewUI(view) {
 }
 
 function applyView(type) {
+  if (type === 'homework') {
+    currentView = 'homework';
+    document.body.classList.add('view-homework');
+    renderHomework();
+    setViewUI('homework');
+    updateNavInfo();
+    updateBanner();
+    updateSidebarActive('homework');
+    updateHwAddBtnState();
+    return;
+  }
+
+  document.body.classList.remove('view-homework');
+  previousScheduleView = type;
+  updateSidebarActive('schedule');
+
   if (isMobileLayout()) {
     if (type === 'bell') {
       currentView = 'bell';
@@ -1642,7 +2355,6 @@ document.getElementById('navPrev').addEventListener('click', () => navigateWeek(
 document.getElementById('navNext').addEventListener('click', () => navigateWeek(1));
 document.getElementById('bannerBtn').addEventListener('click', goToday);
 
-// ================== МАСШТАБ ==================
 function fitAll() {
   if (isMobileLayout()) {
     document.querySelectorAll('.diary-wrap.active .diary, .diary-wrap.active .bell-page')
@@ -1661,12 +2373,398 @@ function fitAll() {
   });
 }
 
-// ================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==================
 const tabs = document.querySelectorAll('.tab[data-view]');
 const wraps = document.querySelectorAll('.diary-wrap');
-
 tabs.forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.dataset.view));
+});
+
+// ================== БОКОВОЕ МЕНЮ ==================
+const sidebar = document.getElementById('sidebar');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+const sidebarItems = document.querySelectorAll('.sidebar-item');
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  sidebarBackdrop.classList.add('open');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  sidebarBackdrop.classList.remove('open');
+}
+function updateSidebarActive(page) {
+  sidebarItems.forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+}
+
+document.getElementById('menuBtn').addEventListener('click', openSidebar);
+sidebarBackdrop.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+});
+
+sidebarItems.forEach(item => {
+  item.addEventListener('click', () => {
+    closeSidebar();
+    const page = item.dataset.page;
+    if (page === 'homework') {
+      applyView('homework');
+    } else {
+      if (previousScheduleView && previousScheduleView !== 'homework') {
+        applyView(previousScheduleView);
+      } else {
+        applyView(isMobileLayout() ? 'mobile' : getCurrentType());
+      }
+    }
+  });
+});
+
+// ================== ДОМАШКА (упрощённая: локальная) ==================
+const HW_STORAGE = 'r144s-homework-v1';
+const AUTHOR_STORAGE = 'r144s-author';
+const SUBJECT_COLORS = ['#6C5CE7', '#E17055', '#00B894', '#0984E3', '#E84393', '#FDCB6E', '#00CEC9', '#6AB04C', '#B53471', '#A29BFE'];
+
+let hwItems = [];
+
+function loadHwItems() {
+  try {
+    const raw = localStorage.getItem(HW_STORAGE);
+    const arr = raw ? JSON.parse(raw) : [];
+    hwItems = Array.isArray(arr) ? arr.filter(x => x && x.subject && x.task) : [];
+  } catch (_) { hwItems = []; }
+}
+function saveHwItems() {
+  try { localStorage.setItem(HW_STORAGE, JSON.stringify(hwItems)); } catch (_) {}
+}
+
+function getAllSubjects() {
+  const set = new Set();
+  ['even','odd'].forEach(w => {
+    DAY_KEYS.forEach(d => {
+      (schedule[w][d] || []).forEach(l => set.add(l.subject));
+    });
+  });
+  return [...set].sort();
+}
+
+function colorForSubject(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+  return SUBJECT_COLORS[Math.abs(hash) % SUBJECT_COLORS.length];
+}
+
+function formatDeadline(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return '';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dl = new Date(y, m - 1, d);
+  const diffDays = Math.round((dl - now) / (24 * 60 * 60 * 1000));
+  const dateStr = `${d} ${MONTHS_GEN[m - 1]}`;
+  if (diffDays < 0) return `просрочено (${dateStr})`;
+  if (diffDays === 0) return `сегодня`;
+  if (diffDays === 1) return `завтра`;
+  return `до ${dateStr}`;
+}
+function isDeadlineSoon(iso) {
+  if (!iso) return false;
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return false;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dl = new Date(y, m - 1, d);
+  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
+  return diff <= 2;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function updateHwAddBtnState() {
+  const btn = document.getElementById('hwAddBtn');
+  if (!btn) return;
+  if (currentUser) {
+    btn.disabled = false;
+    btn.title = 'Добавить задание';
+  } else {
+    btn.disabled = true;
+    btn.title = 'Войдите, чтобы добавлять задания';
+  }
+}
+
+function renderHomework() {
+  const grid = document.getElementById('hwGrid');
+  const empty = document.getElementById('hwEmpty');
+  const countEl = document.getElementById('hwTotalCount');
+  if (!grid || !empty) return;
+
+  if (countEl) {
+    const n = hwItems.length;
+    let word = 'заданий';
+    if (n % 10 === 1 && n % 100 !== 11) word = 'задание';
+    else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'задания';
+    countEl.textContent = `${n} ${word}`;
+  }
+
+  if (hwItems.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.add('active');
+    return;
+  }
+  empty.classList.remove('active');
+
+  const groups = {};
+  for (const item of hwItems) {
+    if (!groups[item.subject]) groups[item.subject] = [];
+    groups[item.subject].push(item);
+  }
+  const subjects = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'ru'));
+
+  let html = '';
+  for (const subj of subjects) {
+    const items = groups[subj];
+    items.sort((a, b) => {
+      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+
+    const accent = colorForSubject(subj);
+
+    let itemsHtml = '';
+    for (const item of items) {
+      const dlText = formatDeadline(item.deadline);
+      const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
+      itemsHtml += `
+        <div class="hw-item">
+          <button class="hw-item-del" data-id="${item.id}" title="Удалить" type="button">✕</button>
+          <div class="hw-item-task">${escapeHtml(item.task)}</div>
+          <div class="hw-item-meta">
+            ${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}
+            ${item.author ? `<span>👤 ${escapeHtml(item.author)}</span>` : ''}
+          </div>
+        </div>`;
+    }
+
+    html += `
+      <div class="hw-card" style="--hw-accent: ${accent}">
+        <div class="hw-card-head">
+          <span class="hw-card-subject">${escapeHtml(subj)}</span>
+          <span class="hw-card-count">${items.length}</span>
+        </div>
+        <div class="hw-card-list">${itemsHtml}</div>
+      </div>`;
+  }
+  grid.innerHTML = html;
+
+  grid.querySelectorAll('.hw-item-del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!currentUser) { showToast('Войдите, чтобы удалять задания'); return; }
+      const id = btn.dataset.id;
+      const item = hwItems.find(x => x.id === id);
+      if (!item) return;
+      if (!confirm(`Удалить задание?\n\n«${item.task.slice(0, 80)}»`)) return;
+      hwItems = hwItems.filter(x => x.id !== id);
+      saveHwItems();
+      renderHomework();
+      showToast('Задание удалено');
+    });
+  });
+}
+
+// ---------- Модалка ДЗ ----------
+const hwModal = document.getElementById('hwModal');
+const hwSubjectEl = document.getElementById('hwSubject');
+const hwTaskEl = document.getElementById('hwTask');
+const hwDeadlineEl = document.getElementById('hwDeadline');
+const hwAuthorEl = document.getElementById('hwAuthor');
+
+function fillSubjectSelect() {
+  const subjects = getAllSubjects();
+  hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
+function openHwModal() {
+  if (!currentUser) { showToast('Войдите, чтобы добавлять задания'); openAuthModal(); return; }
+  fillSubjectSelect();
+  hwTaskEl.value = '';
+  hwDeadlineEl.value = '';
+  const savedAuthor = localStorage.getItem(AUTHOR_STORAGE) || '';
+  hwAuthorEl.value = savedAuthor;
+  hwModal.classList.add('active');
+  setTimeout(() => hwTaskEl.focus(), 60);
+}
+function closeHwModal() { hwModal.classList.remove('active'); }
+
+function saveHwItem() {
+  if (!currentUser) { showToast('Войдите, чтобы добавлять задания'); return; }
+  const subject = hwSubjectEl.value.trim();
+  const task = hwTaskEl.value.trim();
+  const deadline = hwDeadlineEl.value || '';
+  const author = hwAuthorEl.value.trim();
+
+  if (!subject) { showToast('Выберите предмет'); return; }
+  if (!task)    { showToast('Введите текст задания'); hwTaskEl.focus(); return; }
+  if (author) localStorage.setItem(AUTHOR_STORAGE, author);
+
+  const item = {
+    id: 'hw_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    subject, task, deadline, author,
+    createdAt: Date.now()
+  };
+  hwItems.push(item);
+  saveHwItems();
+  closeHwModal();
+  renderHomework();
+  showToast('Задание добавлено');
+}
+
+document.getElementById('hwAddBtn').addEventListener('click', openHwModal);
+document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
+document.getElementById('hwCancel').addEventListener('click', closeHwModal);
+document.getElementById('hwSave').addEventListener('click', saveHwItem);
+hwModal.addEventListener('click', e => {
+  if (e.target === hwModal) closeHwModal();
+});
+document.addEventListener('keydown', e => {
+  if (!hwModal.classList.contains('active')) return;
+  if (e.key === 'Escape') closeHwModal();
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveHwItem();
+});
+
+// ================== АВТОРИЗАЦИЯ ==================
+const authOverlay = document.getElementById('authOverlay');
+const authLoginInput = document.getElementById('authLogin');
+const authPasswordInput = document.getElementById('authPassword');
+const authError = document.getElementById('authError');
+
+function loginFromEmail(email) {
+  if (!email) return null;
+  const m = email.match(/^([^@]+)@/);
+  return m ? m[1] : null;
+}
+
+async function refreshUser() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data && data.session && data.session.user) {
+    currentUser = loginFromEmail(data.session.user.email);
+  } else {
+    currentUser = null;
+  }
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const btn = document.getElementById('authBtn');
+  const sideUser = document.getElementById('sidebarUser');
+  if (!btn) return;
+  if (currentUser) {
+    btn.classList.add('logged-in');
+    btn.textContent = '👤';
+    btn.title = 'Вы вошли как ' + currentUser + '. Нажмите, чтобы выйти.';
+    if (sideUser) {
+      sideUser.textContent = 'Вошёл: ' + currentUser;
+      sideUser.classList.add('visible');
+    }
+  } else {
+    btn.classList.remove('logged-in');
+    btn.textContent = '🔐';
+    btn.title = 'Войти';
+    if (sideUser) {
+      sideUser.textContent = '';
+      sideUser.classList.remove('visible');
+    }
+  }
+  updateHwAddBtnState();
+}
+
+function openAuthModal() {
+  authError.textContent = '';
+  authPasswordInput.value = '';
+  authOverlay.classList.add('active');
+  setTimeout(() => authLoginInput.focus(), 60);
+}
+function closeAuthModal() { authOverlay.classList.remove('active'); }
+
+async function tryLogin(login, password) {
+  const clean = String(login).trim();
+  if (!clean) return { ok: false, msg: 'Введите логин.' };
+  const email = `${clean}@dnevnik.local`;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    if (/invalid/i.test(error.message)) {
+      return { ok: false, msg: 'Неверный логин или пароль.' };
+    }
+    return { ok: false, msg: 'Ошибка: ' + error.message };
+  }
+  currentUser = clean;
+  return { ok: true, login: clean };
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  updateAuthUI();
+  if (currentView === 'homework') renderHomework();
+  showToast('Вы вышли из аккаунта');
+}
+
+async function submitAuth() {
+  const login = authLoginInput.value.trim();
+  const pass = authPasswordInput.value;
+  if (!login) { authError.textContent = 'Введите логин.'; return; }
+  if (!pass)  { authError.textContent = 'Введите пароль.'; return; }
+
+  const submitBtn = document.getElementById('authSubmit');
+  const skipBtn = document.getElementById('authSkip');
+  submitBtn.disabled = true;
+  skipBtn.disabled = true;
+  submitBtn.textContent = 'Вход…';
+
+  const res = await tryLogin(login, pass);
+
+  submitBtn.disabled = false;
+  skipBtn.disabled = false;
+  submitBtn.textContent = 'Войти';
+
+  if (res.ok) {
+    closeAuthModal();
+    updateAuthUI();
+    if (currentView === 'homework') renderHomework();
+    showToast('Добро пожаловать, ' + res.login + '!');
+  } else {
+    authError.textContent = res.msg;
+    authPasswordInput.value = '';
+    authPasswordInput.focus();
+  }
+}
+
+document.getElementById('authBtn').addEventListener('click', async () => {
+  if (currentUser) {
+    if (confirm('Выйти из аккаунта?')) await logout();
+  } else {
+    openAuthModal();
+  }
+});
+document.getElementById('authClose').addEventListener('click', closeAuthModal);
+document.getElementById('authSkip').addEventListener('click', closeAuthModal);
+document.getElementById('authSubmit').addEventListener('click', submitAuth);
+authOverlay.addEventListener('click', e => {
+  if (e.target === authOverlay) closeAuthModal();
+});
+authPasswordInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitAuth();
+});
+authLoginInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') authPasswordInput.focus();
 });
 
 // ================== СМЕНА СУТОК И ПАР ==================
@@ -1696,12 +2794,13 @@ setInterval(() => {
 
 // ================== СМЕНА РАЗМЕРА ЭКРАНА ==================
 let lastMobileState = isMobileLayout();
-
 window.addEventListener('resize', () => {
   const nowMobile = isMobileLayout();
   if (nowMobile !== lastMobileState) {
     lastMobileState = nowMobile;
-    if (nowMobile) {
+    if (currentView === 'homework') {
+      // остаёмся
+    } else if (nowMobile) {
       if (!mobileDate) initMobileDate();
       applyView('mobile');
     } else {
@@ -1712,25 +2811,22 @@ window.addEventListener('resize', () => {
 });
 
 // ================== СТАРТ ==================
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  // Тема
   const savedTheme = localStorage.getItem('schedule-theme');
-  if (savedTheme) {
-    applyTheme(savedTheme);
-  } else {
+  if (savedTheme) applyTheme(savedTheme);
+  else {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     applyTheme(prefersDark ? 'dark' : 'light');
   }
 
+  // Неделя
   weekOffset = 0;
-
   const savedOffsetRaw = localStorage.getItem('schedule-week-offset');
   if (savedOffsetRaw !== null) {
     const parsed = parseInt(savedOffsetRaw, 10);
-    if (!isNaN(parsed) && canNavigateTo(parsed)) {
-      weekOffset = parsed;
-    }
+    if (!isNaN(parsed) && canNavigateTo(parsed)) weekOffset = parsed;
   }
-
   if (!canNavigateTo(weekOffset)) {
     for (let i = 1; i <= 300; i++) {
       if (canNavigateTo(weekOffset + i)) { weekOffset += i; break; }
@@ -1742,11 +2838,18 @@ window.addEventListener('load', () => {
   renderBellPage();
   updateFsIcon();
   ensureTodayButton();
+  loadHwItems();
 
-  if (isMobileLayout()) {
-    applyView('mobile');
+  // Проверяем сессию Supabase
+  await refreshUser();
+
+  // Начальная страница
+  const savedPage = localStorage.getItem('r144s-page') || 'schedule';
+  if (savedPage === 'homework') {
+    applyView('homework');
   } else {
-    applyView(getCurrentType());
+    if (isMobileLayout()) applyView('mobile');
+    else applyView(getCurrentType());
   }
 
   fitAll();
