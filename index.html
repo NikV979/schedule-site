@@ -510,7 +510,7 @@
   .mobile-day-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 8px 10px;
     background: var(--bg-surface);
     border: 2px solid var(--border-main);
@@ -563,6 +563,28 @@
     font-weight: 600;
     margin-top: 2px;
     letter-spacing: 0.3px;
+  }
+
+  .mob-today-btn {
+    padding: 8px 12px;
+    border-radius: 20px;
+    background: var(--tab-bg);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-today-btn:active:not(:disabled) { transform: scale(0.95); }
+  .mob-today-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 
   .mobile-day-body {
@@ -860,7 +882,6 @@
       gap: 0;
     }
 
-    /* Скрываем обычные дневники на телефоне — показываем только мобильный день */
     .diary-wrap[data-view="even"],
     .diary-wrap[data-view="odd"] {
       display: none !important;
@@ -887,7 +908,6 @@
       gap: 8px;
     }
 
-    /* Расписание звонков на мобиле — компактная таблица */
     .bell-page {
       width: 100%;
       height: auto;
@@ -920,6 +940,8 @@
     .tab { padding: 7px 12px; font-size: 12px; }
     .mob-day-title .mob-title-day { font-size: 15px; }
     .mob-pair-subj { font-size: 14px; }
+    .mob-today-btn { padding: 6px 10px; font-size: 11px; }
+    .mob-nav-btn { width: 40px; height: 40px; font-size: 22px; }
   }
 </style>
 </head>
@@ -928,7 +950,7 @@
   <div class="tabs">
     <div class="tab tab-desktop" data-view="even">Чётная неделя</div>
     <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
-    <div class="tab tab-mobile" data-view="mobile">📅 День</div>
+    <div class="tab tab-mobile" data-view="mobile">День</div>
     <div class="tab" data-view="bell">Расписание звонков</div>
     <div class="top-actions">
       <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
@@ -961,6 +983,7 @@
         <div class="mobile-day-nav">
           <button class="mob-nav-btn" id="mobPrev" title="Предыдущий день">‹</button>
           <div class="mob-day-title" id="mobDayTitle">—</div>
+          <button class="mob-today-btn" id="mobToday" title="К сегодняшнему дню">Сегодня</button>
           <button class="mob-nav-btn" id="mobNext" title="Следующий день">›</button>
         </div>
         <div class="mobile-day-body" id="mobileDayBody"></div>
@@ -1127,6 +1150,13 @@ function getRangeString(monday) {
 }
 function isSunday() {
   return new Date().getDay() === 0;
+}
+
+// "Сегодня" в мобильном режиме: если сегодня воскресенье — берём понедельник.
+function getTodayTarget() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return (today.getDay() === 0) ? addDays(today, 1) : today;
 }
 
 // ================== НАВИГАЦИЯ ==================
@@ -1339,9 +1369,7 @@ function renderActiveDiary() {
 let mobileDate = null;
 
 function initMobileDate() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  mobileDate = (today.getDay() === 0) ? addDays(today, 1) : today;
+  mobileDate = getTodayTarget();
 }
 
 function nextSchoolDay(date) {
@@ -1414,8 +1442,13 @@ function renderMobileDay() {
 
   const prevBtn = document.getElementById('mobPrev');
   const nextBtn = document.getElementById('mobNext');
+  const todayBtn = document.getElementById('mobToday');
   if (prevBtn) prevBtn.disabled = !canGoPrevDay();
   if (nextBtn) nextBtn.disabled = !canGoNextDay();
+  if (todayBtn) {
+    const target = getTodayTarget();
+    todayBtn.disabled = mobileDate.getTime() === target.getTime();
+  }
 }
 
 function navigateMobileDay(delta) {
@@ -1423,7 +1456,7 @@ function navigateMobileDay(delta) {
   if (delta > 0 && !canGoNextDay()) return;
   mobileDate = delta > 0 ? nextSchoolDay(mobileDate) : prevSchoolDay(mobileDate);
 
-  // Синхронизируем weekOffset для случаев, когда пользователь вернётся к десктопной вёрстке
+  // Синхронизируем weekOffset, чтобы при переключении на десктоп всё совпало
   const monday = getMonday(mobileDate);
   const baseMonday = getBaseMonday();
   const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
@@ -1433,8 +1466,20 @@ function navigateMobileDay(delta) {
   renderMobileDay();
 }
 
+function goToTodayMobile() {
+  initMobileDate();
+  // Синхронизируем weekOffset
+  const monday = getMonday(mobileDate);
+  const baseMonday = getBaseMonday();
+  const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
+  weekOffset = weeks;
+  saveWeekOffset();
+  renderMobileDay();
+}
+
 document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
 document.getElementById('mobNext').addEventListener('click', () => navigateMobileDay(1));
+document.getElementById('mobToday').addEventListener('click', goToTodayMobile);
 
 // Свайпы
 (function setupSwipe() {
@@ -1518,7 +1563,6 @@ function updateBanner() {
 }
 
 function setViewUI(view) {
-  // На мобиле и even, и odd, и mobile → показываем мобильный день
   let uiView = view;
   if (isMobileLayout() && (view === 'even' || view === 'odd')) uiView = 'mobile';
   if (!isMobileLayout() && view === 'mobile') uiView = getCurrentType();
@@ -1636,6 +1680,7 @@ setInterval(() => {
     lastKnownDay = d;
     if (!isMobileLayout()) renderActiveDiary();
     if (currentView === 'bell') renderBellPage();
+    if (currentView === 'mobile') renderMobileDay();
     updateNavInfo();
     updateBanner();
     lastKnownMinute = -1;
