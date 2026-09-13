@@ -135,7 +135,7 @@
     align-items: center;
     justify-content: center;
     z-index: 22;
-    transition: filter 0.15s, background 0.25s, color 0.25s;
+    transition: filter 0.15s;
   }
   .menu-btn:hover { filter: brightness(0.95); }
   .menu-btn:active { transform: translateY(-50%) scale(0.92); }
@@ -258,7 +258,6 @@
     min-width: 240px;
     text-align: center;
     user-select: none;
-    transition: color 0.25s;
   }
 
   .viewport {
@@ -287,10 +286,8 @@
     flex-shrink: 0;
     max-width: 1000px;
     box-shadow: 0 4px 16px rgba(253, 203, 110, 0.2);
-    transition: background 0.25s, border-color 0.25s, color 0.25s;
     animation: bannerPop 0.2s ease-out;
   }
-
   .banner.active { display: inline-flex; }
 
   @keyframes bannerPop {
@@ -311,10 +308,8 @@
     cursor: pointer;
     font-family: inherit;
     white-space: nowrap;
-    transition: filter 0.15s, background 0.25s;
     flex-shrink: 0;
   }
-
   .banner-btn:hover { filter: brightness(1.1); }
   .banner-btn.odd { background: var(--accent-odd); }
 
@@ -327,7 +322,6 @@
     min-height: 0;
     overflow: hidden;
   }
-
   .diary-wrap.active { display: flex; }
 
   .diary {
@@ -343,7 +337,6 @@
     border-radius: 6px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     transform-origin: center center;
-    transition: background 0.25s, border-color 0.25s;
   }
 
   .page {
@@ -352,7 +345,6 @@
     border: 2px solid var(--border-main);
     background: var(--bg-surface);
     min-width: 0;
-    transition: background 0.25s, border-color 0.25s;
   }
 
   .month-bar {
@@ -366,7 +358,6 @@
     font-weight: 700;
     color: var(--text-head);
     letter-spacing: 1.5px;
-    transition: color 0.25s, border-color 0.25s;
   }
 
   .month-value {
@@ -379,15 +370,9 @@
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 1.5px;
-    transition: color 0.25s, border-color 0.25s;
   }
 
-  .days {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
+  .days { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
   .day {
     flex: 1;
@@ -395,9 +380,7 @@
     grid-template-columns: 46px 1fr;
     border-bottom: 2px solid var(--border-main);
     min-height: 0;
-    transition: background 0.25s, border-color 0.25s;
   }
-
   .day:last-child { border-bottom: none; }
 
   .day.today { background: var(--today-bg); }
@@ -424,26 +407,12 @@
     letter-spacing: 2px;
     padding: 8px 0;
     white-space: nowrap;
-    transition: background 0.25s, color 0.25s, border-color 0.25s;
   }
 
-  .day-date {
-    color: var(--accent-even);
-    font-size: 22px;
-    margin-left: 8px;
-    letter-spacing: 0;
-    transition: color 0.25s;
-  }
-
+  .day-date { color: var(--accent-even); font-size: 22px; margin-left: 8px; letter-spacing: 0; }
   .week-odd .day-date { color: var(--accent-odd); }
 
-  table {
-    width: 100%;
-    height: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-
+  table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
   tbody { height: 100%; }
   tbody tr { height: 25%; }
   tbody td { height: 25%; vertical-align: middle; }
@@ -458,9 +427,7 @@
     font-weight: 700;
     text-align: center;
     line-height: 1.15;
-    transition: background 0.25s, color 0.25s, border-color 0.25s;
   }
-
   th:last-child { border-right: none; }
 
   td {
@@ -471,51 +438,28 @@
     color: var(--text-head);
     line-height: 1.2;
     overflow: hidden;
-    transition: border-color 0.25s, color 0.25s;
   }
-
   td:last-child { border-right: none; }
   tr:last-child td { border-bottom: none; }
 
   .num { text-align: center; padding: 6px 4px; }
-
-  .pair-num {
-    font-size: 17px; font-weight: 700; color: var(--text-primary);
-    line-height: 1.1; white-space: nowrap;
-    transition: color 0.25s;
-  }
-
-  .pair-time {
-    font-size: 15px; font-weight: 700; color: var(--accent-even);
-    margin-top: 4px; letter-spacing: 0.5px;
-    transition: color 0.25s;
-  }
-
+  .pair-num { font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1.1; white-space: nowrap; }
+  .pair-time { font-size: 15px; font-weight: 700; color: var(--accent-even); margin-top: 4px; letter-spacing: 0.5px; }
   .week-odd .pair-time { color: var(--accent-odd); }
 
   .subj-name {
     font-weight: 700; font-size: 17px; color: var(--text-primary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: color 0.25s;
   }
-
   .subj-meta {
     font-size: 13px; color: var(--text-secondary); margin-top: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: color 0.25s;
   }
-
   .room-cell { text-align: center; }
-
   .room-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 17px; font-weight: 700; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     letter-spacing: 0.3px;
-    transition: color 0.25s;
   }
 
   .bell-page {
@@ -531,7 +475,6 @@
     border-radius: 6px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     transform-origin: center center;
-    transition: background 0.25s, border-color 0.25s;
   }
 
   .bell-page-inner {
@@ -541,15 +484,9 @@
     border: 2px solid var(--border-main);
     background: var(--bg-surface);
     min-height: 0;
-    transition: background 0.25s, border-color 0.25s;
   }
 
-  .bell-table {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
+  .bell-table { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
   .bell-head {
     display: grid;
@@ -558,9 +495,7 @@
     border-bottom: 2px solid var(--border-main);
     height: 70px;
     flex-shrink: 0;
-    transition: background 0.25s, border-color 0.25s;
   }
-
   .bell-head > div {
     display: flex;
     align-items: center;
@@ -571,29 +506,18 @@
     letter-spacing: 2px;
     padding: 0 24px;
     border-right: 2px solid var(--border-main);
-    transition: color 0.25s, border-color 0.25s;
   }
-
   .bell-head > div:last-child { border-right: none; }
 
-  .bell-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
+  .bell-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .bell-row {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     border-bottom: 1px solid var(--border-light);
     min-height: 0;
-    transition: background 0.25s, border-color 0.25s;
   }
-
   .bell-row:last-child { border-bottom: none; }
-
   .bell-row > div {
     display: flex;
     align-items: center;
@@ -601,35 +525,12 @@
     padding: 14px 24px;
     border-right: 2px solid var(--border-light);
     text-align: center;
-    transition: border-color 0.25s;
   }
-
   .bell-row > div:last-child { border-right: none; }
-
-  .bell-num-cell {
-    font-size: 34px; font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 1px;
-    transition: color 0.25s;
-  }
-
-  .bell-time-cell {
-    font-size: 32px; font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 1px; white-space: nowrap;
-    transition: color 0.25s;
-  }
-
-  .bell-break-cell {
-    font-size: 22px; font-weight: 700;
-    color: var(--accent-even);
-    letter-spacing: 0.5px;
-    transition: color 0.25s;
-  }
-  .bell-break-cell.none {
-    color: var(--text-secondary);
-    font-style: italic; font-weight: 600;
-  }
+  .bell-num-cell { font-size: 34px; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; }
+  .bell-time-cell { font-size: 32px; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; white-space: nowrap; }
+  .bell-break-cell { font-size: 22px; font-weight: 700; color: var(--accent-even); letter-spacing: 0.5px; }
+  .bell-break-cell.none { color: var(--text-secondary); font-style: italic; font-weight: 600; }
 
   .bell-row.bell-current { background: rgba(0, 184, 148, 0.12); }
   [data-theme="dark"] .bell-row.bell-current { background: rgba(0, 209, 167, 0.14); }
@@ -655,7 +556,6 @@
     border-radius: 10px;
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: background 0.25s, border-color 0.25s;
   }
 
   .mob-nav-btn {
@@ -673,7 +573,6 @@
     font-family: inherit;
     padding: 0; line-height: 1;
     flex-shrink: 0;
-    transition: all 0.15s;
   }
   .mob-nav-btn:active:not(:disabled) { transform: scale(0.92); }
   .mob-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -685,28 +584,14 @@
     line-height: 1.25;
     min-width: 0;
   }
-  .mob-day-title .mob-title-day {
-    display: block;
-    font-size: 17px; font-weight: 800;
-    letter-spacing: 1px;
-  }
-  .mob-day-title .mob-title-date {
-    display: block;
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-top: 2px;
-    letter-spacing: 0.3px;
-  }
+  .mob-day-title .mob-title-day { display: block; font-size: 17px; font-weight: 800; letter-spacing: 1px; }
+  .mob-day-title .mob-title-date { display: block; font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
 
   .mobile-day-body {
-    flex: 1;
-    min-height: 0;
+    flex: 1; min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: flex; flex-direction: column; gap: 8px;
     padding-bottom: 12px;
   }
 
@@ -715,66 +600,29 @@
     border: 2px solid var(--border-main);
     border-radius: 10px;
     padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: background 0.25s, border-color 0.25s;
+    display: flex; flex-direction: column; gap: 6px;
   }
 
-  .mob-pair-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .mob-pair-num {
-    color: var(--accent-even);
-    font-size: 12px; font-weight: 800;
-    letter-spacing: 0.3px; white-space: nowrap;
-  }
-
+  .mob-pair-head { display: flex; align-items: center; gap: 10px; }
+  .mob-pair-num { color: var(--accent-even); font-size: 12px; font-weight: 800; white-space: nowrap; }
   .mobile-day-page.is-odd .mob-pair-num { color: var(--accent-odd); }
-
-  .mob-pair-time {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: 14px; font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-
+  .mob-pair-time { flex: 1; color: var(--text-primary); font-size: 14px; font-weight: 800; letter-spacing: 0.5px; }
   .mob-pair-room {
-    padding: 3px 10px;
-    border-radius: 20px;
+    padding: 3px 10px; border-radius: 20px;
     background: var(--bg-surface-2);
     border: 1px solid var(--border-light);
     font-size: 12px; font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
   }
-
-  .mob-pair-subj {
-    font-size: 15px; font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.3;
-  }
-  .mob-pair-type {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 12px;
-  }
-  .mob-pair-teacher {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-top: -2px;
-  }
+  .mob-pair-subj { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+  .mob-pair-type { font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+  .mob-pair-teacher { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-top: -2px; }
 
   .mob-empty {
-    padding: 50px 20px;
-    text-align: center;
+    padding: 50px 20px; text-align: center;
     color: var(--text-secondary);
-    font-size: 14px;
-    font-style: italic;
+    font-size: 14px; font-style: italic;
     border: 2px dashed var(--border-light);
     border-radius: 10px;
     background: var(--bg-surface);
@@ -783,18 +631,13 @@
   /* ============== БОКОВОЕ МЕНЮ ============== */
 
   .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(10, 10, 30, 0.55);
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0; pointer-events: none;
     transition: opacity 0.25s;
     z-index: 190;
   }
-  .sidebar-backdrop.open {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
 
   .sidebar {
     position: fixed;
@@ -806,8 +649,7 @@
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 4px 0 30px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     overflow-y: auto;
@@ -817,10 +659,7 @@
   .sidebar-head {
     padding: 20px 22px 16px;
     border-bottom: 2px solid var(--border-light);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: border-color 0.25s;
+    display: flex; align-items: center; gap: 14px;
   }
   .sidebar-logo {
     width: 48px; height: 48px;
@@ -829,71 +668,32 @@
     color: #fff;
     font-weight: 800;
     font-size: 16px;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .sidebar-title-wrap {
-    display: flex; flex-direction: column; gap: 2px;
-    min-width: 0;
-  }
-  .sidebar-title {
-    font-size: 17px; font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 0.5px;
-  }
-  .sidebar-subtitle {
-    font-size: 11px; font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .sidebar-user {
-    margin-top: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #00876A;
-    display: none;
-  }
+  .sidebar-title-wrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .sidebar-title { font-size: 17px; font-weight: 800; color: var(--text-primary); }
+  .sidebar-subtitle { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 1px; text-transform: uppercase; }
+  .sidebar-user { margin-top: 6px; font-size: 12px; font-weight: 700; color: #00876A; display: none; }
   .sidebar-user.visible { display: block; }
   [data-theme="dark"] .sidebar-user { color: #4FE0B8; }
 
-  .sidebar-nav {
-    padding: 12px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .sidebar-nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
   .sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    display: flex; align-items: center; gap: 14px;
     padding: 14px 16px;
-    border: none;
-    background: transparent;
+    border: none; background: transparent;
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 15px; font-weight: 700;
     text-align: left;
     cursor: pointer;
     border-radius: 10px;
-    transition: background 0.15s, color 0.15s;
     width: 100%;
   }
   .sidebar-item:hover { background: var(--bg-surface-2); }
-  .sidebar-item.active {
-    background: #6C5CE7;
-    color: #fff;
-  }
-  .sidebar-icon {
-    font-size: 20px;
-    width: 24px;
-    text-align: center;
-    flex-shrink: 0;
-  }
+  .sidebar-item.active { background: #6C5CE7; color: #fff; }
+  .sidebar-icon { font-size: 20px; width: 24px; text-align: center; flex-shrink: 0; }
 
   .sidebar-foot {
     margin-top: auto;
@@ -901,52 +701,36 @@
     font-size: 11px;
     color: var(--text-secondary);
     border-top: 2px solid var(--border-light);
-    transition: border-color 0.25s;
   }
 
   /* ============== ДОМАШКА ============== */
 
   .diary-wrap[data-view="homework"] {
     display: none;
-    width: 100%;
-    flex: 1;
-    min-height: 0;
+    width: 100%; flex: 1; min-height: 0;
     overflow-y: auto;
-    align-items: flex-start;
-    justify-content: center;
+    align-items: flex-start; justify-content: center;
     -webkit-overflow-scrolling: touch;
     padding: 0;
   }
   .diary-wrap[data-view="homework"].active { display: flex; }
 
   .homework-page {
-    width: 100%;
-    max-width: 1300px;
+    width: 100%; max-width: 1300px;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: flex; flex-direction: column; gap: 20px;
   }
 
   .hw-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
   }
   .hw-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 24px; font-weight: 800; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
   }
   .hw-title-count {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 13px; font-weight: 700;
     color: var(--text-secondary);
     background: var(--bg-surface-2);
     padding: 4px 10px;
@@ -955,27 +739,18 @@
   }
   .hw-add-btn {
     padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
+    border: none; border-radius: 10px;
     background: #6C5CE7;
     color: #fff;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 14px; font-weight: 700;
     cursor: pointer;
-    transition: filter 0.15s, transform 0.1s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    display: inline-flex; align-items: center; gap: 8px;
     white-space: nowrap;
   }
   .hw-add-btn:hover { filter: brightness(1.1); }
   .hw-add-btn:active { transform: scale(0.96); }
-  .hw-add-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: none;
-  }
+  .hw-add-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 
   .hw-grid {
     display: grid;
@@ -988,47 +763,28 @@
     border: 2px solid var(--border-main);
     border-radius: 12px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     min-height: 100px;
-    transition: background 0.25s, border-color 0.25s, transform 0.15s;
+    transition: transform 0.15s;
   }
   .hw-card:hover { transform: translateY(-2px); }
 
   .hw-card-head {
     padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     gap: 10px;
     background: var(--hw-accent, #6C5CE7);
     color: #fff;
   }
-  .hw-card-subject {
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-    line-height: 1.2;
-    word-break: break-word;
-  }
+  .hw-card-subject { font-size: 14px; font-weight: 800; line-height: 1.2; word-break: break-word; }
   .hw-card-count {
     background: rgba(255,255,255,0.22);
-    padding: 2px 9px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 800;
-    flex-shrink: 0;
-    min-width: 24px;
-    text-align: center;
+    padding: 2px 9px; border-radius: 20px;
+    font-size: 12px; font-weight: 800;
+    flex-shrink: 0; min-width: 24px; text-align: center;
   }
 
-  .hw-card-list {
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
+  .hw-card-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 
   .hw-item {
     padding: 10px 12px;
@@ -1036,97 +792,57 @@
     border-radius: 8px;
     position: relative;
     border-left: 3px solid var(--hw-accent, #6C5CE7);
-    transition: background 0.15s;
   }
   .hw-item:hover { background: var(--bg-surface-3); }
 
   .hw-item-task {
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 14px; line-height: 1.4;
     color: var(--text-primary);
     font-weight: 600;
-    white-space: pre-wrap;
-    word-break: break-word;
+    white-space: pre-wrap; word-break: break-word;
     padding-right: 22px;
   }
   .hw-item-meta {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    display: flex; gap: 10px; flex-wrap: wrap;
     margin-top: 8px;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 11px; font-weight: 600;
     color: var(--text-secondary);
   }
   .hw-item-deadline.soon { color: #E17055; font-weight: 800; }
 
   .hw-item-del {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    border: none;
-    background: transparent;
+    position: absolute; top: 6px; right: 6px;
+    width: 22px; height: 22px;
+    border: none; background: transparent;
     color: var(--text-secondary);
     font-size: 13px;
-    line-height: 1;
     border-radius: 50%;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-family: inherit;
     opacity: 0.45;
-    transition: opacity 0.15s, background 0.15s, color 0.15s;
   }
-  .hw-item-del:hover {
-    opacity: 1;
-    background: #FFF0EB;
-    color: #E17055;
-  }
-  [data-theme="dark"] .hw-item-del:hover {
-    background: #3A2A22;
-  }
+  .hw-item-del:hover { opacity: 1; background: #FFF0EB; color: #E17055; }
+  [data-theme="dark"] .hw-item-del:hover { background: #3A2A22; }
 
   .hw-empty {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 80px 20px;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 80px 20px;
     text-align: center;
     color: var(--text-secondary);
   }
   .hw-empty.active { display: flex; }
-  .hw-empty-icon {
-    font-size: 56px;
-    opacity: 0.5;
-    line-height: 1;
-  }
-  .hw-empty-text {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .hw-empty-hint {
-    font-size: 13px;
-    color: var(--text-secondary);
-    max-width: 360px;
-    line-height: 1.4;
-  }
+  .hw-empty-icon { font-size: 56px; opacity: 0.5; line-height: 1; }
+  .hw-empty-text { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+  .hw-empty-hint { font-size: 13px; max-width: 360px; line-height: 1.4; }
 
   /* ============== МОДАЛКИ ============== */
 
   .hw-modal-overlay {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(10, 10, 30, 0.55);
     z-index: 300;
-    display: none;
-    justify-content: center;
-    align-items: center;
+    display: none; justify-content: center; align-items: center;
     padding: 20px;
   }
   .hw-modal-overlay.active { display: flex; }
@@ -1134,65 +850,42 @@
   .hw-modal {
     background: var(--bg-surface);
     border-radius: 16px;
-    width: 100%;
-    max-width: 520px;
-    max-height: 92vh;
-    overflow-y: auto;
+    width: 100%; max-width: 520px;
+    max-height: 92vh; overflow-y: auto;
     box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-    animation: hwModalPop 0.2s ease-out;
-    transition: background 0.25s;
+    animation: modalPop 0.2s ease-out;
   }
-  @keyframes hwModalPop {
+  @keyframes modalPop {
     from { transform: scale(0.94); opacity: 0; }
-    to   { transform: scale(1);    opacity: 1; }
+    to   { transform: scale(1); opacity: 1; }
   }
 
   .hw-modal-head {
     padding: 18px 22px;
     background: #6C5CE7;
     color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 2;
   }
-  .hw-modal-head h2 {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-  }
+  .hw-modal-head h2 { font-size: 18px; font-weight: 800; }
   .hw-modal-close {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border: none;
     background: rgba(255,255,255,0.18);
     color: #fff;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 18px;
-    font-family: inherit;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 18px; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
     padding: 0;
-    transition: background 0.15s;
   }
   .hw-modal-close:hover { background: rgba(255,255,255,0.35); }
 
-  .hw-modal-body {
-    padding: 20px 22px 8px;
-    display: flex;
-    flex-direction: column;
-  }
+  .hw-modal-body { padding: 20px 22px 8px; display: flex; flex-direction: column; }
   .hw-field-label {
     display: block;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
     color: var(--text-secondary);
     margin: 14px 0 6px;
   }
@@ -1208,22 +901,14 @@
     color: var(--text-primary);
     background: var(--bg-surface-2);
     outline: none;
-    transition: border-color 0.15s, background 0.25s;
   }
   .hw-input:focus, .hw-textarea:focus, .hw-select:focus {
-    border-color: #6C5CE7;
-    background: var(--bg-surface);
+    border-color: #6C5CE7; background: var(--bg-surface);
   }
-  .hw-textarea {
-    min-height: 100px;
-    resize: vertical;
-    line-height: 1.4;
-    font-family: inherit;
-  }
+  .hw-textarea { min-height: 100px; resize: vertical; line-height: 1.4; }
   .hw-select {
     cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
+    appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236A6A8A' d='M6 8L0 0h12z'/></svg>");
     background-repeat: no-repeat;
     background-position: right 14px center;
@@ -1232,43 +917,31 @@
 
   .hw-modal-foot {
     padding: 14px 22px 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
+    display: flex; gap: 10px; justify-content: flex-end;
   }
   .hw-btn {
     padding: 10px 22px;
     border-radius: 10px;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 14px; font-weight: 700;
     cursor: pointer;
     border: none;
-    transition: filter 0.15s, transform 0.1s;
   }
-  .hw-btn:active { transform: scale(0.96); }
   .hw-btn-cancel {
-    background: var(--bg-surface-2);
-    color: var(--text-primary);
+    background: var(--bg-surface-2); color: var(--text-primary);
     border: 2px solid var(--border-light);
   }
   .hw-btn-cancel:hover { filter: brightness(0.95); }
-  .hw-btn-save {
-    background: #6C5CE7;
-    color: #fff;
-  }
+  .hw-btn-save { background: #6C5CE7; color: #fff; }
   .hw-btn-save:hover { filter: brightness(1.1); }
 
-  /* ============== МОДАЛКА ВХОДА ============== */
+  /* ============== АВТОРИЗАЦИЯ ============== */
 
   .auth-overlay {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(10, 10, 30, 0.65);
     z-index: 500;
-    display: none;
-    justify-content: center;
-    align-items: center;
+    display: none; justify-content: center; align-items: center;
     padding: 20px;
   }
   .auth-overlay.active { display: flex; }
@@ -1276,56 +949,39 @@
   .auth-modal {
     background: var(--bg-surface);
     border-radius: 16px;
-    width: 100%;
-    max-width: 420px;
+    width: 100%; max-width: 420px;
     box-shadow: 0 30px 80px rgba(0,0,0,0.4);
     overflow: hidden;
-    animation: hwModalPop 0.2s ease-out;
+    animation: modalPop 0.2s ease-out;
   }
 
   .auth-head {
     padding: 18px 22px;
     background: #6C5CE7;
     color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .auth-title { font-size: 18px; font-weight: 800; letter-spacing: 0.3px; }
+  .auth-title { font-size: 18px; font-weight: 800; }
   .auth-close {
     width: 32px; height: 32px;
-    border: none;
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    font-family: inherit;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: none; background: rgba(255,255,255,0.18); color: #fff;
+    border-radius: 50%; cursor: pointer;
+    font-size: 18px; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
     padding: 0;
   }
   .auth-close:hover { background: rgba(255,255,255,0.35); }
 
-  .auth-body {
-    padding: 20px 22px 8px;
-    display: flex;
-    flex-direction: column;
-  }
+  .auth-body { padding: 20px 22px 8px; display: flex; flex-direction: column; }
   .auth-label {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
     color: var(--text-secondary);
     margin: 12px 0 6px;
   }
   .auth-label:first-child { margin-top: 0; }
   .auth-input {
-    width: 100%;
-    padding: 11px 14px;
+    width: 100%; padding: 11px 14px;
     border: 2px solid var(--border-light);
     border-radius: 10px;
     font-family: inherit;
@@ -1333,57 +989,38 @@
     color: var(--text-primary);
     background: var(--bg-surface-2);
     outline: none;
-    transition: border-color 0.15s;
   }
   .auth-input:focus { border-color: #6C5CE7; background: var(--bg-surface); }
 
   .auth-error {
-    min-height: 18px;
-    margin-top: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    min-height: 18px; margin-top: 10px;
+    font-size: 13px; font-weight: 600;
     color: #E17055;
-    line-height: 1.3;
   }
   .auth-hint {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    line-height: 1.4;
+    font-size: 11px; color: var(--text-secondary);
+    margin-top: 8px; line-height: 1.4;
   }
 
   .auth-foot {
     padding: 14px 22px 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+    display: flex; gap: 10px; justify-content: space-between;
   }
   .auth-btn {
     padding: 10px 20px;
     border-radius: 10px;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: filter 0.15s, transform 0.1s;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; border: none;
   }
-  .auth-btn:active { transform: scale(0.96); }
   .auth-btn-skip {
-    background: transparent;
-    color: var(--text-secondary);
+    background: transparent; color: var(--text-secondary);
     border: 2px solid var(--border-light);
   }
   .auth-btn-skip:hover { filter: brightness(0.96); }
-  .auth-btn-submit {
-    background: #6C5CE7;
-    color: #fff;
-  }
+  .auth-btn-submit { background: #6C5CE7; color: #fff; }
   .auth-btn-submit:hover { filter: brightness(1.1); }
-  .auth-btn-submit:disabled,
-  .auth-btn-skip:disabled { opacity: 0.6; cursor: default; }
-
-  /* ============== TOAST ============== */
+  .auth-btn-submit:disabled, .auth-btn-skip:disabled { opacity: 0.6; cursor: default; }
 
   .toast {
     position: fixed;
@@ -1394,23 +1031,18 @@
     border: 2px solid var(--border-light);
     border-radius: 12px;
     padding: 12px 22px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 14px; font-weight: 600;
     color: var(--text-primary);
     box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0; pointer-events: none;
     transition: all 0.25s;
     z-index: 600;
-    max-width: 90vw;
-    text-align: center;
+    max-width: 90vw; text-align: center;
   }
   .toast.active {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
-
-  /* ============== МОБИЛЬНАЯ ВЁРСТКА ============== */
 
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
@@ -1434,11 +1066,7 @@
     .menu-btn { left: 10px; }
     .top-actions { right: 10px; }
 
-    .tab {
-      padding: 8px 11px;
-      font-size: 12px;
-      flex-shrink: 0;
-    }
+    .tab { padding: 8px 11px; font-size: 12px; flex-shrink: 0; }
 
     .viewport {
       padding: calc(78px + env(safe-area-inset-top)) 0 0;
@@ -1447,68 +1075,40 @@
     }
 
     .diary-wrap[data-view="even"],
-    .diary-wrap[data-view="odd"] {
-      display: none !important;
-    }
+    .diary-wrap[data-view="odd"] { display: none !important; }
 
     .diary-wrap[data-view="mobile"],
     .diary-wrap[data-view="bell"] {
-      width: 100%;
-      height: 100%;
-      flex: 1;
-      min-height: 0;
+      width: 100%; height: 100%; flex: 1; min-height: 0;
       overflow: hidden;
-      align-items: stretch;
-      justify-content: stretch;
+      align-items: stretch; justify-content: stretch;
     }
 
     .diary-wrap[data-view="mobile"].active,
-    .diary-wrap[data-view="bell"].active {
-      display: flex;
-    }
+    .diary-wrap[data-view="bell"].active { display: flex; }
 
-    .mobile-day-page {
-      padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-      gap: 8px;
-    }
+    .mobile-day-page { padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); gap: 8px; }
 
     .bell-page {
-      width: 100%;
-      height: auto;
-      min-height: 100%;
-      display: block;
-      padding: 8px;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      transform: none !important;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      width: 100%; height: auto; min-height: 100%;
+      display: block; padding: 8px; border: none;
+      box-shadow: none; transform: none !important;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
     }
     .bell-page-inner { border: 2px solid var(--border-main); border-radius: 10px; }
     .bell-head { height: auto; }
-    .bell-head > div {
-      font-size: 11px;
-      padding: 12px 2px;
-      letter-spacing: 0.3px;
-    }
+    .bell-head > div { font-size: 11px; padding: 12px 2px; letter-spacing: 0.3px; }
     .bell-row { min-height: 54px; }
     .bell-row > div { padding: 10px 4px; }
     .bell-num-cell { font-size: 20px; }
     .bell-time-cell { font-size: 16px; }
     .bell-break-cell { font-size: 12px; }
 
-    .homework-page {
-      padding: 12px;
-      gap: 14px;
-    }
+    .homework-page { padding: 12px; gap: 14px; }
     .hw-title { font-size: 20px; }
     .hw-toolbar { gap: 10px; }
     .hw-add-btn { padding: 9px 14px; font-size: 13px; }
-    .hw-grid {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
+    .hw-grid { grid-template-columns: 1fr; gap: 12px; }
     .hw-card-subject { font-size: 13px; }
     .hw-item-task { font-size: 13px; }
   }
@@ -1523,7 +1123,7 @@
 </head>
 <body>
 
-  <!-- ============== БОКОВОЕ МЕНЮ ============== -->
+  <!-- БОКОВОЕ МЕНЮ -->
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
@@ -1541,13 +1141,13 @@
       </button>
       <button class="sidebar-item" data-page="homework" type="button">
         <span class="sidebar-icon">📝</span>
-        <span>Домашка</span>
+        <span>Моя домашка</span>
       </button>
     </nav>
     <div class="sidebar-foot">Р144С · дневник и расписание</div>
   </aside>
 
-  <!-- ============== ШАПКА С ВКЛАДКАМИ ============== -->
+  <!-- ШАПКА -->
   <div class="tabs">
     <button class="menu-btn" id="menuBtn" title="Меню" type="button">☰</button>
     <div class="tab tab-desktop" data-view="even">Чётная неделя</div>
@@ -1561,14 +1161,14 @@
     </div>
   </div>
 
-  <!-- ============== НАВИГАЦИЯ ПО НЕДЕЛЯМ ============== -->
+  <!-- НАВИГАЦИЯ ПО НЕДЕЛЯМ -->
   <div class="week-nav" id="weekNav">
     <button class="nav-btn" id="navPrev" title="Предыдущая неделя" type="button">‹</button>
     <div class="nav-info" id="navInfo">—</div>
     <button class="nav-btn" id="navNext" title="Следующая неделя" type="button">›</button>
   </div>
 
-  <!-- ============== ОСНОВНОЙ КОНТЕНТ ============== -->
+  <!-- КОНТЕНТ -->
   <div class="viewport">
     <div class="banner" id="banner">
       <span class="banner-text" id="bannerText">—</span>
@@ -1610,12 +1210,12 @@
       </div>
     </div>
 
-    <!-- ============== ДОМАШКА ============== -->
+    <!-- ДОМАШКА -->
     <div class="diary-wrap" data-view="homework">
       <div class="homework-page">
         <div class="hw-toolbar">
           <div class="hw-title">
-            Домашка
+            Моя домашка
             <span class="hw-title-count" id="hwTotalCount">0 заданий</span>
           </div>
           <button class="hw-add-btn" id="hwAddBtn" type="button">
@@ -1626,13 +1226,13 @@
         <div class="hw-empty" id="hwEmpty">
           <div class="hw-empty-icon">📝</div>
           <div class="hw-empty-text">Пока нет ни одного задания</div>
-          <div class="hw-empty-hint">Нажмите «Добавить задание», чтобы создать первое. Задания сохраняются на этом устройстве.</div>
+          <div class="hw-empty-hint">Нажмите «Добавить задание», чтобы создать первое. Задания синхронизируются с вашим аккаунтом и видны на любом устройстве.</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============== МОДАЛКА ДОБАВЛЕНИЯ ДЗ ============== -->
+  <!-- МОДАЛКА ДЗ -->
   <div class="hw-modal-overlay" id="hwModal">
     <div class="hw-modal">
       <div class="hw-modal-head">
@@ -1648,9 +1248,6 @@
 
         <label class="hw-field-label" for="hwDeadline">Срок сдачи (необязательно)</label>
         <input class="hw-input" id="hwDeadline" type="date">
-
-        <label class="hw-field-label" for="hwAuthor">Ваше имя</label>
-        <input class="hw-input" id="hwAuthor" type="text" placeholder="Например, Иван" autocomplete="off" maxlength="30">
       </div>
       <div class="hw-modal-foot">
         <button class="hw-btn hw-btn-cancel" id="hwCancel" type="button">Отмена</button>
@@ -1659,7 +1256,7 @@
     </div>
   </div>
 
-  <!-- ============== МОДАЛКА ВХОДА ============== -->
+  <!-- МОДАЛКА ВХОДА -->
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
       <div class="auth-head">
@@ -1687,7 +1284,6 @@
 
 <script>
 // ================== SUPABASE ==================
-// ⚠️ ЗАМЕНИ ЭТИ ДВЕ СТРОКИ НА СВОИ ЗНАЧЕНИЯ
 const SUPABASE_URL = 'https://dwfapqhigqabentacdnw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_xpzny5LK3MiVYMS7XBIZoQ_Yt7fiS8p';
 
@@ -1714,9 +1310,7 @@ async function toggleFullscreen() {
       if (document.exitFullscreen) await document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
-  } catch (e) {
-    showToast('Полный экран недоступен');
-  }
+  } catch (e) { showToast('Полный экран недоступен'); }
   updateFsIcon();
 }
 
@@ -1765,30 +1359,21 @@ function getPairNumber(time) {
   const idx = BELL_TIMES.indexOf(time);
   return idx >= 0 ? idx + 1 : null;
 }
-
 function isPairNow(p) {
   const now = new Date();
   const [sh, sm] = p.start.split(':').map(Number);
   const [eh, em] = p.end.split(':').map(Number);
-  const start = sh * 60 + sm;
-  const end = eh * 60 + em;
+  const start = sh * 60 + sm, end = eh * 60 + em;
   const cur = now.getHours() * 60 + now.getMinutes();
   return cur >= start && cur < end;
 }
 
 // ================== ДАТЫ ==================
-const MONTHS_NOM = [
-  'Январь','Февраль','Март','Апрель','Май','Июнь',
-  'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
-];
-const MONTHS_GEN = [
-  'января','февраля','марта','апреля','мая','июня',
-  'июля','августа','сентября','октября','ноября','декабря'
-];
+const MONTHS_NOM = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
 const BASE_MONDAY = new Date(2026, 8, 14);
 const BASE_IS_ODD = true;
-
 const MIN_MONDAY = new Date(2026, 7, 31);
 const MAX_MONDAY = new Date(2026, 11, 28);
 
@@ -1800,11 +1385,7 @@ function getMonday(date) {
   d.setDate(d.getDate() + diff);
   return d;
 }
-function addDays(date, n) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + n);
-  return d;
-}
+function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d; }
 function isOddWeek(date) {
   const monday = getMonday(date);
   const ms = monday - BASE_MONDAY;
@@ -1818,9 +1399,7 @@ function getReferenceDate() {
 }
 function isToday(date) {
   const t = new Date();
-  return date.getDate() === t.getDate()
-      && date.getMonth() === t.getMonth()
-      && date.getFullYear() === t.getFullYear();
+  return date.getDate() === t.getDate() && date.getMonth() === t.getMonth() && date.getFullYear() === t.getFullYear();
 }
 function formatDate(d) {
   const dd = String(d.getDate()).padStart(2, '0');
@@ -1831,49 +1410,26 @@ function getRangeString(monday) {
   const sat = addDays(monday, 5);
   return `${formatDate(monday)} – ${formatDate(sat)}`;
 }
-function isSunday() {
-  return new Date().getDay() === 0;
-}
-function getTodayDate() {
-  const t = new Date();
-  t.setHours(0, 0, 0, 0);
-  return t;
-}
+function isSunday() { return new Date().getDay() === 0; }
+function getTodayDate() { const t = new Date(); t.setHours(0,0,0,0); return t; }
 
 // ================== НАВИГАЦИЯ ==================
 let weekOffset = 0;
 let currentView = 'even';
 let previousScheduleView = null;
 
-function getBaseMonday() {
-  return getMonday(getReferenceDate());
-}
-function getCurrentMonday() {
-  return addDays(getBaseMonday(), weekOffset * 7);
-}
-function getCurrentType() {
-  return isOddWeek(getCurrentMonday()) ? 'odd' : 'even';
-}
+function getBaseMonday() { return getMonday(getReferenceDate()); }
+function getCurrentMonday() { return addDays(getBaseMonday(), weekOffset * 7); }
+function getCurrentType() { return isOddWeek(getCurrentMonday()) ? 'odd' : 'even'; }
 
 function canNavigateTo(offset) {
   const monday = addDays(getBaseMonday(), offset * 7);
   const t = monday.getTime();
   return t >= MIN_MONDAY.getTime() && t <= MAX_MONDAY.getTime();
 }
-
-function saveWeekOffset() {
-  localStorage.setItem('schedule-week-offset', String(weekOffset));
-}
-
-function isMobileLayout() {
-  return window.matchMedia('(max-width: 900px)').matches;
-}
-
-function isTouchPrimary() {
-  try {
-    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  } catch (_) { return false; }
-}
+function saveWeekOffset() { localStorage.setItem('schedule-week-offset', String(weekOffset)); }
+function isMobileLayout() { return window.matchMedia('(max-width: 900px)').matches; }
+function isTouchPrimary() { try { return window.matchMedia('(hover: none) and (pointer: coarse)').matches; } catch (_) { return false; } }
 
 // ================== ДАННЫЕ ==================
 const schedule = {
@@ -1941,18 +1497,8 @@ const schedule = {
 };
 
 const ROWS_PER_DAY = 4;
-
-const DAYS_LEFT  = [
-  ['ПОНЕДЕЛЬНИК', 'monday'],
-  ['ВТОРНИК',     'tuesday'],
-  ['СРЕДА',       'wednesday'],
-];
-const DAYS_RIGHT = [
-  ['ЧЕТВЕРГ', 'thursday'],
-  ['ПЯТНИЦА', 'friday'],
-  ['СУББОТА', 'saturday'],
-];
-
+const DAYS_LEFT  = [['ПОНЕДЕЛЬНИК','monday'],['ВТОРНИК','tuesday'],['СРЕДА','wednesday']];
+const DAYS_RIGHT = [['ЧЕТВЕРГ','thursday'],['ПЯТНИЦА','friday'],['СУББОТА','saturday']];
 const DAY_NAMES_FULL = ['ВОСКРЕСЕНЬЕ','ПОНЕДЕЛЬНИК','ВТОРНИК','СРЕДА','ЧЕТВЕРГ','ПЯТНИЦА','СУББОТА'];
 const DAY_KEYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
@@ -1988,18 +1534,8 @@ function renderDay(label, lessons, date) {
     <div class="day${todayClass}">
       <div class="day-label">${label}<span class="day-date">${dateNum}</span></div>
       <table>
-        <colgroup>
-          <col style="width:14%">
-          <col style="width:64%">
-          <col style="width:22%">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>№ / Время</th>
-            <th>ПРЕДМЕТ</th>
-            <th>КАБИНЕТ</th>
-          </tr>
-        </thead>
+        <colgroup><col style="width:14%"><col style="width:64%"><col style="width:22%"></colgroup>
+        <thead><tr><th>№ / Время</th><th>ПРЕДМЕТ</th><th>КАБИНЕТ</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -2046,31 +1582,25 @@ function renderActiveDiary() {
   const type = getCurrentType();
   if (type === 'even') {
     document.getElementById('diary-even').innerHTML =
-      renderPage('even', monday, DAYS_LEFT, monday) +
-      renderPage('even', monday, DAYS_RIGHT, thursday);
+      renderPage('even', monday, DAYS_LEFT, monday) + renderPage('even', monday, DAYS_RIGHT, thursday);
   } else {
     document.getElementById('diary-odd').innerHTML =
-      renderPage('odd', monday, DAYS_LEFT, monday) +
-      renderPage('odd', monday, DAYS_RIGHT, thursday);
+      renderPage('odd', monday, DAYS_LEFT, monday) + renderPage('odd', monday, DAYS_RIGHT, thursday);
   }
 }
 
 // ================== МОБИЛЬНЫЙ ДЕНЬ ==================
 let mobileDate = null;
-
 function initMobileDate() { mobileDate = getTodayDate(); }
 function nextDay(date) { return addDays(date, 1); }
 function prevDay(date) { return addDays(date, -1); }
-
 function canGoPrevDay() {
   if (!mobileDate) return false;
-  const prev = prevDay(mobileDate);
-  return getMonday(prev).getTime() >= MIN_MONDAY.getTime();
+  return getMonday(prevDay(mobileDate)).getTime() >= MIN_MONDAY.getTime();
 }
 function canGoNextDay() {
   if (!mobileDate) return false;
-  const next = nextDay(mobileDate);
-  return getMonday(next).getTime() <= MAX_MONDAY.getTime();
+  return getMonday(nextDay(mobileDate)).getTime() <= MAX_MONDAY.getTime();
 }
 function syncWeekOffsetFromMobileDate() {
   if (!mobileDate) return;
@@ -2084,8 +1614,7 @@ function updateTabTodayState() {
   const btn = document.getElementById('tabToday');
   if (!btn) return;
   if (!mobileDate) { btn.disabled = false; return; }
-  const today = getTodayDate();
-  btn.disabled = mobileDate.getTime() === today.getTime();
+  btn.disabled = mobileDate.getTime() === getTodayDate().getTime();
 }
 
 function renderMobileDay() {
@@ -2128,10 +1657,8 @@ function renderMobileDay() {
     body.innerHTML = html;
     body.scrollTop = 0;
   }
-
   const page = document.getElementById('mobileDayPage');
   if (page) page.classList.toggle('is-odd', type === 'odd');
-
   const prevBtn = document.getElementById('mobPrev');
   const nextBtn = document.getElementById('mobNext');
   if (prevBtn) prevBtn.disabled = !canGoPrevDay();
@@ -2146,7 +1673,6 @@ function navigateMobileDay(delta) {
   syncWeekOffsetFromMobileDate();
   renderMobileDay();
 }
-
 function goToTodayMobile() {
   initMobileDate();
   syncWeekOffsetFromMobileDate();
@@ -2169,14 +1695,9 @@ function ensureTodayButton() {
     btn.type = 'button';
     btn.textContent = 'Сегодня';
     tabsBar.insertBefore(btn, topActions);
-    btn.addEventListener('click', () => {
-      if (!isMobileLayout()) return;
-      goToTodayMobile();
-    });
+    btn.addEventListener('click', () => { if (!isMobileLayout()) return; goToTodayMobile(); });
     updateTabTodayState();
-  } else if (!shouldShow && existing) {
-    existing.remove();
-  }
+  } else if (!shouldShow && existing) existing.remove();
 }
 
 document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
@@ -2188,18 +1709,13 @@ document.getElementById('mobNext').addEventListener('click', () => navigateMobil
   let startX = 0, startY = 0, active = false;
   body.addEventListener('touchstart', e => {
     if (e.touches.length !== 1) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    active = true;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; active = true;
   }, { passive: true });
   body.addEventListener('touchend', e => {
-    if (!active) return;
-    active = false;
+    if (!active) return; active = false;
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      navigateMobileDay(dx < 0 ? 1 : -1);
-    }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) navigateMobileDay(dx < 0 ? 1 : -1);
   }, { passive: true });
 })();
 
@@ -2216,10 +1732,7 @@ function updateNavInfo() {
   }
   nav.classList.remove('hidden');
   nav.classList.toggle('odd', currentView === 'odd');
-
-  const monday = getCurrentMonday();
-  info.textContent = getRangeString(monday);
-
+  info.textContent = getRangeString(getCurrentMonday());
   prevBtn.disabled = !canNavigateTo(weekOffset - 1);
   nextBtn.disabled = !canNavigateTo(weekOffset + 1);
 }
@@ -2233,30 +1746,19 @@ function updateBanner() {
     banner.classList.remove('active');
     return;
   }
-
   const isOdd = currentView === 'odd';
   banner.classList.toggle('odd', isOdd);
   bannerBtn.classList.toggle('odd', isOdd);
 
-  let text = '';
-  let showBtn = true;
-  let show = true;
-
-  if (weekOffset > 0) {
-    text = 'Вы просматриваете следующую неделю';
-  } else if (weekOffset < 0) {
-    text = 'Вы просматриваете прошлую неделю';
-  } else if (isSunday()) {
-    text = 'Сегодня выходной · показана следующая учебная неделя';
-    showBtn = false;
-  } else {
-    show = false;
-  }
+  let text = '', showBtn = true, show = true;
+  if (weekOffset > 0) text = 'Вы просматриваете следующую неделю';
+  else if (weekOffset < 0) text = 'Вы просматриваете прошлую неделю';
+  else if (isSunday()) { text = 'Сегодня выходной · показана следующая учебная неделя'; showBtn = false; }
+  else show = false;
 
   bannerText.textContent = text;
   bannerBtn.style.display = showBtn ? 'inline-flex' : 'none';
   banner.classList.toggle('active', show);
-
   fitAll();
 }
 
@@ -2274,15 +1776,14 @@ function setViewUI(view) {
       else if (uiView === 'mobile') t.classList.add('active-mobile');
     }
   });
-  wraps.forEach(w => {
-    w.classList.toggle('active', w.dataset.view === uiView);
-  });
+  wraps.forEach(w => w.classList.toggle('active', w.dataset.view === uiView));
 }
 
-function applyView(type) {
+async function applyView(type) {
   if (type === 'homework') {
     currentView = 'homework';
     document.body.classList.add('view-homework');
+    await loadHwItemsFromCloud();
     renderHomework();
     setViewUI('homework');
     updateNavInfo();
@@ -2322,15 +1823,9 @@ function applyView(type) {
 }
 
 function switchTab(view) {
-  if (view === 'bell' || view === 'mobile') {
-    applyView(view);
-    return;
-  }
+  if (view === 'bell' || view === 'mobile') { applyView(view); return; }
   if (view !== getCurrentType()) {
-    if (!canNavigateTo(weekOffset + 1)) {
-      showToast('Эта неделя вне расписания');
-      return;
-    }
+    if (!canNavigateTo(weekOffset + 1)) { showToast('Эта неделя вне расписания'); return; }
     weekOffset++;
     saveWeekOffset();
   }
@@ -2366,8 +1861,7 @@ function fitAll() {
       const target = wrap.querySelector('.diary, .bell-page');
       if (!target) return;
       target.style.transform = 'scale(1)';
-      const scale = Math.min(wrap.clientWidth / target.offsetWidth,
-                              wrap.clientHeight / target.offsetHeight);
+      const scale = Math.min(wrap.clientWidth / target.offsetWidth, wrap.clientHeight / target.offsetHeight);
       target.style.transform = `scale(${scale})`;
     });
   });
@@ -2375,27 +1869,17 @@ function fitAll() {
 
 const tabs = document.querySelectorAll('.tab[data-view]');
 const wraps = document.querySelectorAll('.diary-wrap');
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => switchTab(tab.dataset.view));
-});
+tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.view)));
 
 // ================== БОКОВОЕ МЕНЮ ==================
 const sidebar = document.getElementById('sidebar');
 const sidebarBackdrop = document.getElementById('sidebarBackdrop');
 const sidebarItems = document.querySelectorAll('.sidebar-item');
 
-function openSidebar() {
-  sidebar.classList.add('open');
-  sidebarBackdrop.classList.add('open');
-}
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  sidebarBackdrop.classList.remove('open');
-}
+function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('open'); }
+function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('open'); }
 function updateSidebarActive(page) {
-  sidebarItems.forEach(item => {
-    item.classList.toggle('active', item.dataset.page === page);
-  });
+  sidebarItems.forEach(item => item.classList.toggle('active', item.dataset.page === page));
 }
 
 document.getElementById('menuBtn').addEventListener('click', openSidebar);
@@ -2408,35 +1892,19 @@ sidebarItems.forEach(item => {
   item.addEventListener('click', () => {
     closeSidebar();
     const page = item.dataset.page;
-    if (page === 'homework') {
-      applyView('homework');
-    } else {
-      if (previousScheduleView && previousScheduleView !== 'homework') {
-        applyView(previousScheduleView);
-      } else {
-        applyView(isMobileLayout() ? 'mobile' : getCurrentType());
-      }
+    if (page === 'homework') applyView('homework');
+    else {
+      if (previousScheduleView && previousScheduleView !== 'homework') applyView(previousScheduleView);
+      else applyView(isMobileLayout() ? 'mobile' : getCurrentType());
     }
   });
 });
 
-// ================== ДОМАШКА (упрощённая: локальная) ==================
-const HW_STORAGE = 'r144s-homework-v1';
-const AUTHOR_STORAGE = 'r144s-author';
+// ================== ДОМАШКА ==================
 const SUBJECT_COLORS = ['#6C5CE7', '#E17055', '#00B894', '#0984E3', '#E84393', '#FDCB6E', '#00CEC9', '#6AB04C', '#B53471', '#A29BFE'];
 
 let hwItems = [];
-
-function loadHwItems() {
-  try {
-    const raw = localStorage.getItem(HW_STORAGE);
-    const arr = raw ? JSON.parse(raw) : [];
-    hwItems = Array.isArray(arr) ? arr.filter(x => x && x.subject && x.task) : [];
-  } catch (_) { hwItems = []; }
-}
-function saveHwItems() {
-  try { localStorage.setItem(HW_STORAGE, JSON.stringify(hwItems)); } catch (_) {}
-}
+let hwLoading = false;
 
 function getAllSubjects() {
   const set = new Set();
@@ -2456,7 +1924,7 @@ function colorForSubject(name) {
 
 function formatDeadline(iso) {
   if (!iso) return '';
-  const [y, m, d] = iso.split('-').map(Number);
+  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
   if (!y || !m || !d) return '';
   const now = new Date(); now.setHours(0,0,0,0);
   const dl = new Date(y, m - 1, d);
@@ -2469,7 +1937,7 @@ function formatDeadline(iso) {
 }
 function isDeadlineSoon(iso) {
   if (!iso) return false;
-  const [y, m, d] = iso.split('-').map(Number);
+  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
   if (!y || !m || !d) return false;
   const now = new Date(); now.setHours(0,0,0,0);
   const dl = new Date(y, m - 1, d);
@@ -2478,23 +1946,31 @@ function isDeadlineSoon(iso) {
 }
 
 function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function updateHwAddBtnState() {
   const btn = document.getElementById('hwAddBtn');
   if (!btn) return;
-  if (currentUser) {
-    btn.disabled = false;
-    btn.title = 'Добавить задание';
+  if (currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
+  else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
+}
+
+async function loadHwItemsFromCloud() {
+  hwLoading = true;
+  const { data, error } = await supabaseClient
+    .from('homework')
+    .select('id, user_id, user_login, subject, task, deadline, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Ошибка загрузки ДЗ:', error);
+    showToast('Не удалось загрузить задания');
+    hwItems = [];
   } else {
-    btn.disabled = true;
-    btn.title = 'Войдите, чтобы добавлять задания';
+    hwItems = data || [];
   }
+  hwLoading = false;
 }
 
 function renderHomework() {
@@ -2502,6 +1978,8 @@ function renderHomework() {
   const empty = document.getElementById('hwEmpty');
   const countEl = document.getElementById('hwTotalCount');
   if (!grid || !empty) return;
+
+  if (hwLoading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
   if (countEl) {
     const n = hwItems.length;
@@ -2511,11 +1989,7 @@ function renderHomework() {
     countEl.textContent = `${n} ${word}`;
   }
 
-  if (hwItems.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.add('active');
-    return;
-  }
+  if (hwItems.length === 0) { grid.innerHTML = ''; empty.classList.add('active'); return; }
   empty.classList.remove('active');
 
   const groups = {};
@@ -2532,22 +2006,21 @@ function renderHomework() {
       if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
       if (a.deadline) return -1;
       if (b.deadline) return 1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
+      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
     });
 
     const accent = colorForSubject(subj);
-
     let itemsHtml = '';
     for (const item of items) {
       const dlText = formatDeadline(item.deadline);
       const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
+      const canDelete = currentUser && item.user_login === currentUser;
       itemsHtml += `
         <div class="hw-item">
-          <button class="hw-item-del" data-id="${item.id}" title="Удалить" type="button">✕</button>
+          ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" title="Удалить" type="button">✕</button>` : ''}
           <div class="hw-item-task">${escapeHtml(item.task)}</div>
           <div class="hw-item-meta">
             ${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}
-            ${item.author ? `<span>👤 ${escapeHtml(item.author)}</span>` : ''}
           </div>
         </div>`;
     }
@@ -2564,27 +2037,26 @@ function renderHomework() {
   grid.innerHTML = html;
 
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       if (!currentUser) { showToast('Войдите, чтобы удалять задания'); return; }
       const id = btn.dataset.id;
-      const item = hwItems.find(x => x.id === id);
+      const item = hwItems.find(x => String(x.id) === String(id));
       if (!item) return;
       if (!confirm(`Удалить задание?\n\n«${item.task.slice(0, 80)}»`)) return;
-      hwItems = hwItems.filter(x => x.id !== id);
-      saveHwItems();
+      const { error } = await supabaseClient.from('homework').delete().eq('id', id);
+      if (error) { console.error(error); showToast('Ошибка удаления: ' + error.message); return; }
+      hwItems = hwItems.filter(x => String(x.id) !== String(id));
       renderHomework();
       showToast('Задание удалено');
     });
   });
 }
 
-// ---------- Модалка ДЗ ----------
 const hwModal = document.getElementById('hwModal');
 const hwSubjectEl = document.getElementById('hwSubject');
 const hwTaskEl = document.getElementById('hwTask');
 const hwDeadlineEl = document.getElementById('hwDeadline');
-const hwAuthorEl = document.getElementById('hwAuthor');
 
 function fillSubjectSelect() {
   const subjects = getAllSubjects();
@@ -2596,32 +2068,47 @@ function openHwModal() {
   fillSubjectSelect();
   hwTaskEl.value = '';
   hwDeadlineEl.value = '';
-  const savedAuthor = localStorage.getItem(AUTHOR_STORAGE) || '';
-  hwAuthorEl.value = savedAuthor;
   hwModal.classList.add('active');
   setTimeout(() => hwTaskEl.focus(), 60);
 }
 function closeHwModal() { hwModal.classList.remove('active'); }
 
-function saveHwItem() {
+async function saveHwItem() {
   if (!currentUser) { showToast('Войдите, чтобы добавлять задания'); return; }
   const subject = hwSubjectEl.value.trim();
   const task = hwTaskEl.value.trim();
-  const deadline = hwDeadlineEl.value || '';
-  const author = hwAuthorEl.value.trim();
+  const deadline = hwDeadlineEl.value || null;
 
   if (!subject) { showToast('Выберите предмет'); return; }
-  if (!task)    { showToast('Введите текст задания'); hwTaskEl.focus(); return; }
-  if (author) localStorage.setItem(AUTHOR_STORAGE, author);
+  if (!task) { showToast('Введите текст задания'); hwTaskEl.focus(); return; }
 
-  const item = {
-    id: 'hw_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-    subject, task, deadline, author,
-    createdAt: Date.now()
-  };
-  hwItems.push(item);
-  saveHwItems();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session || !session.user) {
+    showToast('Сессия истекла, войдите заново');
+    closeHwModal();
+    openAuthModal();
+    return;
+  }
+
+  const saveBtn = document.getElementById('hwSave');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Сохраняю…';
+
+  const { error } = await supabaseClient.from('homework').insert({
+    user_id: session.user.id,
+    user_login: currentUser,
+    subject,
+    task,
+    deadline,
+  });
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Добавить';
+
+  if (error) { console.error(error); showToast('Ошибка сохранения: ' + error.message); return; }
+
   closeHwModal();
+  await loadHwItemsFromCloud();
   renderHomework();
   showToast('Задание добавлено');
 }
@@ -2630,9 +2117,7 @@ document.getElementById('hwAddBtn').addEventListener('click', openHwModal);
 document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
 document.getElementById('hwCancel').addEventListener('click', closeHwModal);
 document.getElementById('hwSave').addEventListener('click', saveHwItem);
-hwModal.addEventListener('click', e => {
-  if (e.target === hwModal) closeHwModal();
-});
+hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
 document.addEventListener('keydown', e => {
   if (!hwModal.classList.contains('active')) return;
   if (e.key === 'Escape') closeHwModal();
@@ -2653,11 +2138,8 @@ function loginFromEmail(email) {
 
 async function refreshUser() {
   const { data } = await supabaseClient.auth.getSession();
-  if (data && data.session && data.session.user) {
-    currentUser = loginFromEmail(data.session.user.email);
-  } else {
-    currentUser = null;
-  }
+  if (data && data.session && data.session.user) currentUser = loginFromEmail(data.session.user.email);
+  else currentUser = null;
   updateAuthUI();
 }
 
@@ -2669,18 +2151,12 @@ function updateAuthUI() {
     btn.classList.add('logged-in');
     btn.textContent = '👤';
     btn.title = 'Вы вошли как ' + currentUser + '. Нажмите, чтобы выйти.';
-    if (sideUser) {
-      sideUser.textContent = 'Вошёл: ' + currentUser;
-      sideUser.classList.add('visible');
-    }
+    if (sideUser) { sideUser.textContent = 'Вошёл: ' + currentUser; sideUser.classList.add('visible'); }
   } else {
     btn.classList.remove('logged-in');
     btn.textContent = '🔐';
     btn.title = 'Войти';
-    if (sideUser) {
-      sideUser.textContent = '';
-      sideUser.classList.remove('visible');
-    }
+    if (sideUser) { sideUser.textContent = ''; sideUser.classList.remove('visible'); }
   }
   updateHwAddBtnState();
 }
@@ -2697,12 +2173,9 @@ async function tryLogin(login, password) {
   const clean = String(login).trim();
   if (!clean) return { ok: false, msg: 'Введите логин.' };
   const email = `${clean}@dnevnik.local`;
-
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
-    if (/invalid/i.test(error.message)) {
-      return { ok: false, msg: 'Неверный логин или пароль.' };
-    }
+    if (/invalid/i.test(error.message)) return { ok: false, msg: 'Неверный логин или пароль.' };
     return { ok: false, msg: 'Ошибка: ' + error.message };
   }
   currentUser = clean;
@@ -2713,7 +2186,7 @@ async function logout() {
   await supabaseClient.auth.signOut();
   currentUser = null;
   updateAuthUI();
-  if (currentView === 'homework') renderHomework();
+  if (currentView === 'homework') { hwItems = []; renderHomework(); }
   showToast('Вы вышли из аккаунта');
 }
 
@@ -2721,24 +2194,22 @@ async function submitAuth() {
   const login = authLoginInput.value.trim();
   const pass = authPasswordInput.value;
   if (!login) { authError.textContent = 'Введите логин.'; return; }
-  if (!pass)  { authError.textContent = 'Введите пароль.'; return; }
+  if (!pass) { authError.textContent = 'Введите пароль.'; return; }
 
   const submitBtn = document.getElementById('authSubmit');
   const skipBtn = document.getElementById('authSkip');
-  submitBtn.disabled = true;
-  skipBtn.disabled = true;
+  submitBtn.disabled = true; skipBtn.disabled = true;
   submitBtn.textContent = 'Вход…';
 
   const res = await tryLogin(login, pass);
 
-  submitBtn.disabled = false;
-  skipBtn.disabled = false;
+  submitBtn.disabled = false; skipBtn.disabled = false;
   submitBtn.textContent = 'Войти';
 
   if (res.ok) {
     closeAuthModal();
     updateAuthUI();
-    if (currentView === 'homework') renderHomework();
+    if (currentView === 'homework') { await loadHwItemsFromCloud(); renderHomework(); }
     showToast('Добро пожаловать, ' + res.login + '!');
   } else {
     authError.textContent = res.msg;
@@ -2748,24 +2219,15 @@ async function submitAuth() {
 }
 
 document.getElementById('authBtn').addEventListener('click', async () => {
-  if (currentUser) {
-    if (confirm('Выйти из аккаунта?')) await logout();
-  } else {
-    openAuthModal();
-  }
+  if (currentUser) { if (confirm('Выйти из аккаунта?')) await logout(); }
+  else openAuthModal();
 });
 document.getElementById('authClose').addEventListener('click', closeAuthModal);
 document.getElementById('authSkip').addEventListener('click', closeAuthModal);
 document.getElementById('authSubmit').addEventListener('click', submitAuth);
-authOverlay.addEventListener('click', e => {
-  if (e.target === authOverlay) closeAuthModal();
-});
-authPasswordInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitAuth();
-});
-authLoginInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') authPasswordInput.focus();
-});
+authOverlay.addEventListener('click', e => { if (e.target === authOverlay) closeAuthModal(); });
+authPasswordInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
+authLoginInput.addEventListener('keydown', e => { if (e.key === 'Enter') authPasswordInput.focus(); });
 
 // ================== СМЕНА СУТОК И ПАР ==================
 let lastKnownDay = new Date().getDate();
@@ -2785,10 +2247,7 @@ setInterval(() => {
   }
   if (currentView === 'bell') {
     const m = now.getMinutes();
-    if (m !== lastKnownMinute) {
-      lastKnownMinute = m;
-      renderBellPage();
-    }
+    if (m !== lastKnownMinute) { lastKnownMinute = m; renderBellPage(); }
   }
 }, 30000);
 
@@ -2798,21 +2257,15 @@ window.addEventListener('resize', () => {
   const nowMobile = isMobileLayout();
   if (nowMobile !== lastMobileState) {
     lastMobileState = nowMobile;
-    if (currentView === 'homework') {
-      // остаёмся
-    } else if (nowMobile) {
-      if (!mobileDate) initMobileDate();
-      applyView('mobile');
-    } else {
-      applyView(getCurrentType());
-    }
+    if (currentView === 'homework') {}
+    else if (nowMobile) { if (!mobileDate) initMobileDate(); applyView('mobile'); }
+    else applyView(getCurrentType());
   }
   fitAll();
 });
 
 // ================== СТАРТ ==================
 window.addEventListener('load', async () => {
-  // Тема
   const savedTheme = localStorage.getItem('schedule-theme');
   if (savedTheme) applyTheme(savedTheme);
   else {
@@ -2820,7 +2273,6 @@ window.addEventListener('load', async () => {
     applyTheme(prefersDark ? 'dark' : 'light');
   }
 
-  // Неделя
   weekOffset = 0;
   const savedOffsetRaw = localStorage.getItem('schedule-week-offset');
   if (savedOffsetRaw !== null) {
@@ -2838,16 +2290,12 @@ window.addEventListener('load', async () => {
   renderBellPage();
   updateFsIcon();
   ensureTodayButton();
-  loadHwItems();
 
-  // Проверяем сессию Supabase
   await refreshUser();
 
-  // Начальная страница
   const savedPage = localStorage.getItem('r144s-page') || 'schedule';
-  if (savedPage === 'homework') {
-    applyView('homework');
-  } else {
+  if (savedPage === 'homework') applyView('homework');
+  else {
     if (isMobileLayout()) applyView('mobile');
     else applyView(getCurrentType());
   }
