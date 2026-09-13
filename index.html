@@ -98,6 +98,9 @@
   .tab.active-even { background: #6C5CE7; color: #fff; }
   .tab.active-odd  { background: #E17055; color: #fff; }
   .tab.active-bell { background: #0984E3; color: #fff; }
+  .tab.active-mobile { background: #0984E3; color: #fff; }
+
+  .tab-mobile { display: none; }
 
   .top-actions {
     position: absolute;
@@ -486,6 +489,172 @@
     transition: color 0.25s;
   }
 
+  /* ============== МОБИЛЬНЫЙ ДЕНЬ ============== */
+
+  .diary-wrap[data-view="mobile"] {
+    display: none;
+  }
+  .diary-wrap[data-view="mobile"].active {
+    display: flex;
+  }
+
+  .mobile-day-page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .mobile-day-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .mob-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-family: inherit;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .mob-nav-btn:active:not(:disabled) { transform: scale(0.92); }
+  .mob-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .mob-day-title {
+    flex: 1;
+    text-align: center;
+    color: var(--text-primary);
+    line-height: 1.25;
+    min-width: 0;
+  }
+  .mob-day-title .mob-title-day {
+    display: block;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .mob-day-title .mob-title-date {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .mobile-day-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .mob-pair {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .mob-pair-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mob-pair-num {
+    color: var(--accent-even);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .mobile-day-page.is-odd .mob-pair-num {
+    color: var(--accent-odd);
+  }
+
+  .mob-pair-time {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  .mob-pair-room {
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border-light);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .mob-pair-subj {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .mob-pair-type {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .mob-pair-teacher {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-top: -2px;
+  }
+
+  .mob-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-style: italic;
+    border: 2px dashed var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-surface);
+  }
+
   /* ============== РАСПИСАНИЕ ЗВОНКОВ ============== */
 
   .bell-page {
@@ -647,14 +816,17 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ============== МОБИЛЬНАЯ ВЁРСТКА ==============
-     На узких экранах отключаем масштабирование и превращаем
-     дневник в вертикальный список дней — читается нормально,
-     страница просто скроллится. */
+  /* ============== МОБИЛЬНАЯ ВЁРСТКА ============== */
 
   @media (max-width: 900px) {
+    .tab-desktop { display: none; }
+    .tab-mobile { display: inline-block; }
+
+    .week-nav { display: none !important; }
+    .banner { display: none !important; }
+
     .tabs {
-      padding-right: 130px;
+      padding-right: 120px;
       flex-wrap: nowrap;
       overflow-x: auto;
       justify-content: flex-start;
@@ -681,126 +853,83 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 25;
     }
-    .week-nav {
-      top: auto;
-      height: 46px;
-      gap: 10px;
-    }
-    .nav-info { min-width: 0; font-size: 14px; flex: 1; }
-    .nav-btn { width: 34px; height: 34px; font-size: 18px; }
-    .nav-today { padding: 5px 10px; font-size: 11px; }
 
     .viewport {
-      padding: calc(116px + env(safe-area-inset-top)) 0 calc(56px + env(safe-area-inset-bottom));
+      padding: calc(78px + env(safe-area-inset-top)) 0 0;
       justify-content: flex-start;
-      gap: 6px;
+      gap: 0;
     }
 
-    .banner {
-      margin: 0 8px;
-      font-size: 12px;
-      padding: 8px 12px;
-      max-width: calc(100% - 16px);
+    /* Скрываем обычные дневники на телефоне — показываем только мобильный день */
+    .diary-wrap[data-view="even"],
+    .diary-wrap[data-view="odd"] {
+      display: none !important;
     }
-    .banner-btn { padding: 6px 12px; font-size: 11px; }
 
-    /* Отключаем масштабирование — контент течёт сам по себе */
-    .diary-wrap {
-      display: none;
+    .diary-wrap[data-view="mobile"],
+    .diary-wrap[data-view="bell"] {
       width: 100%;
+      height: 100%;
       flex: 1;
       min-height: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      align-items: flex-start;
-      justify-content: flex-start;
-      -webkit-overflow-scrolling: touch;
+      overflow: hidden;
+      align-items: stretch;
+      justify-content: stretch;
     }
-    .diary-wrap.active { display: block; }
 
-    .diary,
+    .diary-wrap[data-view="mobile"].active,
+    .diary-wrap[data-view="bell"].active {
+      display: flex;
+    }
+
+    .mobile-day-page {
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+      gap: 8px;
+    }
+
+    /* Расписание звонков на мобиле — компактная таблица */
     .bell-page {
       width: 100%;
       height: auto;
       min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 10px;
+      display: block;
+      padding: 8px;
       border: none;
       border-radius: 0;
       box-shadow: none;
-      transform: none !important; /* fitAll не будет трогать */
+      transform: none !important;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
-
-    .diary .page {
-      width: 100%;
-      border: 2px solid var(--border-main);
-    }
-
-    .days { display: flex; flex-direction: column; }
-
-    .day {
-      flex: none;
-      min-height: 0;
-      height: auto;
-      display: grid;
-      grid-template-columns: 40px 1fr;
-    }
-
-    .day table { height: auto; }
-    .day tbody { height: auto; }
-    .day tbody tr { height: auto; min-height: 48px; }
-    .day tbody td { height: auto; padding: 10px 10px; }
-
-    .day-label { font-size: 14px; letter-spacing: 1.5px; padding: 12px 0; }
-    .day-date { font-size: 18px; margin-left: 6px; }
-
-    .month-bar { font-size: 15px; padding: 10px; letter-spacing: 1px; }
-    .month-value { min-width: 0; font-size: 15px; padding: 0 8px 3px; }
-
-    th { font-size: 11px; padding: 8px 4px; letter-spacing: 0.5px; }
-
-    .pair-num { font-size: 13px; }
-    .pair-time { font-size: 12px; }
-    .subj-name { font-size: 14px; white-space: normal; }
-    .subj-meta { font-size: 11px; white-space: normal; }
-    .room-name { font-size: 14px; }
-
-    .num { padding: 8px 2px; }
-
-    /* Таблица звонков — тоже компактнее, но всё ещё в столбик */
-    .bell-page-inner { border: none; }
+    .bell-page-inner { border: 2px solid var(--border-main); border-radius: 10px; }
     .bell-head { height: auto; }
     .bell-head > div {
-      font-size: 12px;
-      padding: 14px 4px;
-      letter-spacing: 0.5px;
+      font-size: 11px;
+      padding: 12px 2px;
+      letter-spacing: 0.3px;
     }
-    .bell-row { min-height: 56px; }
-    .bell-row > div { padding: 12px 6px; }
-    .bell-num-cell { font-size: 22px; }
-    .bell-time-cell { font-size: 20px; }
-    .bell-break-cell { font-size: 14px; }
+    .bell-row { min-height: 54px; }
+    .bell-row > div { padding: 10px 4px; }
+    .bell-num-cell { font-size: 20px; }
+    .bell-time-cell { font-size: 16px; }
+    .bell-break-cell { font-size: 12px; }
   }
 
   @media (max-width: 500px) {
-    .tabs { padding-right: 116px; }
+    .tabs { padding-right: 104px; }
     .tab { padding: 7px 12px; font-size: 12px; }
-    .subj-name { font-size: 13px; }
-    .subj-meta { font-size: 10px; }
-    .room-name { font-size: 13px; }
-    th { font-size: 10px; }
-    .day tbody td { padding: 8px 6px; }
+    .mob-day-title .mob-title-day { font-size: 15px; }
+    .mob-pair-subj { font-size: 14px; }
   }
 </style>
 </head>
 <body>
 
   <div class="tabs">
-    <div class="tab" data-view="even">Чётная</div>
-    <div class="tab" data-view="odd">Нечётная</div>
-    <div class="tab" data-view="bell">Звонки</div>
+    <div class="tab tab-desktop" data-view="even">Чётная неделя</div>
+    <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
+    <div class="tab tab-mobile" data-view="mobile">📅 День</div>
+    <div class="tab" data-view="bell">Расписание звонков</div>
     <div class="top-actions">
       <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
       <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
@@ -826,6 +955,18 @@
     <div class="diary-wrap" data-view="odd">
       <div class="diary" id="diary-odd"></div>
     </div>
+
+    <div class="diary-wrap" data-view="mobile">
+      <div class="mobile-day-page" id="mobileDayPage">
+        <div class="mobile-day-nav">
+          <button class="mob-nav-btn" id="mobPrev" title="Предыдущий день">‹</button>
+          <div class="mob-day-title" id="mobDayTitle">—</div>
+          <button class="mob-nav-btn" id="mobNext" title="Следующий день">›</button>
+        </div>
+        <div class="mobile-day-body" id="mobileDayBody"></div>
+      </div>
+    </div>
+
     <div class="diary-wrap" data-view="bell">
       <div class="bell-page">
         <div class="bell-page-inner">
@@ -863,7 +1004,6 @@ async function toggleFullscreen() {
     if (!isFs) {
       if (el.requestFullscreen) await el.requestFullscreen();
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
     } else {
       if (document.exitFullscreen) await document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -934,6 +1074,10 @@ function isPairNow(p) {
 const MONTHS_NOM = [
   'Январь','Февраль','Март','Апрель','Май','Июнь',
   'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
+];
+const MONTHS_GEN = [
+  'января','февраля','марта','апреля','мая','июня',
+  'июля','августа','сентября','октября','ноября','декабря'
 ];
 
 const BASE_MONDAY = new Date(2026, 8, 14);
@@ -1007,6 +1151,10 @@ function canNavigateTo(offset) {
 
 function saveWeekOffset() {
   localStorage.setItem('schedule-week-offset', String(weekOffset));
+}
+
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 900px)').matches;
 }
 
 // ================== ДАННЫЕ ==================
@@ -1084,6 +1232,9 @@ const DAYS_RIGHT = [
   ['ПЯТНИЦА', 'friday'],
   ['СУББОТА', 'saturday'],
 ];
+
+const DAY_NAMES_FULL = ['ВОСКРЕСЕНЬЕ','ПОНЕДЕЛЬНИК','ВТОРНИК','СРЕДА','ЧЕТВЕРГ','ПЯТНИЦА','СУББОТА'];
+const DAY_KEYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
 function renderDay(label, lessons, date) {
   const dateNum = date.getDate();
@@ -1169,7 +1320,7 @@ function renderBellPage() {
 }
 
 function renderActiveDiary() {
-  if (currentView === 'bell') return;
+  if (currentView === 'bell' || currentView === 'mobile') return;
   const monday = getCurrentMonday();
   const thursday = addDays(monday, 3);
   const type = getCurrentType();
@@ -1184,6 +1335,129 @@ function renderActiveDiary() {
   }
 }
 
+// ================== МОБИЛЬНЫЙ ДЕНЬ ==================
+let mobileDate = null;
+
+function initMobileDate() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  mobileDate = (today.getDay() === 0) ? addDays(today, 1) : today;
+}
+
+function nextSchoolDay(date) {
+  let d = addDays(date, 1);
+  if (d.getDay() === 0) d = addDays(d, 1);
+  return d;
+}
+function prevSchoolDay(date) {
+  let d = addDays(date, -1);
+  if (d.getDay() === 0) d = addDays(d, -1);
+  return d;
+}
+
+function canGoPrevDay() {
+  if (!mobileDate) return false;
+  const prev = prevSchoolDay(mobileDate);
+  return getMonday(prev).getTime() >= MIN_MONDAY.getTime();
+}
+function canGoNextDay() {
+  if (!mobileDate) return false;
+  const next = nextSchoolDay(mobileDate);
+  return getMonday(next).getTime() <= MAX_MONDAY.getTime();
+}
+
+function renderMobileDay() {
+  if (!mobileDate) initMobileDate();
+  const date = mobileDate;
+  const dow = date.getDay();
+  if (dow === 0) { mobileDate = nextSchoolDay(date); return renderMobileDay(); }
+
+  const dayKey = DAY_KEYS[dow];
+  const type = isOddWeek(date) ? 'odd' : 'even';
+  const lessons = schedule[type][dayKey] || [];
+
+  const title = document.getElementById('mobDayTitle');
+  if (title) {
+    title.innerHTML =
+      `<span class="mob-title-day">${DAY_NAMES_FULL[dow]}</span>` +
+      `<span class="mob-title-date">${date.getDate()} ${MONTHS_GEN[date.getMonth()]} · ${type === 'odd' ? 'нечётная' : 'чётная'}</span>`;
+  }
+
+  const body = document.getElementById('mobileDayBody');
+  if (body) {
+    let html = '';
+    if (lessons.length === 0) {
+      html = '<div class="mob-empty">— в этот день пар нет —</div>';
+    } else {
+      for (const l of lessons) {
+        const pairNum = getPairNumber(l.time);
+        const p = PAIRS.find(x => x.start === l.time);
+        const timeRange = p ? `${p.start} – ${p.end}` : l.time;
+        html += `
+          <div class="mob-pair">
+            <div class="mob-pair-head">
+              <span class="mob-pair-num">${pairNum ? pairNum + ' пара' : ''}</span>
+              <span class="mob-pair-time">${timeRange}</span>
+              <span class="mob-pair-room">${l.room || '—'}</span>
+            </div>
+            <div class="mob-pair-subj">${l.subject} <span class="mob-pair-type">(${l.type})</span></div>
+            ${l.teacher ? `<div class="mob-pair-teacher">${l.teacher}</div>` : ''}
+          </div>`;
+      }
+    }
+    body.innerHTML = html;
+    body.scrollTop = 0;
+  }
+
+  const page = document.getElementById('mobileDayPage');
+  if (page) page.classList.toggle('is-odd', type === 'odd');
+
+  const prevBtn = document.getElementById('mobPrev');
+  const nextBtn = document.getElementById('mobNext');
+  if (prevBtn) prevBtn.disabled = !canGoPrevDay();
+  if (nextBtn) nextBtn.disabled = !canGoNextDay();
+}
+
+function navigateMobileDay(delta) {
+  if (delta < 0 && !canGoPrevDay()) return;
+  if (delta > 0 && !canGoNextDay()) return;
+  mobileDate = delta > 0 ? nextSchoolDay(mobileDate) : prevSchoolDay(mobileDate);
+
+  // Синхронизируем weekOffset для случаев, когда пользователь вернётся к десктопной вёрстке
+  const monday = getMonday(mobileDate);
+  const baseMonday = getBaseMonday();
+  const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
+  weekOffset = weeks;
+  saveWeekOffset();
+
+  renderMobileDay();
+}
+
+document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
+document.getElementById('mobNext').addEventListener('click', () => navigateMobileDay(1));
+
+// Свайпы
+(function setupSwipe() {
+  const body = document.getElementById('mobileDayBody');
+  if (!body) return;
+  let startX = 0, startY = 0, active = false;
+  body.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    active = true;
+  }, { passive: true });
+  body.addEventListener('touchend', e => {
+    if (!active) return;
+    active = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      navigateMobileDay(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+})();
+
 // ================== НАВИГАЦИЯ (UI) ==================
 function updateNavInfo() {
   const nav = document.getElementById('weekNav');
@@ -1192,7 +1466,7 @@ function updateNavInfo() {
   const nextBtn = document.getElementById('navNext');
   const todayBtn = document.getElementById('navToday');
 
-  if (currentView === 'bell') {
+  if (currentView === 'bell' || currentView === 'mobile') {
     nav.classList.add('hidden');
     return;
   }
@@ -1212,7 +1486,7 @@ function updateBanner() {
   const bannerText = document.getElementById('bannerText');
   const bannerBtn = document.getElementById('bannerBtn');
 
-  if (currentView === 'bell') {
+  if (currentView === 'bell' || currentView === 'mobile') {
     banner.classList.remove('active');
     return;
   }
@@ -1244,23 +1518,45 @@ function updateBanner() {
 }
 
 function setViewUI(view) {
+  // На мобиле и even, и odd, и mobile → показываем мобильный день
+  let uiView = view;
+  if (isMobileLayout() && (view === 'even' || view === 'odd')) uiView = 'mobile';
+  if (!isMobileLayout() && view === 'mobile') uiView = getCurrentType();
+
   tabs.forEach(t => {
-    t.classList.remove('active-even', 'active-odd', 'active-bell');
-    if (t.dataset.view === view) {
-      if (view === 'even') t.classList.add('active-even');
-      else if (view === 'odd') t.classList.add('active-odd');
-      else if (view === 'bell') t.classList.add('active-bell');
+    t.classList.remove('active-even', 'active-odd', 'active-bell', 'active-mobile');
+    if (t.dataset.view === uiView) {
+      if (uiView === 'even') t.classList.add('active-even');
+      else if (uiView === 'odd') t.classList.add('active-odd');
+      else if (uiView === 'bell') t.classList.add('active-bell');
+      else if (uiView === 'mobile') t.classList.add('active-mobile');
     }
   });
   wraps.forEach(w => {
-    w.classList.toggle('active', w.dataset.view === view);
+    w.classList.toggle('active', w.dataset.view === uiView);
   });
 }
 
 function applyView(type) {
+  if (isMobileLayout()) {
+    if (type === 'bell') {
+      currentView = 'bell';
+      renderBellPage();
+      setViewUI('bell');
+    } else {
+      currentView = 'mobile';
+      renderMobileDay();
+      setViewUI('mobile');
+    }
+    updateNavInfo();
+    updateBanner();
+    return;
+  }
+
+  if (type === 'mobile') type = getCurrentType();
   currentView = type;
-  renderActiveDiary();
   if (type === 'bell') renderBellPage();
+  else renderActiveDiary();
   setViewUI(type);
   updateNavInfo();
   updateBanner();
@@ -1268,11 +1564,10 @@ function applyView(type) {
 }
 
 function switchTab(view) {
-  if (view === 'bell') {
-    applyView('bell');
+  if (view === 'bell' || view === 'mobile') {
+    applyView(view);
     return;
   }
-
   if (view !== getCurrentType()) {
     if (!canNavigateTo(weekOffset + 1)) {
       showToast('Эта неделя вне расписания');
@@ -1304,14 +1599,8 @@ document.getElementById('navToday').addEventListener('click', goToday);
 document.getElementById('bannerBtn').addEventListener('click', goToday);
 
 // ================== МАСШТАБ ==================
-// На узких экранах transform не применяем — там работает адаптивная вёрстка.
-function isMobileLayout() {
-  return window.matchMedia('(max-width: 900px)').matches;
-}
-
 function fitAll() {
   if (isMobileLayout()) {
-    // Убираем возможный transform, оставшийся с десктопа
     document.querySelectorAll('.diary-wrap.active .diary, .diary-wrap.active .bell-page')
       .forEach(el => { el.style.transform = ''; });
     return;
@@ -1345,7 +1634,7 @@ setInterval(() => {
   const d = now.getDate();
   if (d !== lastKnownDay) {
     lastKnownDay = d;
-    renderActiveDiary();
+    if (!isMobileLayout()) renderActiveDiary();
     if (currentView === 'bell') renderBellPage();
     updateNavInfo();
     updateBanner();
@@ -1359,6 +1648,23 @@ setInterval(() => {
     }
   }
 }, 30000);
+
+// ================== СМЕНА РАЗМЕРА ЭКРАНА ==================
+let lastMobileState = isMobileLayout();
+
+window.addEventListener('resize', () => {
+  const nowMobile = isMobileLayout();
+  if (nowMobile !== lastMobileState) {
+    lastMobileState = nowMobile;
+    if (nowMobile) {
+      if (!mobileDate) initMobileDate();
+      applyView('mobile');
+    } else {
+      applyView(getCurrentType());
+    }
+  }
+  fitAll();
+});
 
 // ================== СТАРТ ==================
 window.addEventListener('load', () => {
@@ -1387,16 +1693,20 @@ window.addEventListener('load', () => {
     }
   }
 
+  initMobileDate();
   renderBellPage();
-  applyView(getCurrentType());
   updateFsIcon();
+
+  if (isMobileLayout()) {
+    applyView('mobile');
+  } else {
+    applyView(getCurrentType());
+  }
 
   fitAll();
   setTimeout(fitAll, 100);
   setTimeout(fitAll, 400);
 });
-
-window.addEventListener('resize', fitAll);
 </script>
 
 </body>
