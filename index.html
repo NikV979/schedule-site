@@ -61,8 +61,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Шапка на grid: 3 колонки — меню / центр / кнопки.
-     Левый и правый столбцы одинаковой ширины, центр всегда строго посередине. */
   .tabs {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -182,6 +180,182 @@
     background: #123A2E;
     color: #4FE0B8;
   }
+
+  /* ============== АВАТАРЫ ============== */
+
+  .sidebar-logo {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar-logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-logo-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .btn-auth {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .btn-auth-icon {
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .btn-auth-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .btn-auth:hover .btn-auth-photo {
+    filter: brightness(0.85);
+  }
+
+  .avatar-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.65);
+    z-index: 550;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .avatar-modal-overlay.active { display: flex; }
+
+  .avatar-modal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    overflow: hidden;
+    animation: modalPop 0.2s ease-out;
+  }
+
+  .avatar-modal-head {
+    padding: 18px 22px;
+    background: #6C5CE7;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .avatar-modal-head h2 { font-size: 18px; font-weight: 800; }
+  .avatar-modal-close {
+    width: 32px; height: 32px;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .avatar-modal-close:hover { background: rgba(255,255,255,0.35); }
+
+  .avatar-modal-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .avatar-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--bg-surface-2);
+    border: 3px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .avatar-preview:hover { border-color: #6C5CE7; }
+  .avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .avatar-preview-placeholder {
+    font-size: 44px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+
+  .avatar-modal-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .avatar-modal-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .avatar-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+  }
+  .avatar-btn-upload { background: #6C5CE7; color: #fff; }
+  .avatar-btn-upload:hover { filter: brightness(1.1); }
+  .avatar-btn-remove {
+    background: transparent;
+    color: #E17055;
+    border: 2px solid #E17055;
+  }
+  .avatar-btn-remove:hover { background: #FFF0EB; }
+  [data-theme="dark"] .avatar-btn-remove:hover { background: #3A2A22; }
+
+  .avatar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .avatar-file-input { display: none; }
 
   @media (hover: none) and (pointer: coarse) {
     .btn-fs { display: none !important; }
@@ -735,6 +909,14 @@
     border-radius: 20px;
     border: 1px solid var(--border-light);
   }
+
+  .hw-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
   .hw-add-btn {
     padding: 10px 20px;
     border: none; border-radius: 10px;
@@ -750,10 +932,28 @@
   .hw-add-btn:active { transform: scale(0.96); }
   .hw-add-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 
+  .hw-clear-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: transparent;
+    color: #E17055;
+    border: 2px solid #E17055;
+    font-family: inherit;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .hw-clear-btn:hover { background: #FFF0EB; }
+  .hw-clear-btn:active { transform: scale(0.96); }
+  .hw-clear-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  [data-theme="dark"] .hw-clear-btn:hover { background: #3A2A22; }
+
   .hw-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
   }
 
   .hw-card {
@@ -762,36 +962,124 @@
     border-radius: 12px;
     overflow: hidden;
     display: flex; flex-direction: column;
-    min-height: 100px;
-    transition: transform 0.15s;
+    min-height: 0;
   }
-  .hw-card:hover { transform: translateY(-2px); }
 
   .hw-card-head {
-    padding: 12px 16px;
+    padding: 14px 18px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 10px;
     background: var(--hw-accent, #6C5CE7);
-    color: #fff;
+    color: var(--hw-text, #fff);
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.15s;
   }
-  .hw-card-subject { font-size: 14px; font-weight: 800; line-height: 1.2; word-break: break-word; }
-  .hw-card-count {
-    background: rgba(255,255,255,0.22);
-    padding: 2px 9px; border-radius: 20px;
-    font-size: 12px; font-weight: 800;
-    flex-shrink: 0; min-width: 24px; text-align: center;
+  .hw-card-head:hover { filter: brightness(1.05); }
+
+  .hw-card-head-left {
+    display: flex; align-items: center; gap: 12px;
+    min-width: 0;
+    flex: 1;
   }
 
-  .hw-card-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .hw-card-arrow {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .hw-card.expanded .hw-card-arrow {
+    transform: rotate(90deg);
+  }
+
+  .hw-card-subject { font-size: 16px; font-weight: 800; line-height: 1.2; word-break: break-word; }
+
+  .hw-card-count {
+    background: rgba(0,0,0,0.15);
+    padding: 3px 11px; border-radius: 20px;
+    font-size: 13px; font-weight: 800;
+    flex-shrink: 0; min-width: 28px; text-align: center;
+  }
+  .hw-card-head.light .hw-card-count { background: rgba(0,0,0,0.1); }
+
+  .hw-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.25s ease;
+  }
+  .hw-card.expanded .hw-card-list {
+    padding: 16px;
+    max-height: 8000px;
+  }
 
   .hw-item {
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: var(--bg-surface-2);
     border-radius: 8px;
     position: relative;
     border-left: 3px solid var(--hw-accent, #6C5CE7);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background 0.15s;
   }
   .hw-item:hover { background: var(--bg-surface-3); }
+
+  .hw-check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-light);
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .hw-check:hover {
+    border-color: #00B894;
+    transform: scale(1.1);
+  }
+  .hw-check.done {
+    background: #00B894;
+    border-color: #00B894;
+  }
+  .hw-check.done::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 7px;
+    width: 6px;
+    height: 11px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .hw-item-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hw-item.done .hw-item-task {
+    text-decoration: line-through;
+    text-decoration-color: var(--text-secondary);
+    opacity: 0.55;
+  }
+  .hw-item.done .hw-item-meta {
+    opacity: 0.5;
+  }
 
   .hw-item-task {
     font-size: 14px; line-height: 1.4;
@@ -809,16 +1097,21 @@
   .hw-item-deadline.soon { color: #E17055; font-weight: 800; }
 
   .hw-item-del {
-    position: absolute; top: 6px; right: 6px;
-    width: 22px; height: 22px;
-    border: none; background: transparent;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
     color: var(--text-secondary);
     font-size: 13px;
     border-radius: 50%;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: inherit;
     opacity: 0.45;
+    flex-shrink: 0;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
   }
   .hw-item-del:hover { opacity: 1; background: #FFF0EB; color: #E17055; }
   [data-theme="dark"] .hw-item-del:hover { background: #3A2A22; }
@@ -1050,8 +1343,6 @@
     .week-nav { display: none !important; }
     .banner { display: none !important; }
 
-    /* На мобильном сжимаем края — 44px хватит для одной кнопки,
-       но не забудь: справа может быть 2 кнопки (auth + theme), им обеим нужно место. */
     .tabs {
       grid-template-columns: 44px 1fr 84px;
       padding: 0 10px;
@@ -1107,9 +1398,12 @@
     .hw-title { font-size: 20px; }
     .hw-toolbar { gap: 10px; }
     .hw-add-btn { padding: 9px 14px; font-size: 13px; }
-    .hw-grid { grid-template-columns: 1fr; gap: 12px; }
-    .hw-card-subject { font-size: 13px; }
+    .hw-clear-btn { padding: 9px 14px; font-size: 12px; }
+    .hw-card-subject { font-size: 15px; }
     .hw-item-task { font-size: 13px; }
+    .hw-item { padding: 10px 12px; gap: 10px; }
+    .hw-check { width: 22px; height: 22px; }
+    .hw-check.done::after { top: 2px; left: 6px; width: 5px; height: 10px; }
   }
 
   @media (max-width: 500px) {
@@ -1127,7 +1421,10 @@
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
-      <div class="sidebar-logo">Р144С</div>
+      <div class="sidebar-logo" id="sidebarAvatar">
+        <span class="sidebar-logo-fallback">Р144С</span>
+        <img class="sidebar-logo-img" id="sidebarAvatarImg" alt="" style="display:none">
+      </div>
       <div class="sidebar-title-wrap">
         <div class="sidebar-title">Дневник</div>
         <div class="sidebar-subtitle">Группа Р144С</div>
@@ -1141,7 +1438,7 @@
       </button>
       <button class="sidebar-item" data-page="homework" type="button">
         <span class="sidebar-icon">📝</span>
-        <span>Моя домашка</span>
+        <span>Домашка</span>
       </button>
     </nav>
     <div class="sidebar-foot">Р144С · дневник и расписание</div>
@@ -1157,7 +1454,10 @@
       <div class="tab" data-view="bell">Расписание звонков</div>
     </div>
     <div class="top-actions">
-      <button class="action-btn btn-auth" id="authBtn" title="Войти" type="button">🔐</button>
+      <button class="action-btn btn-auth" id="authBtn" title="Войти" type="button">
+        <span class="btn-auth-icon" id="authBtnIcon">🔐</span>
+        <img class="btn-auth-photo" id="authBtnPhoto" alt="" style="display:none">
+      </button>
       <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран" type="button">⛶</button>
       <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему" type="button">🌙</button>
     </div>
@@ -1217,12 +1517,15 @@
       <div class="homework-page">
         <div class="hw-toolbar">
           <div class="hw-title">
-            Моя домашка
+            Домашка
             <span class="hw-title-count" id="hwTotalCount">0 заданий</span>
           </div>
-          <button class="hw-add-btn" id="hwAddBtn" type="button">
-            <span>+</span> Добавить задание
-          </button>
+          <div class="hw-actions">
+            <button class="hw-clear-btn" id="hwClearBtn" type="button">Очистить всё</button>
+            <button class="hw-add-btn" id="hwAddBtn" type="button">
+              <span>+</span> Добавить задание
+            </button>
+          </div>
         </div>
         <div class="hw-grid" id="hwGrid"></div>
         <div class="hw-empty" id="hwEmpty">
@@ -1282,6 +1585,35 @@
     </div>
   </div>
 
+  <!-- МОДАЛКА СМЕНЫ ФОТО -->
+  <div class="avatar-modal-overlay" id="avatarModal">
+    <div class="avatar-modal">
+      <div class="avatar-modal-head">
+        <h2>Моё фото</h2>
+        <button class="avatar-modal-close" id="avatarModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="avatar-modal-body">
+        <div class="avatar-preview" id="avatarPreview">
+          <span class="avatar-preview-placeholder" id="avatarPreviewPlaceholder">👤</span>
+        </div>
+
+        <div class="avatar-modal-hint">
+          Загрузите фото в формате JPG, PNG или WebP. Максимум 2 МБ.<br>
+          Оно будет видно только вашей группе.
+        </div>
+
+        <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="avatar-file-input">
+
+        <div class="avatar-modal-actions">
+          <button class="avatar-btn avatar-btn-upload" id="avatarUploadBtn" type="button">Выбрать фото</button>
+          <button class="avatar-btn avatar-btn-upload" id="avatarSaveBtn" type="button" style="display:none; background: #00B894;">Сохранить</button>
+          <button class="avatar-btn avatar-btn-remove" id="avatarRemoveBtn" type="button" style="display:none">Удалить</button>
+        </div>
+        <button class="avatar-btn" id="avatarLogoutBtn" type="button" style="background: transparent; color: var(--text-secondary); border: 2px solid var(--border-light); margin-top: 4px;">Выйти из аккаунта</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -1293,6 +1625,261 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let currentUserId = null;
 let hwRealtimeChannel = null;
+
+// ================== ИМЕНА ПОЛЬЗОВАТЕЛЕЙ ==================
+const USER_NAMES = {
+  'user01': 'Мария',
+  'user02': 'Вера',
+  'user03': 'Анастасия',
+  'user04': 'Елизавета',
+  'user05': 'Ксения',
+};
+
+function displayName(login) {
+  if (!login) return '';
+  return USER_NAMES[login] || login;
+}
+
+// ================== АВАТАРЫ ==================
+const AVATAR_BUCKET = 'avatars';
+let currentAvatarUrl = null;
+let avatarObjectUrl = null;
+
+function avatarPath(userId) {
+  return `${userId}/avatar.jpg`;
+}
+
+async function getAvatarPublicUrl(userId) {
+  if (!userId) return null;
+  const { data } = supabaseClient.storage
+    .from(AVATAR_BUCKET)
+    .getPublicUrl(avatarPath(userId));
+  return data && data.publicUrl ? data.publicUrl : null;
+}
+
+async function avatarExists(userId) {
+  if (!userId) return false;
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from(AVATAR_BUCKET)
+      .list(userId, { limit: 10 });
+    if (error) return false;
+    return (data || []).some(f => f.name && f.name.startsWith('avatar.'));
+  } catch (_) { return false; }
+}
+
+async function refreshAvatarUI() {
+  const btnIcon = document.getElementById('authBtnIcon');
+  const btnPhoto = document.getElementById('authBtnPhoto');
+  const sideFallback = document.querySelector('#sidebarAvatar .sidebar-logo-fallback');
+  const sideImg = document.getElementById('sidebarAvatarImg');
+
+  if (!currentUserId) {
+    currentAvatarUrl = null;
+    if (btnIcon) btnIcon.style.display = '';
+    if (btnPhoto) { btnPhoto.style.display = 'none'; btnPhoto.src = ''; }
+    if (sideFallback) sideFallback.style.display = '';
+    if (sideImg) { sideImg.style.display = 'none'; sideImg.src = ''; }
+    return;
+  }
+
+  const exists = await avatarExists(currentUserId);
+  if (!exists) {
+    currentAvatarUrl = null;
+    if (btnIcon) btnIcon.style.display = '';
+    if (btnPhoto) { btnPhoto.style.display = 'none'; btnPhoto.src = ''; }
+    if (sideFallback) sideFallback.style.display = '';
+    if (sideImg) { sideImg.style.display = 'none'; sideImg.src = ''; }
+    return;
+  }
+
+  const url = await getAvatarPublicUrl(currentUserId);
+  if (!url) return;
+  currentAvatarUrl = url + '?t=' + Date.now();
+
+  if (btnIcon) btnIcon.style.display = 'none';
+  if (btnPhoto) { btnPhoto.src = currentAvatarUrl; btnPhoto.style.display = 'block'; }
+
+  if (sideFallback) sideFallback.style.display = 'none';
+  if (sideImg) { sideImg.src = currentAvatarUrl; sideImg.style.display = 'block'; }
+}
+
+// --- Модалка смены фото ---
+const avatarModal = document.getElementById('avatarModal');
+const avatarFileInput = document.getElementById('avatarFileInput');
+const avatarPreview = document.getElementById('avatarPreview');
+const avatarPreviewPlaceholder = document.getElementById('avatarPreviewPlaceholder');
+const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+const avatarRemoveBtn = document.getElementById('avatarRemoveBtn');
+
+function openAvatarModal() {
+  if (!currentUser) { showToast('Сначала войдите'); openAuthModal(); return; }
+  updateAvatarPreview();
+  avatarModal.classList.add('active');
+}
+function closeAvatarModal() {
+  avatarModal.classList.remove('active');
+  if (avatarObjectUrl) {
+    URL.revokeObjectURL(avatarObjectUrl);
+    avatarObjectUrl = null;
+  }
+  avatarFileInput.value = '';
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  if (saveBtn) saveBtn.style.display = 'none';
+}
+
+function updateAvatarPreview() {
+  const oldImg = avatarPreview.querySelector('img');
+  if (oldImg) oldImg.remove();
+
+  if (avatarObjectUrl) {
+    const img = document.createElement('img');
+    img.src = avatarObjectUrl;
+    avatarPreview.appendChild(img);
+    if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
+    if (avatarRemoveBtn) avatarRemoveBtn.style.display = '';
+    return;
+  }
+
+  if (currentAvatarUrl) {
+    const img = document.createElement('img');
+    img.src = currentAvatarUrl;
+    avatarPreview.appendChild(img);
+    if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
+    if (avatarRemoveBtn) avatarRemoveBtn.style.display = '';
+  } else {
+    if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = '';
+    if (avatarRemoveBtn) avatarRemoveBtn.style.display = 'none';
+  }
+}
+
+avatarPreview.addEventListener('click', () => {
+  if (!currentUser) return;
+  avatarFileInput.click();
+});
+
+avatarUploadBtn.addEventListener('click', () => {
+  if (!currentUser) return;
+  avatarFileInput.click();
+});
+
+avatarFileInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+
+  if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+    showToast('Только JPG, PNG или WebP');
+    avatarFileInput.value = '';
+    return;
+  }
+  if (f.size > 2 * 1024 * 1024) {
+    showToast('Файл больше 2 МБ');
+    avatarFileInput.value = '';
+    return;
+  }
+
+  if (avatarObjectUrl) URL.revokeObjectURL(avatarObjectUrl);
+  avatarObjectUrl = URL.createObjectURL(f);
+  updateAvatarPreview();
+
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  if (saveBtn) saveBtn.style.display = '';
+});
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide) / 2;
+      const sy = (img.height - minSide) / 2;
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+
+      canvas.toBlob(blob => {
+        if (!blob) return reject(new Error('Не удалось сжать'));
+        resolve(blob);
+      }, 'image/jpeg', 0.85);
+    };
+    img.onerror = () => reject(new Error('Не удалось прочитать файл'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
+  if (!currentUser || !currentUserId) return;
+  const f = avatarFileInput.files && avatarFileInput.files[0];
+  if (!f) { showToast('Выберите фото'); return; }
+
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Загружаю…';
+
+  try {
+    const blob = await compressImage(f);
+
+    const { error } = await supabaseClient.storage
+      .from(AVATAR_BUCKET)
+      .upload(avatarPath(currentUserId), blob, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
+
+    if (error) throw error;
+
+    showToast('Фото обновлено');
+    closeAvatarModal();
+    await refreshAvatarUI();
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка загрузки: ' + (err.message || 'неизвестная'));
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Сохранить';
+  }
+});
+
+avatarRemoveBtn.addEventListener('click', async () => {
+  if (!currentUser || !currentUserId) return;
+  if (!confirm('Удалить фото профиля?')) return;
+
+  avatarRemoveBtn.disabled = true;
+  avatarRemoveBtn.textContent = 'Удаляю…';
+
+  try {
+    const { error } = await supabaseClient.storage
+      .from(AVATAR_BUCKET)
+      .remove([avatarPath(currentUserId)]);
+    if (error) throw error;
+
+    showToast('Фото удалено');
+    closeAvatarModal();
+    await refreshAvatarUI();
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
+  } finally {
+    avatarRemoveBtn.disabled = false;
+    avatarRemoveBtn.textContent = 'Удалить';
+  }
+});
+
+document.getElementById('avatarModalClose').addEventListener('click', closeAvatarModal);
+avatarModal.addEventListener('click', e => {
+  if (e.target === avatarModal) closeAvatarModal();
+});
+
+document.getElementById('avatarLogoutBtn').addEventListener('click', async () => {
+  if (confirm('Выйти из аккаунта?')) {
+    closeAvatarModal();
+    await logout();
+  }
+});
 
 // ================== FULLSCREEN ==================
 const fsBtn = document.getElementById('fsBtn');
@@ -1929,10 +2516,19 @@ function unsubscribeHwRealtime() {
 }
 
 // ================== ДОМАШКА ==================
-const SUBJECT_COLORS = ['#6C5CE7', '#E17055', '#00B894', '#0984E3', '#E84393', '#FDCB6E', '#00CEC9', '#6AB04C', '#B53471', '#A29BFE'];
+const SUBJECT_FIXED_COLORS = {
+  'УПР. ЧЕЛ. РЕС.':     { bg: '#E74C3C', text: '#FFFFFF' },
+  'ЭК ПО ФК И СПОРТУ':  { bg: '#FFFFFF', text: '#1A1A2E' },
+  'ОСН. МЕНЕДЖМЕНТ':    { bg: '#FF69B4', text: '#FFFFFF' },
+  'ПСИХОДИАГНОСТИКА':   { bg: '#000000', text: '#FFFFFF' },
+  'КОНЦ. СОВР. ЕСТ-ЗН': { bg: '#808080', text: '#FFFFFF' },
+};
+
+const SUBJECT_PALETTE = ['#6C5CE7', '#E17055', '#00B894', '#0984E3', '#E84393', '#FDCB6E', '#00CEC9', '#6AB04C', '#B53471', '#A29BFE'];
 
 let hwItems = [];
 let hwLoading = false;
+const expandedSubjects = new Set();
 
 function getAllSubjects() {
   const set = new Set();
@@ -1944,10 +2540,29 @@ function getAllSubjects() {
   return [...set].sort();
 }
 
-function colorForSubject(name) {
+function getContrastText(hex) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substr(0, 2), 16);
+  const g = parseInt(h.substr(2, 2), 16);
+  const b = parseInt(h.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 150 ? '#1A1A2E' : '#FFFFFF';
+}
+function isLightColor(hex) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substr(0, 2), 16);
+  const g = parseInt(h.substr(2, 2), 16);
+  const b = parseInt(h.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 150;
+}
+
+function getSubjectStyle(subj) {
+  if (SUBJECT_FIXED_COLORS[subj]) return SUBJECT_FIXED_COLORS[subj];
   let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
-  return SUBJECT_COLORS[Math.abs(hash) % SUBJECT_COLORS.length];
+  for (let i = 0; i < subj.length; i++) hash = ((hash << 5) - hash) + subj.charCodeAt(i);
+  const bg = SUBJECT_PALETTE[Math.abs(hash) % SUBJECT_PALETTE.length];
+  return { bg, text: getContrastText(bg) };
 }
 
 function formatDeadline(iso) {
@@ -1977,11 +2592,21 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function isHwDone(id) {
+  return localStorage.getItem('hw-done-' + id) === '1';
+}
+
 function updateHwAddBtnState() {
   const btn = document.getElementById('hwAddBtn');
-  if (!btn) return;
-  if (currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
-  else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
+  const clearBtn = document.getElementById('hwClearBtn');
+  if (btn) {
+    if (currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
+    else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
+  }
+  if (clearBtn) {
+    if (currentUser && hwItems.length > 0) { clearBtn.disabled = false; clearBtn.title = 'Удалить все задания'; }
+    else { clearBtn.disabled = true; clearBtn.title = 'Нет заданий для удаления'; }
+  }
 }
 
 async function loadHwItemsFromCloud() {
@@ -1999,6 +2624,7 @@ async function loadHwItemsFromCloud() {
     hwItems = data || [];
   }
   hwLoading = false;
+  updateHwAddBtnState();
 }
 
 function renderHomework() {
@@ -2017,7 +2643,12 @@ function renderHomework() {
     countEl.textContent = `${n} ${word}`;
   }
 
-  if (hwItems.length === 0) { grid.innerHTML = ''; empty.classList.add('active'); return; }
+  if (hwItems.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.add('active');
+    updateHwAddBtnState();
+    return;
+  }
   empty.classList.remove('active');
 
   const groups = {};
@@ -2037,32 +2668,78 @@ function renderHomework() {
       return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
     });
 
-    const accent = colorForSubject(subj);
+    const style = getSubjectStyle(subj);
+    const light = isLightColor(style.bg);
+    const expandedClass = expandedSubjects.has(subj) ? ' expanded' : '';
+    const lightClass = light ? ' light' : '';
+    const borderStyle = light ? 'border-bottom: 2px solid rgba(0,0,0,0.12);' : '';
+
     let itemsHtml = '';
     for (const item of items) {
       const dlText = formatDeadline(item.deadline);
       const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
       const canDelete = currentUser && item.user_login === currentUser;
+      const isDone = isHwDone(item.id);
+      const doneClass = isDone ? ' done' : '';
+      const checkDoneClass = isDone ? ' done' : '';
+      const borderColor = style.bg === '#FFFFFF' ? '#B8BCCE' : style.bg;
+
       itemsHtml += `
-        <div class="hw-item">
-          ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" title="Удалить" type="button">✕</button>` : ''}
-          <div class="hw-item-task">${escapeHtml(item.task)}</div>
-          <div class="hw-item-meta">
-            ${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}
+        <div class="hw-item${doneClass}" data-id="${item.id}" style="border-left-color: ${borderColor};">
+          <div class="hw-check${checkDoneClass}" data-check-id="${item.id}" title="Отметить выполненным"></div>
+          <div class="hw-item-main">
+            <div class="hw-item-task">${escapeHtml(item.task)}</div>
+            <div class="hw-item-meta">
+              ${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}
+            </div>
           </div>
+          ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" title="Удалить" type="button">✕</button>` : ''}
         </div>`;
     }
 
     html += `
-      <div class="hw-card" style="--hw-accent: ${accent}">
-        <div class="hw-card-head">
-          <span class="hw-card-subject">${escapeHtml(subj)}</span>
+      <div class="hw-card${expandedClass}" data-subject="${escapeHtml(subj)}" style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
+        <div class="hw-card-head${lightClass}" style="${borderStyle}">
+          <div class="hw-card-head-left">
+            <span class="hw-card-arrow">▸</span>
+            <span class="hw-card-subject">${escapeHtml(subj)}</span>
+          </div>
           <span class="hw-card-count">${items.length}</span>
         </div>
         <div class="hw-card-list">${itemsHtml}</div>
       </div>`;
   }
   grid.innerHTML = html;
+
+  grid.querySelectorAll('.hw-card-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.hw-card');
+      if (!card) return;
+      const subj = card.dataset.subject;
+      const isExp = card.classList.toggle('expanded');
+      if (isExp) expandedSubjects.add(subj);
+      else expandedSubjects.delete(subj);
+    });
+  });
+
+  grid.querySelectorAll('.hw-check').forEach(check => {
+    check.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = check.dataset.checkId;
+      const item = check.closest('.hw-item');
+      if (!item) return;
+      const wasDone = item.classList.contains('done');
+      if (wasDone) {
+        localStorage.removeItem('hw-done-' + id);
+        item.classList.remove('done');
+        check.classList.remove('done');
+      } else {
+        localStorage.setItem('hw-done-' + id, '1');
+        item.classList.add('done');
+        check.classList.add('done');
+      }
+    });
+  });
 
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
     btn.addEventListener('click', async e => {
@@ -2074,11 +2751,14 @@ function renderHomework() {
       if (!confirm(`Удалить задание?\n\n«${item.task.slice(0, 80)}»`)) return;
       const { error } = await supabaseClient.from('homework').delete().eq('id', id);
       if (error) { console.error(error); showToast('Ошибка удаления: ' + error.message); return; }
+      localStorage.removeItem('hw-done-' + id);
       hwItems = hwItems.filter(x => String(x.id) !== String(id));
       renderHomework();
       showToast('Задание удалено');
     });
   });
+
+  updateHwAddBtnState();
 }
 
 const hwModal = document.getElementById('hwModal');
@@ -2136,12 +2816,45 @@ async function saveHwItem() {
   if (error) { console.error(error); showToast('Ошибка сохранения: ' + error.message); return; }
 
   closeHwModal();
+  expandedSubjects.add(subject);
   await loadHwItemsFromCloud();
   renderHomework();
   showToast('Задание добавлено');
 }
 
+async function clearAllHw() {
+  if (!currentUser) { showToast('Войдите, чтобы очистить задания'); openAuthModal(); return; }
+  if (hwItems.length === 0) { showToast('Нет заданий для удаления'); return; }
+  if (!confirm(`Удалить ВСЕ задания (${hwItems.length})?\n\nЭто действие нельзя отменить.`)) return;
+
+  const btn = document.getElementById('hwClearBtn');
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Удаляю…';
+
+  const { error } = await supabaseClient
+    .from('homework')
+    .delete()
+    .eq('user_id', currentUserId);
+
+  btn.textContent = old;
+
+  if (error) {
+    console.error(error);
+    showToast('Ошибка удаления: ' + error.message);
+    updateHwAddBtnState();
+    return;
+  }
+
+  hwItems.forEach(item => localStorage.removeItem('hw-done-' + item.id));
+  hwItems = [];
+  expandedSubjects.clear();
+  renderHomework();
+  showToast('Все задания удалены');
+}
+
 document.getElementById('hwAddBtn').addEventListener('click', openHwModal);
+document.getElementById('hwClearBtn').addEventListener('click', clearAllHw);
 document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
 document.getElementById('hwCancel').addEventListener('click', closeHwModal);
 document.getElementById('hwSave').addEventListener('click', saveHwItem);
@@ -2177,6 +2890,8 @@ async function refreshUser() {
 
   if (currentUserId) subscribeHwRealtime();
   else unsubscribeHwRealtime();
+
+  await refreshAvatarUI();
 }
 
 function updateAuthUI() {
@@ -2185,12 +2900,10 @@ function updateAuthUI() {
   if (!btn) return;
   if (currentUser) {
     btn.classList.add('logged-in');
-    btn.textContent = '👤';
-    btn.title = 'Вы вошли как ' + currentUser + '. Нажмите, чтобы выйти.';
-    if (sideUser) { sideUser.textContent = 'Вошёл: ' + currentUser; sideUser.classList.add('visible'); }
+    btn.title = 'Вы вошли как ' + displayName(currentUser) + '. Нажмите, чтобы открыть профиль.';
+    if (sideUser) { sideUser.textContent = 'Вошёл: ' + displayName(currentUser); sideUser.classList.add('visible'); }
   } else {
     btn.classList.remove('logged-in');
-    btn.textContent = '🔐';
     btn.title = 'Войти';
     if (sideUser) { sideUser.textContent = ''; sideUser.classList.remove('visible'); }
   }
@@ -2217,6 +2930,7 @@ async function tryLogin(login, password) {
   currentUser = clean;
   currentUserId = data.session.user.id;
   subscribeHwRealtime();
+  await refreshAvatarUI();
   return { ok: true, login: clean };
 }
 
@@ -2225,6 +2939,8 @@ async function logout() {
   await supabaseClient.auth.signOut();
   currentUser = null;
   currentUserId = null;
+  expandedSubjects.clear();
+  await refreshAvatarUI();
   updateAuthUI();
   if (currentView === 'homework') { hwItems = []; renderHomework(); }
   showToast('Вы вышли из аккаунта');
@@ -2250,7 +2966,7 @@ async function submitAuth() {
     closeAuthModal();
     updateAuthUI();
     if (currentView === 'homework') { await loadHwItemsFromCloud(); renderHomework(); }
-    showToast('Добро пожаловать, ' + res.login + '!');
+    showToast('Добро пожаловать, ' + displayName(res.login) + '!');
   } else {
     authError.textContent = res.msg;
     authPasswordInput.value = '';
@@ -2259,8 +2975,11 @@ async function submitAuth() {
 }
 
 document.getElementById('authBtn').addEventListener('click', async () => {
-  if (currentUser) { if (confirm('Выйти из аккаунта?')) await logout(); }
-  else openAuthModal();
+  if (currentUser) {
+    openAvatarModal();
+  } else {
+    openAuthModal();
+  }
 });
 document.getElementById('authClose').addEventListener('click', closeAuthModal);
 document.getElementById('authSkip').addEventListener('click', closeAuthModal);
