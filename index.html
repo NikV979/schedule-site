@@ -104,8 +104,14 @@
 
   .tab-desktop { display: inline-block; }
   .tab-mobile  { display: none; }
-  .tab-today   { display: none; background: #6C5CE7; color: #fff; }
 
+  /* Кнопка «Сегодня» — только для мобильного режима.
+     На десктопе принудительно скрыта. */
+  .tab-today {
+    display: none !important;
+    background: #6C5CE7;
+    color: #fff;
+  }
   .tab-today:active:not(:disabled) { filter: brightness(0.92); }
   .tab-today:disabled {
     opacity: 0.4;
@@ -831,7 +837,7 @@
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
     .tab-mobile  { display: inline-block; }
-    .tab-today   { display: inline-block; }
+    .tab-today   { display: inline-block !important; }
 
     .week-nav { display: none !important; }
     .banner { display: none !important; }
@@ -922,6 +928,11 @@
     .bell-num-cell { font-size: 20px; }
     .bell-time-cell { font-size: 16px; }
     .bell-break-cell { font-size: 12px; }
+  }
+
+  /* Явное правило: на десктопе кнопки «Сегодня» нет вообще */
+  @media (min-width: 901px) {
+    .tab-today { display: none !important; }
   }
 
   @media (max-width: 500px) {
@@ -1140,11 +1151,11 @@ function isSunday() {
   return new Date().getDay() === 0;
 }
 
-// "Сегодня" в мобильном режиме: если сегодня воскресенье — берём понедельник.
-function getTodayTarget() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return (today.getDay() === 0) ? addDays(today, 1) : today;
+// "Сегодня" — просто текущая дата (для кнопки «Сегодня» на мобиле).
+function getTodayDate() {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  return t;
 }
 
 // ================== НАВИГАЦИЯ ==================
@@ -1204,6 +1215,7 @@ const schedule = {
       {time:'18:30', subject:'ЭК ПО ФК И СПОРТУ',  type:'пр',  teacher:'',               room:'Спортзал'},
     ],
     saturday: [],
+    sunday: [],
   },
   odd: {
     monday: [
@@ -1235,6 +1247,7 @@ const schedule = {
       {time:'09:00', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.', room:'425'},
       {time:'10:50', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.', room:'425'},
     ],
+    sunday: [],
   }
 };
 
@@ -1357,28 +1370,24 @@ function renderActiveDiary() {
 let mobileDate = null;
 
 function initMobileDate() {
-  mobileDate = getTodayTarget();
+  mobileDate = getTodayDate();
 }
 
-function nextSchoolDay(date) {
-  let d = addDays(date, 1);
-  if (d.getDay() === 0) d = addDays(d, 1);
-  return d;
+function nextDay(date) {
+  return addDays(date, 1);
 }
-function prevSchoolDay(date) {
-  let d = addDays(date, -1);
-  if (d.getDay() === 0) d = addDays(d, -1);
-  return d;
+function prevDay(date) {
+  return addDays(date, -1);
 }
 
 function canGoPrevDay() {
   if (!mobileDate) return false;
-  const prev = prevSchoolDay(mobileDate);
+  const prev = prevDay(mobileDate);
   return getMonday(prev).getTime() >= MIN_MONDAY.getTime();
 }
 function canGoNextDay() {
   if (!mobileDate) return false;
-  const next = nextSchoolDay(mobileDate);
+  const next = nextDay(mobileDate);
   return getMonday(next).getTime() <= MAX_MONDAY.getTime();
 }
 
@@ -1395,15 +1404,14 @@ function updateTabTodayState() {
   const btn = document.getElementById('tabToday');
   if (!btn) return;
   if (!mobileDate) { btn.disabled = false; return; }
-  const target = getTodayTarget();
-  btn.disabled = mobileDate.getTime() === target.getTime();
+  const today = getTodayDate();
+  btn.disabled = mobileDate.getTime() === today.getTime();
 }
 
 function renderMobileDay() {
   if (!mobileDate) initMobileDate();
   const date = mobileDate;
   const dow = date.getDay();
-  if (dow === 0) { mobileDate = nextSchoolDay(date); return renderMobileDay(); }
 
   const dayKey = DAY_KEYS[dow];
   const type = isOddWeek(date) ? 'odd' : 'even';
@@ -1456,7 +1464,7 @@ function renderMobileDay() {
 function navigateMobileDay(delta) {
   if (delta < 0 && !canGoPrevDay()) return;
   if (delta > 0 && !canGoNextDay()) return;
-  mobileDate = delta > 0 ? nextSchoolDay(mobileDate) : prevSchoolDay(mobileDate);
+  mobileDate = delta > 0 ? nextDay(mobileDate) : prevDay(mobileDate);
   syncWeekOffsetFromMobileDate();
   renderMobileDay();
 }
