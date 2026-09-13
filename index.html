@@ -1289,6 +1289,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xpzny5LK3MiVYMS7XBIZoQ_Yt7fiS8p';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
+let currentUserId = null;
+let hwRealtimeChannel = null;
 
 // ================== FULLSCREEN ==================
 const fsBtn = document.getElementById('fsBtn');
@@ -1899,6 +1901,32 @@ sidebarItems.forEach(item => {
     }
   });
 });
+// ================== REALTIME ==================
+function subscribeHwRealtime() {
+  if (hwRealtimeChannel) return; // уже подписаны
+  if (!currentUserId) return;
+
+  hwRealtimeChannel = supabaseClient
+    .channel('homework-user-' + currentUserId)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'homework',
+      filter: `user_id=eq.${currentUserId}`
+    }, async (payload) => {
+      // Просто перезагружаем список из облака — это надёжнее и проще,
+      // чем вручную редактировать hwItems по типу события.
+      await loadHwItemsFromCloud();
+      if (currentView === 'homework') renderHomework();
+    })
+    .subscribe();
+}
+
+function unsubscribeHwRealtime() {
+  if (!hwRealtimeChannel) return;
+  supabaseClient.removeChannel(hwRealtimeChannel);
+  hwRealtimeChannel = null;
+}
 
 // ================== ДОМАШКА ==================
 const SUBJECT_COLORS = ['#6C5CE7', '#E17055', '#00B894', '#0984E3', '#E84393', '#FDCB6E', '#00CEC9', '#6AB04C', '#B53471', '#A29BFE'];
@@ -2138,9 +2166,18 @@ function loginFromEmail(email) {
 
 async function refreshUser() {
   const { data } = await supabaseClient.auth.getSession();
-  if (data && data.session && data.session.user) currentUser = loginFromEmail(data.session.user.email);
-  else currentUser = null;
+  if (data && data.session && data.session.user) {
+    currentUser = loginFromEmail(data.session.user.email);
+    currentUserId = data.session.user.id;
+  } else {
+    currentUser = null;
+    currentUserId = null;
+  }
   updateAuthUI();
+
+  // Управление realtime-каналом
+  if (currentUserId) subscribeHwRealtime();
+  else unsubscribeHwRealtime();
 }
 
 function updateAuthUI() {
@@ -2179,12 +2216,16 @@ async function tryLogin(login, password) {
     return { ok: false, msg: 'Ошибка: ' + error.message };
   }
   currentUser = clean;
+  currentUserId = data.session.user.id;
+  subscribeHwRealtime();
   return { ok: true, login: clean };
 }
 
 async function logout() {
+  unsubscribeHwRealtime();
   await supabaseClient.auth.signOut();
   currentUser = null;
+  currentUserId = null;
   updateAuthUI();
   if (currentView === 'homework') { hwItems = []; renderHomework(); }
   showToast('Вы вышли из аккаунта');
