@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дневник Р144С</title>
+<style>
+  :root {
+    --bg-page:        #E8EAF2;
+    --bg-surface:     #FFFFFF;
+    --bg-surface-2:   #F5F6FA;
+    --border-main:    #3A3A7A;
+    --border-light:   #B8BCCE;
+    --text-primary:   #1A1A5A;
+    --text-head:      #2A2A5A;
+    --text-secondary: #6A6A8A;
+    --text-empty:     #D0D4E0;
+    --accent-even:    #6C5CE7;
+    --accent-odd:     #E17055;
+    --tab-bg:         #F0F2F8;
+    --tab-text:       #1A1A2E;
+    --today-bg:       #FFFCF0;
+    --today-label:    #FFF6D6;
+    --today-date:     #FDCB6E;
+    --shadow-menu:    rgba(0,0,0,0.18);
+  }
+
+  [data-theme="dark"] {
+    --bg-page:        #0F0F1E;
+    --bg-surface:     #1A1A2E;
+    --bg-surface-2:   #22223A;
+    --border-main:    #55558A;
+    --border-light:   #3A3A5A;
+    --text-primary:   #E5E5F2;
+    --text-head:      #C8C8E0;
+    --text-secondary: #9A9AB8;
+    --text-empty:     #45456A;
+    --accent-even:    #8577F0;
+    --accent-odd:     #F08060;
+    --tab-bg:         #262642;
+    --tab-text:       #E5E5F2;
+    --today-bg:       #2A2615;
+    --today-label:    #38321C;
+    --today-date:     #B89A30;
+    --shadow-menu:    rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg-page);
+    transition: background 0.25s;
+  }
+
+  .tabs {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    background: var(--bg-surface);
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding-right: 120px;
+    height: 60px;
+    transition: background 0.25s;
+  }
+
+  .tab {
+    padding: 10px 26px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--tab-text);
+    background: var(--tab-bg);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab.active-even { background: #6C5CE7; color: #fff; }
+  .tab.active-odd  { background: #E17055; color: #fff; }
+  .tab.active-bell { background: #0984E3; color: #fff; }
+
+  .top-actions {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    border: none;
+    font-family: inherit;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-theme {
+    font-size: 16px;
+    background: var(--tab-bg);
+    color: var(--tab-text);
+    line-height: 1;
+    width: 36px;
+  }
+  .btn-theme:hover { filter: brightness(0.95); }
+
+  .week-nav {
+    position: fixed;
+    top: 60px; left: 0; right: 0;
+    z-index: 15;
+    background: var(--bg-surface);
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid var(--border-light);
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .week-nav.hidden { display: none; }
+
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    user-select: none;
+    padding: 0;
+    font-family: inherit;
+    line-height: 1;
+  }
+
+  .nav-btn:hover {
+    background: var(--accent-even);
+    color: #fff;
+    border-color: var(--accent-even);
+  }
+
+  .week-nav.odd .nav-btn:hover {
+    background: var(--accent-odd);
+    border-color: var(--accent-odd);
+  }
+
+  .nav-btn:active { transform: scale(0.94); }
+
+  .nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .nav-btn:disabled:hover,
+  .week-nav.odd .nav-btn:disabled:hover {
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    border-color: var(--border-light);
+  }
+
+  .nav-btn:disabled:active { transform: none; }
+
+  .nav-info {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    min-width: 240px;
+    text-align: center;
+    user-select: none;
+    transition: color 0.25s;
+  }
+
+  .nav-today {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--tab-bg);
+    color: var(--tab-text);
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+    transition: all 0.15s;
+    border: 1px solid var(--border-light);
+    font-family: inherit;
+  }
+
+  .nav-today:hover:not(:disabled) { filter: brightness(0.95); }
+
+  .nav-today:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .viewport {
+    position: absolute;
+    inset: 0;
+    padding: 120px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  .banner {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: var(--today-bg);
+    border: 2px solid var(--today-date);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    max-width: 1000px;
+    box-shadow: 0 4px 16px rgba(253, 203, 110, 0.2);
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+    animation: bannerPop 0.2s ease-out;
+  }
+
+  .banner.active { display: inline-flex; }
+
+  @keyframes bannerPop {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .banner-text { line-height: 1.3; }
+
+  .banner-btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    background: var(--accent-even);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: filter 0.15s, background 0.25s;
+    flex-shrink: 0;
+  }
+
+  .banner-btn:hover { filter: brightness(1.1); }
+  .banner-btn.odd { background: var(--accent-odd); }
+
+  .diary-wrap {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .diary-wrap.active { display: flex; }
+
+  .diary {
+    width: 1700px;
+    height: 1000px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    transform-origin: center center;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--border-main);
+    background: var(--bg-surface);
+    min-width: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .month-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border-bottom: 2px solid var(--border-main);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-head);
+    letter-spacing: 1.5px;
+    transition: color 0.25s, border-color 0.25s;
+  }
+
+  .month-value {
+    display: inline-block;
+    min-width: 260px;
+    padding: 0 16px 4px;
+    border-bottom: 2px solid var(--border-main);
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1.5px;
+    transition: color 0.25s, border-color 0.25s;
+  }
+
+  .days {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .day {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 46px 1fr;
+    border-bottom: 2px solid var(--border-main);
+    min-height: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .day:last-child { border-bottom: none; }
+
+  .day.today { background: var(--today-bg); }
+  .day.today .day-label { background: var(--today-label) !important; }
+  .day.today .day-date {
+    background: var(--today-date);
+    color: #1A1A5A !important;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+
+  .day-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface-2);
+    border-right: 2px solid var(--border-main);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-head);
+    letter-spacing: 2px;
+    padding: 8px 0;
+    white-space: nowrap;
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+  }
+
+  .day-date {
+    color: var(--accent-even);
+    font-size: 22px;
+    margin-left: 8px;
+    letter-spacing: 0;
+    transition: color 0.25s;
+  }
+
+  .week-odd .day-date { color: var(--accent-odd); }
+
+  table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  tbody { height: 100%; }
+  tbody tr { height: 25%; }
+  tbody td { height: 25%; vertical-align: middle; }
+
+  th {
+    background: var(--bg-surface-2);
+    border-bottom: 2px solid var(--border-main);
+    border-right: 2px solid var(--border-main);
+    padding: 6px 6px;
+    font-size: 14px;
+    color: var(--text-head);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.15;
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+  }
+
+  th:last-child { border-right: none; }
+
+  td {
+    border-bottom: 1px solid var(--border-light);
+    border-right: 2px solid var(--border-light);
+    padding: 6px 14px;
+    font-size: 15px;
+    color: var(--text-head);
+    line-height: 1.2;
+    overflow: hidden;
+    transition: border-color 0.25s, color 0.25s;
+  }
+
+  td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+
+  .num { text-align: center; padding: 6px 4px; }
+
+  .pair-num {
+    font-size: 17px; font-weight: 700; color: var(--text-primary);
+    line-height: 1.1; white-space: nowrap;
+    transition: color 0.25s;
+  }
+
+  .pair-time {
+    font-size: 15px; font-weight: 700; color: var(--accent-even);
+    margin-top: 4px; letter-spacing: 0.5px;
+    transition: color 0.25s;
+  }
+
+  .week-odd .pair-time { color: var(--accent-odd); }
+
+  .subj-name {
+    font-weight: 700; font-size: 17px; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: color 0.25s;
+  }
+
+  .subj-meta {
+    font-size: 13px; color: var(--text-secondary); margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: color 0.25s;
+  }
+
+  /* ============== КАБИНЕТ ============== */
+
+  .room-cell {
+    text-align: center;
+  }
+
+  .room-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.3px;
+    transition: color 0.25s;
+  }
+
+  /* ============== РАСПИСАНИЕ ЗВОНКОВ ============== */
+
+  .bell-page {
+    width: 1700px;
+    height: 1000px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    transform-origin: center center;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .bell-page-inner {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--border-main);
+    background: var(--bg-surface);
+    min-height: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .bell-table {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .bell-head {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--bg-surface-2);
+    border-bottom: 2px solid var(--border-main);
+    height: 70px;
+    flex-shrink: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .bell-head > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-head);
+    letter-spacing: 2px;
+    padding: 0 24px;
+    border-right: 2px solid var(--border-main);
+    transition: color 0.25s, border-color 0.25s;
+  }
+
+  .bell-head > div:last-child { border-right: none; }
+
+  .bell-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .bell-row {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border-light);
+    min-height: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .bell-row:last-child { border-bottom: none; }
+
+  .bell-row > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 24px;
+    border-right: 2px solid var(--border-light);
+    text-align: center;
+    transition: border-color 0.25s;
+  }
+
+  .bell-row > div:last-child { border-right: none; }
+
+  .bell-num-cell {
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    transition: color 0.25s;
+  }
+
+  .bell-time-cell {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transition: color 0.25s;
+  }
+
+  .bell-break-cell {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent-even);
+    letter-spacing: 0.5px;
+    transition: color 0.25s;
+  }
+
+  .bell-break-cell.none {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .bell-row.bell-current {
+    background: rgba(0, 184, 148, 0.12);
+  }
+  [data-theme="dark"] .bell-row.bell-current {
+    background: rgba(0, 209, 167, 0.14);
+  }
+
+  .bell-row.bell-current .bell-time-cell {
+    color: #00B894;
+  }
+  [data-theme="dark"] .bell-row.bell-current .bell-time-cell {
+    color: #00D1A7;
+  }
+
+  @media (max-width: 900px) {
+    .tabs {
+      padding-right: 16px;
+      padding-bottom: 56px;
+      height: auto;
+      flex-wrap: wrap;
+    }
+    .top-actions {
+      position: static;
+      transform: none;
+      justify-content: center;
+      margin-top: 8px;
+      width: 100%;
+    }
+    .tab { flex: 1; text-align: center; padding: 10px 12px; font-size: 13px; }
+    .week-nav {
+      top: 120px;
+      flex-wrap: wrap;
+      height: auto;
+      padding: 6px 12px;
+      gap: 8px;
+    }
+    .week-nav .nav-info { min-width: 0; flex: 1 1 100%; order: 10; }
+    .viewport { padding-top: 200px; }
+    .banner { font-size: 12px; padding: 8px 12px; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="tabs">
+    <div class="tab" data-view="even">Чётная неделя</div>
+    <div class="tab" data-view="odd">Нечётная неделя</div>
+    <div class="tab" data-view="bell">Расписание звонков</div>
+    <div class="top-actions">
+      <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
+    </div>
+  </div>
+
+  <div class="week-nav" id="weekNav">
+    <button class="nav-btn" id="navPrev" title="Предыдущая неделя">‹</button>
+    <div class="nav-info" id="navInfo">—</div>
+    <button class="nav-today" id="navToday">Сегодня</button>
+    <button class="nav-btn" id="navNext" title="Следующая неделя">›</button>
+  </div>
+
+  <div class="viewport">
+    <div class="banner" id="banner">
+      <span class="banner-text" id="bannerText">—</span>
+      <button class="banner-btn" id="bannerBtn" style="display:none">К текущей неделе</button>
+    </div>
+
+    <div class="diary-wrap" data-view="even">
+      <div class="diary" id="diary-even"></div>
+    </div>
+    <div class="diary-wrap" data-view="odd">
+      <div class="diary" id="diary-odd"></div>
+    </div>
+    <div class="diary-wrap" data-view="bell">
+      <div class="bell-page">
+        <div class="bell-page-inner">
+          <div class="month-bar">РАСПИСАНИЕ ЗВОНКОВ</div>
+          <div class="bell-table">
+            <div class="bell-head">
+              <div>№ ПАРЫ</div>
+              <div>НАЧАЛО</div>
+              <div>ОКОНЧАНИЕ</div>
+              <div>ПЕРЕМЕНА</div>
+            </div>
+            <div class="bell-body" id="bellGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+// ================== ТЕМА ==================
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('schedule-theme', theme);
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = theme === 'dark' ? '☀' : '🌙';
+}
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// ================== TOAST ==================
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('active');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('active'), 2200);
+}
+
+// ================== ЗВОНКИ ==================
+const PAIRS = [
+  { num: 1, start: '09:00', end: '10:30', break: 20 },
+  { num: 2, start: '10:50', end: '12:20', break: 20 },
+  { num: 3, start: '12:40', end: '14:10', break: 45 },
+  { num: 4, start: '14:55', end: '16:25', break: 20 },
+  { num: 5, start: '16:45', end: '18:15', break: 15 },
+  { num: 6, start: '18:30', end: '20:00', break: 0 },
+];
+
+const BELL_TIMES = PAIRS.map(p => p.start);
+
+function getPairNumber(time) {
+  const idx = BELL_TIMES.indexOf(time);
+  return idx >= 0 ? idx + 1 : null;
+}
+
+function isPairNow(p) {
+  const now = new Date();
+  const [sh, sm] = p.start.split(':').map(Number);
+  const [eh, em] = p.end.split(':').map(Number);
+  const start = sh * 60 + sm;
+  const end = eh * 60 + em;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  return cur >= start && cur < end;
+}
+
+// ================== ДАТЫ ==================
+const MONTHS_NOM = [
+  'Январь','Февраль','Март','Апрель','Май','Июнь',
+  'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
+];
+
+const BASE_MONDAY = new Date(2026, 8, 14);
+const BASE_IS_ODD = true;
+
+const MIN_MONDAY = new Date(2026, 7, 31);
+const MAX_MONDAY = new Date(2026, 11, 28);
+
+function getMonday(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function isOddWeek(date) {
+  const monday = getMonday(date);
+  const ms = monday - BASE_MONDAY;
+  const weeks = Math.round(ms / (7 * 24 * 60 * 60 * 1000));
+  return (weeks % 2 === 0) ? BASE_IS_ODD : !BASE_IS_ODD;
+}
+function getReferenceDate() {
+  const today = new Date();
+  if (today.getDay() === 0) return addDays(today, 1);
+  return today;
+}
+function isToday(date) {
+  const t = new Date();
+  return date.getDate() === t.getDate()
+      && date.getMonth() === t.getMonth()
+      && date.getFullYear() === t.getFullYear();
+}
+function formatDate(d) {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dd}.${mm}`;
+}
+function getRangeString(monday) {
+  const sat = addDays(monday, 5);
+  return `${formatDate(monday)} – ${formatDate(sat)}`;
+}
+function isSunday() {
+  return new Date().getDay() === 0;
+}
+
+// ================== НАВИГАЦИЯ ==================
+let weekOffset = 0;
+let currentView = 'even';
+
+function getBaseMonday() {
+  return getMonday(getReferenceDate());
+}
+function getCurrentMonday() {
+  return addDays(getBaseMonday(), weekOffset * 7);
+}
+function getCurrentType() {
+  return isOddWeek(getCurrentMonday()) ? 'odd' : 'even';
+}
+
+function canNavigateTo(offset) {
+  const monday = addDays(getBaseMonday(), offset * 7);
+  const t = monday.getTime();
+  return t >= MIN_MONDAY.getTime() && t <= MAX_MONDAY.getTime();
+}
+
+function saveWeekOffset() {
+  localStorage.setItem('schedule-week-offset', String(weekOffset));
+}
+
+// ================== ДАННЫЕ ==================
+const schedule = {
+  even: {
+    monday: [
+      {time:'12:40', subject:'ОСН. МЕНЕДЖМЕНТ', type:'пр',  teacher:'Марневская И.В.', room:'ВЦ 374'},
+      {time:'14:55', subject:'ЭКОНОМИЧ. ТЕОРИЯ', type:'пр',  teacher:'Шехова Н.В.',     room:'530'},
+      {time:'16:45', subject:'ЭКОНОМИЧ. ТЕОРИЯ', type:'лек', teacher:'Шехова Н.В.',     room:'440'},
+      {time:'18:30', subject:'ЭК ПО ФК И СПОРТУ', type:'пр', teacher:'',                room:'Спортзал'},
+    ],
+    tuesday: [
+      {time:'14:55', subject:'УПР. ЧЕЛ. РЕС.',   type:'лек', teacher:'Стешин В.А.',     room:'404'},
+      {time:'16:45', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.',    room:'405'},
+      {time:'18:30', subject:'ПСИХ. ЛИЧНОСТИ',   type:'пр',  teacher:'Берзина О.А.',    room:'418'},
+    ],
+    wednesday: [
+      {time:'14:55', subject:'ПСИХ. ЭКСТРЕМ И ЧС', type:'пр',  teacher:'Бирючкова Ю.М.', room:'434'},
+      {time:'16:45', subject:'КОНЦ. СОВР. ЕСТ-ЗН', type:'пр',  teacher:'Дрозд А.Л.',     room:'563'},
+      {time:'18:30', subject:'ПЕД. ПСИХОЛОГИЯ',    type:'лек', teacher:'Федосеева И.А.', room:'437'},
+    ],
+    thursday: [
+      {time:'10:50', subject:'УПР. ЧЕЛ. РЕС.', type:'пр',  teacher:'Стешин В.А.',  room:'437'},
+      {time:'12:40', subject:'ПСИХ. ЛИЧНОСТИ', type:'лек', teacher:'Болотова О.В.', room:'437'},
+    ],
+    friday: [
+      {time:'14:55', subject:'ПСИХ. ЭКСТРЕМ И ЧС', type:'лек', teacher:'Бирючкова Ю.М.', room:'437'},
+      {time:'16:45', subject:'ПСИХОДИАГНОСТИКА',   type:'лек', teacher:'Жаринова Е.Н.',  room:'437'},
+      {time:'18:30', subject:'ЭК ПО ФК И СПОРТУ',  type:'пр',  teacher:'',               room:'Спортзал'},
+    ],
+    saturday: [],
+  },
+  odd: {
+    monday: [
+      {time:'16:45', subject:'ЭКОНОМИЧ. ТЕОРИЯ', type:'лек', teacher:'Шехова Н.В.', room:'440'},
+      {time:'18:30', subject:'ЭК ПО ФК И СПОРТУ', type:'пр', teacher:'',            room:'Спортзал'},
+    ],
+    tuesday: [
+      {time:'14:55', subject:'УПР. ЧЕЛ. РЕС.',   type:'лек', teacher:'Стешин В.А.',  room:'437'},
+      {time:'16:45', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.', room:'405'},
+      {time:'18:30', subject:'ПСИХ. ЛИЧНОСТИ',   type:'пр',  teacher:'Берзина О.А.', room:'418'},
+    ],
+    wednesday: [
+      {time:'14:55', subject:'ПСИХ. ЭКСТРЕМ И ЧС', type:'пр',  teacher:'Бирючкова Ю.М.', room:'401'},
+      {time:'16:45', subject:'ПЕД. ПСИХОЛОГИЯ',    type:'пр',  teacher:'Федосеева И.А.', room:'563'},
+      {time:'18:30', subject:'ПЕД. ПСИХОЛОГИЯ',    type:'лек', teacher:'Федосеева И.А.', room:'437'},
+    ],
+    thursday: [
+      {time:'10:50', subject:'УПР. ЧЕЛ. РЕС.',     type:'пр',  teacher:'Стешин В.А.',    room:'437'},
+      {time:'12:40', subject:'ПСИХ. ЛИЧНОСТИ',     type:'лек', teacher:'Болотова О.В.',  room:'437'},
+      {time:'14:55', subject:'ОСН. МЕНЕДЖМЕНТ',    type:'лек', teacher:'Марневская И.В.', room:'437'},
+      {time:'16:45', subject:'КОНЦ. СОВР. ЕСТ-ЗН', type:'лек', teacher:'Дрозд А.Л.',     room:'429'},
+    ],
+    friday: [
+      {time:'14:55', subject:'ПСИХ. ЭКСТРЕМ И ЧС', type:'лек', teacher:'Бирючкова Ю.М.', room:'437'},
+      {time:'16:45', subject:'ПСИХОДИАГНОСТИКА',   type:'лек', teacher:'Жаринова Е.Н.',  room:'437'},
+      {time:'18:30', subject:'ЭК ПО ФК И СПОРТУ',  type:'пр',  teacher:'',               room:'Спортзал'},
+    ],
+    saturday: [
+      {time:'09:00', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.', room:'425'},
+      {time:'10:50', subject:'ПСИХОДИАГНОСТИКА', type:'лаб', teacher:'Берзина О.А.', room:'425'},
+    ],
+  }
+};
+
+const ROWS_PER_DAY = 4;
+
+const DAYS_LEFT  = [
+  ['ПОНЕДЕЛЬНИК', 'monday'],
+  ['ВТОРНИК',     'tuesday'],
+  ['СРЕДА',       'wednesday'],
+];
+const DAYS_RIGHT = [
+  ['ЧЕТВЕРГ', 'thursday'],
+  ['ПЯТНИЦА', 'friday'],
+  ['СУББОТА', 'saturday'],
+];
+
+function renderDay(label, lessons, date) {
+  const dateNum = date.getDate();
+  const todayClass = isToday(date) ? ' today' : '';
+
+  let rows = '';
+  for (let i = 0; i < ROWS_PER_DAY; i++) {
+    const l = lessons[i];
+    if (l) {
+      const pairNum = getPairNumber(l.time);
+      rows += `
+        <tr>
+          <td class="num">
+            <div class="pair-num">${pairNum ? pairNum + ' пара' : ''}</div>
+            <div class="pair-time">${l.time}</div>
+          </td>
+          <td>
+            <div class="subj-name">${l.subject} (${l.type})</div>
+            ${l.teacher ? `<div class="subj-meta">${l.teacher}</div>` : ''}
+          </td>
+          <td class="room-cell">
+            <div class="room-name">${l.room || '—'}</div>
+          </td>
+        </tr>`;
+    } else {
+      rows += `<tr class="empty-row"><td></td><td></td><td></td></tr>`;
+    }
+  }
+
+  return `
+    <div class="day${todayClass}">
+      <div class="day-label">${label}<span class="day-date">${dateNum}</span></div>
+      <table>
+        <colgroup>
+          <col style="width:14%">
+          <col style="width:64%">
+          <col style="width:22%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>№ / Время</th>
+            <th>ПРЕДМЕТ</th>
+            <th>КАБИНЕТ</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderPage(weekKey, monday, days, monthDate) {
+  let daysHtml = '';
+  days.forEach(([label, key], i) => {
+    const offset = days === DAYS_RIGHT ? i + 3 : i;
+    daysHtml += renderDay(label, schedule[weekKey][key], addDays(monday, offset));
+  });
+  const monthLabel = MONTHS_NOM[monthDate.getMonth()];
+  return `
+    <div class="page week-${weekKey}">
+      <div class="month-bar">Месяц <span class="month-value">${monthLabel}</span></div>
+      <div class="days">${daysHtml}</div>
+    </div>`;
+}
+
+function renderBellPage() {
+  const list = document.getElementById('bellGrid');
+  if (!list) return;
+  let html = '';
+  for (const p of PAIRS) {
+    const isLast = p.break === 0;
+    const breakText = isLast ? 'Конец занятий' : `${p.break} мин`;
+    const breakClass = isLast ? 'bell-break-cell none' : 'bell-break-cell';
+    const curClass = isPairNow(p) ? ' bell-current' : '';
+    html += `
+      <div class="bell-row${curClass}">
+        <div><div class="bell-num-cell">${p.num}</div></div>
+        <div><div class="bell-time-cell">${p.start}</div></div>
+        <div><div class="bell-time-cell">${p.end}</div></div>
+        <div><div class="${breakClass}">${breakText}</div></div>
+      </div>`;
+  }
+  list.innerHTML = html;
+}
+
+function renderActiveDiary() {
+  if (currentView === 'bell') return;
+  const monday = getCurrentMonday();
+  const thursday = addDays(monday, 3);
+  const type = getCurrentType();
+  if (type === 'even') {
+    document.getElementById('diary-even').innerHTML =
+      renderPage('even', monday, DAYS_LEFT, monday) +
+      renderPage('even', monday, DAYS_RIGHT, thursday);
+  } else {
+    document.getElementById('diary-odd').innerHTML =
+      renderPage('odd', monday, DAYS_LEFT, monday) +
+      renderPage('odd', monday, DAYS_RIGHT, thursday);
+  }
+}
+
+// ================== НАВИГАЦИЯ (UI) ==================
+function updateNavInfo() {
+  const nav = document.getElementById('weekNav');
+  const info = document.getElementById('navInfo');
+  const prevBtn = document.getElementById('navPrev');
+  const nextBtn = document.getElementById('navNext');
+  const todayBtn = document.getElementById('navToday');
+
+  if (currentView === 'bell') {
+    nav.classList.add('hidden');
+    return;
+  }
+  nav.classList.remove('hidden');
+  nav.classList.toggle('odd', currentView === 'odd');
+
+  const monday = getCurrentMonday();
+  info.textContent = getRangeString(monday);
+
+  prevBtn.disabled = !canNavigateTo(weekOffset - 1);
+  nextBtn.disabled = !canNavigateTo(weekOffset + 1);
+  todayBtn.disabled = (weekOffset === 0);
+}
+
+function updateBanner() {
+  const banner = document.getElementById('banner');
+  const bannerText = document.getElementById('bannerText');
+  const bannerBtn = document.getElementById('bannerBtn');
+
+  if (currentView === 'bell') {
+    banner.classList.remove('active');
+    return;
+  }
+
+  const isOdd = currentView === 'odd';
+  banner.classList.toggle('odd', isOdd);
+  bannerBtn.classList.toggle('odd', isOdd);
+
+  let text = '';
+  let showBtn = true;
+  let show = true;
+
+  if (weekOffset > 0) {
+    text = 'Вы просматриваете следующую неделю';
+  } else if (weekOffset < 0) {
+    text = 'Вы просматриваете прошлую неделю';
+  } else if (isSunday()) {
+    text = 'Сегодня выходной · показана следующая учебная неделя';
+    showBtn = false;
+  } else {
+    show = false;
+  }
+
+  bannerText.textContent = text;
+  bannerBtn.style.display = showBtn ? 'inline-flex' : 'none';
+  banner.classList.toggle('active', show);
+
+  fitAll();
+}
+
+function setViewUI(view) {
+  tabs.forEach(t => {
+    t.classList.remove('active-even', 'active-odd', 'active-bell');
+    if (t.dataset.view === view) {
+      if (view === 'even') t.classList.add('active-even');
+      else if (view === 'odd') t.classList.add('active-odd');
+      else if (view === 'bell') t.classList.add('active-bell');
+    }
+  });
+  wraps.forEach(w => {
+    w.classList.toggle('active', w.dataset.view === view);
+  });
+}
+
+function applyView(type) {
+  currentView = type;
+  renderActiveDiary();
+  if (type === 'bell') renderBellPage();
+  setViewUI(type);
+  updateNavInfo();
+  updateBanner();
+  fitAll();
+}
+
+function switchTab(view) {
+  if (view === 'bell') {
+    applyView('bell');
+    return;
+  }
+
+  if (view !== getCurrentType()) {
+    if (!canNavigateTo(weekOffset + 1)) {
+      showToast('Эта неделя вне расписания');
+      return;
+    }
+    weekOffset++;
+    saveWeekOffset();
+  }
+  applyView(view);
+}
+
+function navigateWeek(delta) {
+  if (!canNavigateTo(weekOffset + delta)) return;
+  weekOffset += delta;
+  saveWeekOffset();
+  applyView(getCurrentType());
+}
+
+function goToday() {
+  if (weekOffset === 0) return;
+  weekOffset = 0;
+  saveWeekOffset();
+  applyView(getCurrentType());
+}
+
+document.getElementById('navPrev').addEventListener('click', () => navigateWeek(-1));
+document.getElementById('navNext').addEventListener('click', () => navigateWeek(1));
+document.getElementById('navToday').addEventListener('click', goToday);
+document.getElementById('bannerBtn').addEventListener('click', goToday);
+
+// ================== МАСШТАБ ==================
+function fitAll() {
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.diary-wrap.active').forEach(wrap => {
+      const target = wrap.querySelector('.diary, .bell-page');
+      if (!target) return;
+      target.style.transform = 'scale(1)';
+      const scale = Math.min(wrap.clientWidth / target.offsetWidth,
+                              wrap.clientHeight / target.offsetHeight);
+      target.style.transform = `scale(${scale})`;
+    });
+  });
+}
+
+// ================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==================
+const tabs = document.querySelectorAll('.tab');
+const wraps = document.querySelectorAll('.diary-wrap');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.view));
+});
+
+// ================== СМЕНА СУТОК И ПАР ==================
+let lastKnownDay = new Date().getDate();
+let lastKnownMinute = -1;
+
+setInterval(() => {
+  const now = new Date();
+  const d = now.getDate();
+  if (d !== lastKnownDay) {
+    lastKnownDay = d;
+    renderActiveDiary();
+    if (currentView === 'bell') renderBellPage();
+    updateNavInfo();
+    updateBanner();
+    lastKnownMinute = -1;
+  }
+  if (currentView === 'bell') {
+    const m = now.getMinutes();
+    if (m !== lastKnownMinute) {
+      lastKnownMinute = m;
+      renderBellPage();
+    }
+  }
+}, 30000);
+
+// ================== СТАРТ ==================
+window.addEventListener('load', () => {
+  const savedTheme = localStorage.getItem('schedule-theme');
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+
+  weekOffset = 0;
+
+  const savedOffsetRaw = localStorage.getItem('schedule-week-offset');
+  if (savedOffsetRaw !== null) {
+    const parsed = parseInt(savedOffsetRaw, 10);
+    if (!isNaN(parsed) && canNavigateTo(parsed)) {
+      weekOffset = parsed;
+    }
+  }
+
+  if (!canNavigateTo(weekOffset)) {
+    for (let i = 1; i <= 300; i++) {
+      if (canNavigateTo(weekOffset + i)) { weekOffset += i; break; }
+      if (canNavigateTo(weekOffset - i)) { weekOffset -= i; break; }
+    }
+  }
+
+  renderBellPage();
+  applyView(getCurrentType());
+
+  fitAll();
+  setTimeout(fitAll, 100);
+  setTimeout(fitAll, 400);
+});
+
+window.addEventListener('resize', fitAll);
+</script>
+
+</body>
+</html>
