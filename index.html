@@ -93,6 +93,8 @@
     user-select: none;
     transition: all 0.2s;
     white-space: nowrap;
+    font-family: inherit;
+    border: none;
   }
 
   .tab.active-even { background: #6C5CE7; color: #fff; }
@@ -100,7 +102,15 @@
   .tab.active-bell { background: #0984E3; color: #fff; }
   .tab.active-mobile { background: #0984E3; color: #fff; }
 
-  .tab-mobile { display: none; }
+  .tab-desktop { display: inline-block; }
+  .tab-mobile  { display: none; }
+  .tab-today   { display: none; background: #6C5CE7; color: #fff; }
+
+  .tab-today:active:not(:disabled) { filter: brightness(0.92); }
+  .tab-today:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
 
   .top-actions {
     position: absolute;
@@ -510,8 +520,8 @@
   .mobile-day-nav {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 10px;
+    padding: 8px 12px;
     background: var(--bg-surface);
     border: 2px solid var(--border-main);
     border-radius: 10px;
@@ -563,28 +573,6 @@
     font-weight: 600;
     margin-top: 2px;
     letter-spacing: 0.3px;
-  }
-
-  .mob-today-btn {
-    padding: 8px 12px;
-    border-radius: 20px;
-    background: var(--tab-bg);
-    border: 1px solid var(--border-light);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .mob-today-btn:active:not(:disabled) { transform: scale(0.95); }
-  .mob-today-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
 
   .mobile-day-body {
@@ -842,13 +830,14 @@
 
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
-    .tab-mobile { display: inline-block; }
+    .tab-mobile  { display: inline-block; }
+    .tab-today   { display: inline-block; }
 
     .week-nav { display: none !important; }
     .banner { display: none !important; }
 
     .tabs {
-      padding-right: 120px;
+      padding-right: 100px;
       flex-wrap: nowrap;
       overflow-x: auto;
       justify-content: flex-start;
@@ -860,7 +849,7 @@
     }
     .tabs::-webkit-scrollbar { display: none; }
     .tab {
-      padding: 8px 16px;
+      padding: 8px 14px;
       font-size: 13px;
       flex-shrink: 0;
     }
@@ -936,11 +925,10 @@
   }
 
   @media (max-width: 500px) {
-    .tabs { padding-right: 104px; }
-    .tab { padding: 7px 12px; font-size: 12px; }
+    .tabs { padding-right: 92px; }
+    .tab { padding: 7px 11px; font-size: 12px; }
     .mob-day-title .mob-title-day { font-size: 15px; }
     .mob-pair-subj { font-size: 14px; }
-    .mob-today-btn { padding: 6px 10px; font-size: 11px; }
     .mob-nav-btn { width: 40px; height: 40px; font-size: 22px; }
   }
 </style>
@@ -952,6 +940,7 @@
     <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
     <div class="tab tab-mobile" data-view="mobile">День</div>
     <div class="tab" data-view="bell">Расписание звонков</div>
+    <button class="tab tab-today" id="tabToday" type="button">Сегодня</button>
     <div class="top-actions">
       <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
       <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
@@ -983,7 +972,6 @@
         <div class="mobile-day-nav">
           <button class="mob-nav-btn" id="mobPrev" title="Предыдущий день">‹</button>
           <div class="mob-day-title" id="mobDayTitle">—</div>
-          <button class="mob-today-btn" id="mobToday" title="К сегодняшнему дню">Сегодня</button>
           <button class="mob-nav-btn" id="mobNext" title="Следующий день">›</button>
         </div>
         <div class="mobile-day-body" id="mobileDayBody"></div>
@@ -1394,6 +1382,23 @@ function canGoNextDay() {
   return getMonday(next).getTime() <= MAX_MONDAY.getTime();
 }
 
+function syncWeekOffsetFromMobileDate() {
+  if (!mobileDate) return;
+  const monday = getMonday(mobileDate);
+  const baseMonday = getBaseMonday();
+  const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
+  weekOffset = weeks;
+  saveWeekOffset();
+}
+
+function updateTabTodayState() {
+  const btn = document.getElementById('tabToday');
+  if (!btn) return;
+  if (!mobileDate) { btn.disabled = false; return; }
+  const target = getTodayTarget();
+  btn.disabled = mobileDate.getTime() === target.getTime();
+}
+
 function renderMobileDay() {
   if (!mobileDate) initMobileDate();
   const date = mobileDate;
@@ -1442,44 +1447,36 @@ function renderMobileDay() {
 
   const prevBtn = document.getElementById('mobPrev');
   const nextBtn = document.getElementById('mobNext');
-  const todayBtn = document.getElementById('mobToday');
   if (prevBtn) prevBtn.disabled = !canGoPrevDay();
   if (nextBtn) nextBtn.disabled = !canGoNextDay();
-  if (todayBtn) {
-    const target = getTodayTarget();
-    todayBtn.disabled = mobileDate.getTime() === target.getTime();
-  }
+
+  updateTabTodayState();
 }
 
 function navigateMobileDay(delta) {
   if (delta < 0 && !canGoPrevDay()) return;
   if (delta > 0 && !canGoNextDay()) return;
   mobileDate = delta > 0 ? nextSchoolDay(mobileDate) : prevSchoolDay(mobileDate);
-
-  // Синхронизируем weekOffset, чтобы при переключении на десктоп всё совпало
-  const monday = getMonday(mobileDate);
-  const baseMonday = getBaseMonday();
-  const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
-  weekOffset = weeks;
-  saveWeekOffset();
-
+  syncWeekOffsetFromMobileDate();
   renderMobileDay();
 }
 
 function goToTodayMobile() {
   initMobileDate();
-  // Синхронизируем weekOffset
-  const monday = getMonday(mobileDate);
-  const baseMonday = getBaseMonday();
-  const weeks = Math.round((monday - baseMonday) / (7 * 24 * 60 * 60 * 1000));
-  weekOffset = weeks;
-  saveWeekOffset();
+  syncWeekOffsetFromMobileDate();
+  currentView = 'mobile';
   renderMobileDay();
+  setViewUI('mobile');
+  updateNavInfo();
+  updateBanner();
 }
 
 document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
 document.getElementById('mobNext').addEventListener('click', () => navigateMobileDay(1));
-document.getElementById('mobToday').addEventListener('click', goToTodayMobile);
+document.getElementById('tabToday').addEventListener('click', () => {
+  if (!isMobileLayout()) return;
+  goToTodayMobile();
+});
 
 // Свайпы
 (function setupSwipe() {
@@ -1662,7 +1659,8 @@ function fitAll() {
 }
 
 // ================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==================
-const tabs = document.querySelectorAll('.tab');
+// Берём только те .tab, у которых есть data-view — исключаем кнопку «Сегодня».
+const tabs = document.querySelectorAll('.tab[data-view]');
 const wraps = document.querySelectorAll('.diary-wrap');
 
 tabs.forEach(tab => {
