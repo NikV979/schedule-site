@@ -2,7 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Дневник Р144С">
+<meta name="theme-color" content="#1A1A2E">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Дневник Р144С","short_name":"Дневник","start_url":"./","display":"standalone","orientation":"any","background_color":"%230F0F1E","theme_color":"%231A1A2E"}'>
+<link rel="apple-touch-icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="%236C5CE7"/><text x="90" y="118" font-size="90" font-family="Arial" fill="white" text-anchor="middle" font-weight="bold">Р</text></svg>'>
 <title>Дневник Р144С</title>
 <style>
   :root {
@@ -53,6 +60,8 @@
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: var(--bg-page);
     transition: background 0.25s;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .tabs {
@@ -66,8 +75,10 @@
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    padding-right: 120px;
+    padding-right: 160px;
     height: 60px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    height: calc(60px + env(safe-area-inset-top));
     transition: background 0.25s;
   }
 
@@ -113,18 +124,19 @@
     justify-content: center;
   }
 
-  .btn-theme {
+  .btn-theme, .btn-fs {
     font-size: 16px;
     background: var(--tab-bg);
     color: var(--tab-text);
     line-height: 1;
     width: 36px;
   }
-  .btn-theme:hover { filter: brightness(0.95); }
+  .btn-theme:hover, .btn-fs:hover { filter: brightness(0.95); }
 
   .week-nav {
     position: fixed;
-    top: 60px; left: 0; right: 0;
+    top: calc(60px + env(safe-area-inset-top));
+    left: 0; right: 0;
     z-index: 15;
     background: var(--bg-surface);
     height: 50px;
@@ -220,7 +232,7 @@
   .viewport {
     position: absolute;
     inset: 0;
-    padding: 120px 16px 16px;
+    padding: calc(120px + env(safe-area-inset-top)) 16px 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -461,11 +473,7 @@
     transition: color 0.25s;
   }
 
-  /* ============== КАБИНЕТ ============== */
-
-  .room-cell {
-    text-align: center;
-  }
+  .room-cell { text-align: center; }
 
   .room-name {
     font-size: 17px;
@@ -613,41 +621,188 @@
     color: #00D1A7;
   }
 
+  .toast {
+    position: fixed;
+    bottom: calc(30px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-surface);
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s;
+    z-index: 200;
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .toast.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ============== МОБИЛЬНАЯ ВЁРСТКА ==============
+     На узких экранах отключаем масштабирование и превращаем
+     дневник в вертикальный список дней — читается нормально,
+     страница просто скроллится. */
+
   @media (max-width: 900px) {
     .tabs {
-      padding-right: 16px;
-      padding-bottom: 56px;
+      padding-right: 130px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: flex-start;
       height: auto;
-      flex-wrap: wrap;
+      min-height: calc(60px + env(safe-area-inset-top));
+      padding-top: max(10px, env(safe-area-inset-top));
+      padding-bottom: 10px;
+      gap: 6px;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      flex-shrink: 0;
     }
     .top-actions {
-      position: static;
+      position: fixed;
+      right: 8px;
+      top: max(12px, env(safe-area-inset-top));
       transform: none;
-      justify-content: center;
-      margin-top: 8px;
-      width: 100%;
+      background: var(--bg-surface);
+      padding: 4px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 25;
     }
-    .tab { flex: 1; text-align: center; padding: 10px 12px; font-size: 13px; }
     .week-nav {
-      top: 120px;
-      flex-wrap: wrap;
-      height: auto;
-      padding: 6px 12px;
-      gap: 8px;
+      top: auto;
+      height: 46px;
+      gap: 10px;
     }
-    .week-nav .nav-info { min-width: 0; flex: 1 1 100%; order: 10; }
-    .viewport { padding-top: 200px; }
-    .banner { font-size: 12px; padding: 8px 12px; max-width: 100%; }
+    .nav-info { min-width: 0; font-size: 14px; flex: 1; }
+    .nav-btn { width: 34px; height: 34px; font-size: 18px; }
+    .nav-today { padding: 5px 10px; font-size: 11px; }
+
+    .viewport {
+      padding: calc(116px + env(safe-area-inset-top)) 0 calc(56px + env(safe-area-inset-bottom));
+      justify-content: flex-start;
+      gap: 6px;
+    }
+
+    .banner {
+      margin: 0 8px;
+      font-size: 12px;
+      padding: 8px 12px;
+      max-width: calc(100% - 16px);
+    }
+    .banner-btn { padding: 6px 12px; font-size: 11px; }
+
+    /* Отключаем масштабирование — контент течёт сам по себе */
+    .diary-wrap {
+      display: none;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      align-items: flex-start;
+      justify-content: flex-start;
+      -webkit-overflow-scrolling: touch;
+    }
+    .diary-wrap.active { display: block; }
+
+    .diary,
+    .bell-page {
+      width: 100%;
+      height: auto;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      transform: none !important; /* fitAll не будет трогать */
+    }
+
+    .diary .page {
+      width: 100%;
+      border: 2px solid var(--border-main);
+    }
+
+    .days { display: flex; flex-direction: column; }
+
+    .day {
+      flex: none;
+      min-height: 0;
+      height: auto;
+      display: grid;
+      grid-template-columns: 40px 1fr;
+    }
+
+    .day table { height: auto; }
+    .day tbody { height: auto; }
+    .day tbody tr { height: auto; min-height: 48px; }
+    .day tbody td { height: auto; padding: 10px 10px; }
+
+    .day-label { font-size: 14px; letter-spacing: 1.5px; padding: 12px 0; }
+    .day-date { font-size: 18px; margin-left: 6px; }
+
+    .month-bar { font-size: 15px; padding: 10px; letter-spacing: 1px; }
+    .month-value { min-width: 0; font-size: 15px; padding: 0 8px 3px; }
+
+    th { font-size: 11px; padding: 8px 4px; letter-spacing: 0.5px; }
+
+    .pair-num { font-size: 13px; }
+    .pair-time { font-size: 12px; }
+    .subj-name { font-size: 14px; white-space: normal; }
+    .subj-meta { font-size: 11px; white-space: normal; }
+    .room-name { font-size: 14px; }
+
+    .num { padding: 8px 2px; }
+
+    /* Таблица звонков — тоже компактнее, но всё ещё в столбик */
+    .bell-page-inner { border: none; }
+    .bell-head { height: auto; }
+    .bell-head > div {
+      font-size: 12px;
+      padding: 14px 4px;
+      letter-spacing: 0.5px;
+    }
+    .bell-row { min-height: 56px; }
+    .bell-row > div { padding: 12px 6px; }
+    .bell-num-cell { font-size: 22px; }
+    .bell-time-cell { font-size: 20px; }
+    .bell-break-cell { font-size: 14px; }
+  }
+
+  @media (max-width: 500px) {
+    .tabs { padding-right: 116px; }
+    .tab { padding: 7px 12px; font-size: 12px; }
+    .subj-name { font-size: 13px; }
+    .subj-meta { font-size: 10px; }
+    .room-name { font-size: 13px; }
+    th { font-size: 10px; }
+    .day tbody td { padding: 8px 6px; }
   }
 </style>
 </head>
 <body>
 
   <div class="tabs">
-    <div class="tab" data-view="even">Чётная неделя</div>
-    <div class="tab" data-view="odd">Нечётная неделя</div>
-    <div class="tab" data-view="bell">Расписание звонков</div>
+    <div class="tab" data-view="even">Чётная</div>
+    <div class="tab" data-view="odd">Нечётная</div>
+    <div class="tab" data-view="bell">Звонки</div>
     <div class="top-actions">
+      <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
       <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
     </div>
   </div>
@@ -692,10 +847,43 @@
   <div class="toast" id="toast"></div>
 
 <script>
+// ================== FULLSCREEN ==================
+const fsBtn = document.getElementById('fsBtn');
+
+function updateFsIcon() {
+  const fs = document.fullscreenElement || document.webkitFullscreenElement;
+  fsBtn.textContent = fs ? '⤢' : '⛶';
+  fsBtn.title = fs ? 'Выйти из полноэкранного' : 'Во весь экран';
+}
+
+async function toggleFullscreen() {
+  const el = document.documentElement;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  try {
+    if (!isFs) {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+    } else {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  } catch (e) {
+    showToast('Полный экран недоступен');
+  }
+  updateFsIcon();
+}
+
+fsBtn.addEventListener('click', toggleFullscreen);
+document.addEventListener('fullscreenchange', updateFsIcon);
+document.addEventListener('webkitfullscreenchange', updateFsIcon);
+
 // ================== ТЕМА ==================
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('schedule-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#1A1A2E' : '#FFFFFF');
   const btn = document.getElementById('themeBtn');
   if (btn) btn.textContent = theme === 'dark' ? '☀' : '🌙';
 }
@@ -1116,7 +1304,18 @@ document.getElementById('navToday').addEventListener('click', goToday);
 document.getElementById('bannerBtn').addEventListener('click', goToday);
 
 // ================== МАСШТАБ ==================
+// На узких экранах transform не применяем — там работает адаптивная вёрстка.
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 900px)').matches;
+}
+
 function fitAll() {
+  if (isMobileLayout()) {
+    // Убираем возможный transform, оставшийся с десктопа
+    document.querySelectorAll('.diary-wrap.active .diary, .diary-wrap.active .bell-page')
+      .forEach(el => { el.style.transform = ''; });
+    return;
+  }
   requestAnimationFrame(() => {
     document.querySelectorAll('.diary-wrap.active').forEach(wrap => {
       const target = wrap.querySelector('.diary, .bell-page');
@@ -1190,6 +1389,7 @@ window.addEventListener('load', () => {
 
   renderBellPage();
   applyView(getCurrentType());
+  updateFsIcon();
 
   fitAll();
   setTimeout(fitAll, 100);
