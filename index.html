@@ -64,6 +64,8 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Шапка с вкладками. Паддинги слева/справа симметричны,
+     поэтому justify-content: center даёт идеальный центр. */
   .tabs {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -75,7 +77,6 @@
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    padding-right: 160px;
     height: 60px;
     padding-top: max(10px, env(safe-area-inset-top));
     height: calc(60px + env(safe-area-inset-top));
@@ -105,10 +106,7 @@
   .tab-desktop { display: inline-block; }
   .tab-mobile  { display: none; }
 
-  /* Кнопка «Сегодня» — только для мобильного режима.
-     На десктопе принудительно скрыта. */
   .tab-today {
-    display: none !important;
     background: #6C5CE7;
     color: #fff;
   }
@@ -151,6 +149,11 @@
     width: 36px;
   }
   .btn-theme:hover, .btn-fs:hover { filter: brightness(0.95); }
+
+  /* Кнопка «Во весь экран» — только для ПК. На тач-устройствах скрываем. */
+  @media (hover: none) and (pointer: coarse) {
+    .btn-fs { display: none !important; }
+  }
 
   .week-nav {
     position: fixed;
@@ -225,27 +228,6 @@
     text-align: center;
     user-select: none;
     transition: color 0.25s;
-  }
-
-  .nav-today {
-    font-size: 12px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: var(--tab-bg);
-    color: var(--tab-text);
-    cursor: pointer;
-    font-weight: 700;
-    user-select: none;
-    transition: all 0.15s;
-    border: 1px solid var(--border-light);
-    font-family: inherit;
-  }
-
-  .nav-today:hover:not(:disabled) { filter: brightness(0.95); }
-
-  .nav-today:disabled {
-    opacity: 0.45;
-    cursor: default;
   }
 
   .viewport {
@@ -837,25 +819,27 @@
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
     .tab-mobile  { display: inline-block; }
-    .tab-today   { display: inline-block !important; }
+
+    /* Дополнительная страховка: на мобильной ширине кнопка ⛶ скрыта */
+    .btn-fs { display: none !important; }
 
     .week-nav { display: none !important; }
     .banner { display: none !important; }
 
+    /* Симметричные паддинги сохраняют центр экрана центром;
+       если вкладки шире — обрезаются одинаково с обеих сторон. */
     .tabs {
-      padding-right: 100px;
+      justify-content: center;
       flex-wrap: nowrap;
-      overflow-x: auto;
-      justify-content: flex-start;
+      overflow-x: hidden;
       height: auto;
       min-height: calc(60px + env(safe-area-inset-top));
       padding-top: max(10px, env(safe-area-inset-top));
       padding-bottom: 10px;
       gap: 6px;
     }
-    .tabs::-webkit-scrollbar { display: none; }
     .tab {
-      padding: 8px 14px;
+      padding: 8px 12px;
       font-size: 13px;
       flex-shrink: 0;
     }
@@ -930,14 +914,8 @@
     .bell-break-cell { font-size: 12px; }
   }
 
-  /* Явное правило: на десктопе кнопки «Сегодня» нет вообще */
-  @media (min-width: 901px) {
-    .tab-today { display: none !important; }
-  }
-
   @media (max-width: 500px) {
-    .tabs { padding-right: 92px; }
-    .tab { padding: 7px 11px; font-size: 12px; }
+    .tab { padding: 7px 10px; font-size: 12px; }
     .mob-day-title .mob-title-day { font-size: 15px; }
     .mob-pair-subj { font-size: 14px; }
     .mob-nav-btn { width: 40px; height: 40px; font-size: 22px; }
@@ -951,7 +929,6 @@
     <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
     <div class="tab tab-mobile" data-view="mobile">День</div>
     <div class="tab" data-view="bell">Расписание звонков</div>
-    <button class="tab tab-today" id="tabToday" type="button">Сегодня</button>
     <div class="top-actions">
       <button class="action-btn btn-fs" id="fsBtn" title="Во весь экран">⛶</button>
       <button class="action-btn btn-theme" id="themeBtn" title="Переключить тему">🌙</button>
@@ -961,7 +938,6 @@
   <div class="week-nav" id="weekNav">
     <button class="nav-btn" id="navPrev" title="Предыдущая неделя">‹</button>
     <div class="nav-info" id="navInfo">—</div>
-    <button class="nav-today" id="navToday">Сегодня</button>
     <button class="nav-btn" id="navNext" title="Следующая неделя">›</button>
   </div>
 
@@ -1150,8 +1126,6 @@ function getRangeString(monday) {
 function isSunday() {
   return new Date().getDay() === 0;
 }
-
-// "Сегодня" — просто текущая дата (для кнопки «Сегодня» на мобиле).
 function getTodayDate() {
   const t = new Date();
   t.setHours(0, 0, 0, 0);
@@ -1184,6 +1158,14 @@ function saveWeekOffset() {
 
 function isMobileLayout() {
   return window.matchMedia('(max-width: 900px)').matches;
+}
+
+function isTouchPrimary() {
+  try {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  } catch (_) {
+    return false;
+  }
 }
 
 // ================== ДАННЫЕ ==================
@@ -1373,12 +1355,8 @@ function initMobileDate() {
   mobileDate = getTodayDate();
 }
 
-function nextDay(date) {
-  return addDays(date, 1);
-}
-function prevDay(date) {
-  return addDays(date, -1);
-}
+function nextDay(date) { return addDays(date, 1); }
+function prevDay(date) { return addDays(date, -1); }
 
 function canGoPrevDay() {
   if (!mobileDate) return false;
@@ -1479,12 +1457,32 @@ function goToTodayMobile() {
   updateBanner();
 }
 
+// ================== СОЗДАНИЕ КНОПКИ «СЕГОДНЯ» ==================
+function ensureTodayButton() {
+  const existing = document.getElementById('tabToday');
+  const shouldShow = isTouchPrimary();
+
+  if (shouldShow && !existing) {
+    const tabsBar = document.querySelector('.tabs');
+    const topActions = tabsBar.querySelector('.top-actions');
+    const btn = document.createElement('button');
+    btn.className = 'tab tab-today';
+    btn.id = 'tabToday';
+    btn.type = 'button';
+    btn.textContent = 'Сегодня';
+    tabsBar.insertBefore(btn, topActions);
+    btn.addEventListener('click', () => {
+      if (!isMobileLayout()) return;
+      goToTodayMobile();
+    });
+    updateTabTodayState();
+  } else if (!shouldShow && existing) {
+    existing.remove();
+  }
+}
+
 document.getElementById('mobPrev').addEventListener('click', () => navigateMobileDay(-1));
 document.getElementById('mobNext').addEventListener('click', () => navigateMobileDay(1));
-document.getElementById('tabToday').addEventListener('click', () => {
-  if (!isMobileLayout()) return;
-  goToTodayMobile();
-});
 
 // Свайпы
 (function setupSwipe() {
@@ -1514,7 +1512,6 @@ function updateNavInfo() {
   const info = document.getElementById('navInfo');
   const prevBtn = document.getElementById('navPrev');
   const nextBtn = document.getElementById('navNext');
-  const todayBtn = document.getElementById('navToday');
 
   if (currentView === 'bell' || currentView === 'mobile') {
     nav.classList.add('hidden');
@@ -1528,7 +1525,6 @@ function updateNavInfo() {
 
   prevBtn.disabled = !canNavigateTo(weekOffset - 1);
   nextBtn.disabled = !canNavigateTo(weekOffset + 1);
-  todayBtn.disabled = (weekOffset === 0);
 }
 
 function updateBanner() {
@@ -1644,7 +1640,6 @@ function goToday() {
 
 document.getElementById('navPrev').addEventListener('click', () => navigateWeek(-1));
 document.getElementById('navNext').addEventListener('click', () => navigateWeek(1));
-document.getElementById('navToday').addEventListener('click', goToday);
 document.getElementById('bannerBtn').addEventListener('click', goToday);
 
 // ================== МАСШТАБ ==================
@@ -1667,7 +1662,6 @@ function fitAll() {
 }
 
 // ================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==================
-// Берём только те .tab, у которых есть data-view — исключаем кнопку «Сегодня».
 const tabs = document.querySelectorAll('.tab[data-view]');
 const wraps = document.querySelectorAll('.diary-wrap');
 
@@ -1747,6 +1741,7 @@ window.addEventListener('load', () => {
   initMobileDate();
   renderBellPage();
   updateFsIcon();
+  ensureTodayButton();
 
   if (isMobileLayout()) {
     applyView('mobile');
