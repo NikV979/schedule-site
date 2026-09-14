@@ -90,7 +90,22 @@ function showFilesLoading() {
     </div>`;
 }
 
-// ===== ПЛИТКА ФАЙЛА (карточка-плитка для сетки) =====
+// ===== ГРУППА ПО ТИПУ ФАЙЛА =====
+function getFileTypeGroup(item) {
+  const mime = item.mime_type || '';
+  const name = item.name || '';
+  const ext = name.split('.').pop().toLowerCase();
+
+  if (mime === 'application/pdf' || ext === 'pdf') return { key: 'pdf', title: 'PDF', emoji: '📄' };
+  if (mime.includes('word') || ['doc','docx'].includes(ext)) return { key: 'doc', title: 'Документы', emoji: '📝' };
+  if (mime.includes('presentation') || mime.includes('powerpoint') || ['ppt','pptx'].includes(ext)) return { key: 'ppt', title: 'Презентации', emoji: '📊' };
+  if (mime.startsWith('image/') || ['jpg','jpeg','png','webp'].includes(ext)) return { key: 'img', title: 'Изображения', emoji: '🖼' };
+  if (mime.startsWith('text/') || ext === 'txt') return { key: 'txt', title: 'Тексты', emoji: '📃' };
+
+  return { key: 'other', title: 'Другое', emoji: '📎' };
+}
+
+// ===== ПЛИТКА ФАЙЛА =====
 function renderFileCard(item) {
   const cls = getFileIconClass(item.mime_type);
   const iconText = getFileIconText(item.mime_type, item.name);
@@ -184,47 +199,76 @@ function renderFiles() {
     return;
   }
 
-  // Без группировки — просто сетка плиток
-  if (!state.files.groupEnabled) {
+  // Режим "без группировки" — просто сетка
+  if (state.files.groupMode === 'none') {
     grid.innerHTML = `<div class="files-tiles-grid">${filtered.map(renderFileCard).join('')}</div>`;
     bindFileCardEvents(grid);
     updateFilesClearBtnState();
     return;
   }
 
-  // С группировкой по предметам
+  // Собираем группы
   const groups = new Map();
-  for (const item of filtered) {
-    const subj = getFileSubject(item);
-    if (!groups.has(subj)) groups.set(subj, []);
-    groups.get(subj).push(item);
+
+  if (state.files.groupMode === 'subject') {
+    for (const item of filtered) {
+      const subj = getFileSubject(item);
+      if (!groups.has(subj)) {
+        const style = getSubjectStyle(subj);
+        groups.set(subj, { title: subj, emoji: '📚', style, items: [] });
+      }
+      groups.get(subj).items.push(item);
+    }
+  } else if (state.files.groupMode === 'type') {
+    for (const item of filtered) {
+      const t = getFileTypeGroup(item);
+      if (!groups.has(t.key)) {
+        const typeColor = {
+          pdf:  { bg: '#C75B5B', text: '#FFFFFF' },
+          doc:  { bg: '#4A6FA5', text: '#FFFFFF' },
+          ppt:  { bg: '#C77E5B', text: '#FFFFFF' },
+          img:  { bg: '#6E9E7C', text: '#FFFFFF' },
+          txt:  { bg: '#7B8FA1', text: '#FFFFFF' },
+          other:{ bg: '#5B4BD6', text: '#FFFFFF' },
+        }[t.key];
+        groups.set(t.key, { title: t.title, emoji: t.emoji, style: typeColor, items: [] });
+      }
+      groups.get(t.key).items.push(item);
+    }
   }
 
-  const subjects = [...groups.keys()].sort((a, b) => {
-    if (a === 'Без предмета') return 1;
-    if (b === 'Без предмета') return -1;
-    return a.localeCompare(b, 'ru');
-  });
+  // Порядок групп
+  let sortedKeys;
+  if (state.files.groupMode === 'type') {
+    const order = ['pdf', 'doc', 'ppt', 'img', 'txt', 'other'];
+    sortedKeys = order.filter(k => groups.has(k));
+  } else {
+    sortedKeys = [...groups.keys()].sort((a, b) => {
+      if (a === 'Без предмета') return 1;
+      if (b === 'Без предмета') return -1;
+      return a.localeCompare(b, 'ru');
+    });
+  }
 
   let html = '';
-  for (const subj of subjects) {
-    const items = groups.get(subj);
-    const isExpanded = state.files.expandedSubjects.has(subj) || q.length > 0;
+  for (const key of sortedKeys) {
+    const group = groups.get(key);
+    if (!group) continue;
 
-    const style = getSubjectStyle(subj);
-    const light = isLightColor(style.bg);
+    const isExpanded = state.files.expandedSubjects.has(key) || q.length > 0;
+    const light = isLightColor(group.style.bg);
     const lightClass = light ? ' light' : '';
 
     html += `
-      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(subj)}"
-           style="--fs-accent: ${style.bg}; --fs-text: ${style.text};">
+      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(key)}"
+           style="--fs-accent: ${group.style.bg}; --fs-text: ${group.style.text};">
         <div class="files-subject-head${lightClass}">
           <span class="files-subject-arrow">▸</span>
-          <span class="files-subject-name">${escapeHtml(subj)}</span>
-          <span class="files-subject-count">${items.length}</span>
+          <span class="files-subject-name">${group.emoji} ${escapeHtml(group.title)}</span>
+          <span class="files-subject-count">${group.items.length}</span>
         </div>
         <div class="files-subject-list">
-          <div class="files-tiles-grid">${items.map(renderFileCard).join('')}</div>
+          <div class="files-tiles-grid">${group.items.map(renderFileCard).join('')}</div>
         </div>
       </div>`;
   }
@@ -232,9 +276,9 @@ function renderFiles() {
 
   grid.querySelectorAll('.files-subject-head').forEach(head => {
     head.addEventListener('click', () => {
-      const group = head.closest('.files-subject-group');
-      const subj = group.dataset.subject;
-      const expanded = group.classList.toggle('expanded');
+      const grp = head.closest('.files-subject-group');
+      const subj = grp.dataset.subject;
+      const expanded = grp.classList.toggle('expanded');
       if (expanded) state.files.expandedSubjects.add(subj);
       else state.files.expandedSubjects.delete(subj);
       localStorage.setItem('files-expanded-subjects', JSON.stringify([...state.files.expandedSubjects]));
@@ -608,13 +652,16 @@ if (filesSearchInput) {
   });
 }
 
-// Переключатель группировки
-const filesGroupToggle = document.getElementById('filesGroupToggle');
-if (filesGroupToggle) {
-  filesGroupToggle.checked = state.files.groupEnabled;
-  filesGroupToggle.addEventListener('change', e => {
-    state.files.groupEnabled = e.target.checked;
-    localStorage.setItem('files-group-enabled', state.files.groupEnabled ? '1' : '0');
+// Переключатель способа группировки
+const filesGroupModeEl = document.getElementById('filesGroupMode');
+if (filesGroupModeEl) {
+  filesGroupModeEl.value = state.files.groupMode || 'subject';
+
+  filesGroupModeEl.addEventListener('change', e => {
+    state.files.groupMode = e.target.value;
+    localStorage.setItem('files-group-mode', state.files.groupMode);
+    state.files.expandedSubjects.clear();
+    localStorage.removeItem('files-expanded-subjects');
     renderFiles();
   });
 }
