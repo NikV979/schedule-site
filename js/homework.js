@@ -33,13 +33,11 @@ function getSubjectStyle(subject) {
   const all = getAllSubjects();
   const idx = all.indexOf(subject);
   if (idx >= 0) return SUBJECT_PALETTE[idx % SUBJECT_PALETTE.length];
-  // Хеш для предметов не из списка
   let h = 0;
   for (let i = 0; i < subject.length; i++) h = (h * 31 + subject.charCodeAt(i)) | 0;
   return SUBJECT_PALETTE[Math.abs(h) % SUBJECT_PALETTE.length];
 }
 
-// ===== СВЕТЛЫЙ ЛИ ЦВЕТ =====
 function isLightColor(hex) {
   if (!hex) return false;
   const c = hex.replace('#', '');
@@ -54,8 +52,8 @@ function isLightColor(hex) {
 async function loadHwItemsFromCloud() {
   const { data, error } = await supabaseClient
     .from('homework')
-    .select('id, user_login, subject, task, deadline, done, position, created_at')
-    .order('position', { ascending: true });
+    .select('id, user_login, subject, task, deadline, done, created_at')
+    .order('created_at', { ascending: true });
 
   if (error) {
     console.error('Ошибка загрузки домашки:', error);
@@ -66,7 +64,7 @@ async function loadHwItemsFromCloud() {
   state.hw.items = data || [];
 }
 
-// ===== ФИЛЬТР =====
+// ===== ВАЖНОЕ =====
 function isImportant(hw) {
   if (!hw.deadline) return false;
   if (hw.done) return false;
@@ -82,15 +80,14 @@ function renderHomework() {
   const empty = document.getElementById('hwEmpty');
   if (!grid || !empty) return;
 
-  const subjects = getAllSubjects();
-  const q = ''; // поиска пока нет
+  // Защита на случай, если state.hw.expandedSubjects не создан
+  if (!state.hw.expandedSubjects) state.hw.expandedSubjects = new Set();
+  if (typeof state.hw.onlyImportant !== 'boolean') state.hw.onlyImportant = false;
 
-  if (!state.hw.items.length && !state.hw.onlyImportant) {
-    // Ничего нет — показываем ВСЕ карточки пустыми, чтобы можно было добавить
-  }
+  const subjects = getAllSubjects();
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
   let html = '';
-  const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
   for (const subject of subjects) {
     const items = state.hw.items.filter(it => it.subject === subject);
@@ -105,7 +102,6 @@ function renderHomework() {
     const lightClass = light ? ' light' : '';
     const isEmpty = items.length === 0;
 
-    // На мобилке карточки свёрнуты по умолчанию (expanded только если в состоянии)
     const isExpanded = state.hw.expandedSubjects.has(subject);
 
     html += `
@@ -129,18 +125,14 @@ function renderHomework() {
 
   grid.innerHTML = html;
 
-  // ===== ОБРАБОТЧИКИ =====
-
-  // Клик по шапке карточки
+  // ===== Клик по шапке карточки =====
   grid.querySelectorAll('.hw-card-head').forEach(head => {
     head.addEventListener('click', () => {
       const card = head.closest('.hw-card');
       const subj = card.dataset.subject;
 
-      // На мобилке:
-      // - Пустая карточка → открыть модалку добавления
-      // - Карточка с заданиями → раскрыть/свернуть
       if (isMobile) {
+        // Пустая — модалка. С заданиями — раскрыть/свернуть.
         if (card.classList.contains('hw-card-empty')) {
           openHwModal(subj);
           return;
@@ -151,21 +143,20 @@ function renderHomework() {
         return;
       }
 
-      // На десктопе: клик = открыть модалку добавления
+      // Десктоп — модалка
       openHwModal(subj);
     });
   });
 
-  // Клик по кнопке «+ Добавить задание» внутри карточки
+  // ===== Кнопка «+ Добавить задание» внутри карточки =====
   grid.querySelectorAll('.hw-add-item-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const subj = btn.dataset.addSubject;
-      openHwModal(subj);
+      openHwModal(btn.dataset.addSubject);
     });
   });
 
-  // Клик по заданию — открыть контекстное меню
+  // ===== Клик по заданию — контекстное меню =====
   grid.querySelectorAll('.hw-item').forEach(item => {
     item.addEventListener('click', e => {
       e.stopPropagation();
@@ -178,7 +169,7 @@ function renderHomework() {
     });
   });
 
-  // Бейдж
+  // ===== Бейдж =====
   const badge = document.getElementById('hwTabBadge');
   if (badge) badge.textContent = state.hw.items.length;
 }
@@ -276,18 +267,13 @@ async function addHwItem(subject, task, deadline) {
     return false;
   }
   try {
-    const maxPos = state.hw.items
-      .filter(h => h.subject === subject)
-      .reduce((m, h) => Math.max(m, h.position || 0), 0);
-
     const { error } = await supabaseClient.from('homework').insert({
       user_id: state.currentUserId,
       user_login: state.currentUser,
       subject,
       task,
       deadline: deadline || null,
-      done: false,
-      position: maxPos + 1
+      done: false
     });
     if (error) throw error;
 
