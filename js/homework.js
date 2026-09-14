@@ -72,7 +72,7 @@ function isDeadlineSoon(iso) {
   return diff <= 2;
 }
 
-// Определяет группу срочности: 'overdue' | 'soon' | 'week' | 'later' | 'nodate'
+// Группа срочности: 'overdue' | 'soon' | 'week' | 'later' | 'nodate'
 function getUrgencyGroup(item) {
   if (!item.deadline) return 'nodate';
   const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
@@ -101,7 +101,7 @@ function updateHwAddBtnState() {
   const clearBtn = document.getElementById('hwClearBtn');
   if (btn) {
     if (state.currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
-    else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
+    else { btn.disabled = false; btn.title = 'Войдите, чтобы добавлять задания'; }
   }
   if (clearBtn) {
     if (state.currentUser && state.hw.items.length > 0) { clearBtn.disabled = false; clearBtn.title = 'Удалить все задания'; }
@@ -133,9 +133,7 @@ function updateHwDashboard() {
   const elWeek = document.getElementById('hwStatWeek');
   if (!elTotal || !elUrgent || !elWeek) return;
 
-  const now = new Date(); now.setHours(0,0,0,0);
   let urgent = 0, week = 0;
-
   for (const item of state.hw.items) {
     const g = getUrgencyGroup(item);
     if (g === 'overdue' || g === 'soon') urgent++;
@@ -155,7 +153,6 @@ function renderHomework() {
 
   if (state.hw.loading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
-  // Счётчик в заголовке
   if (countEl) {
     const n = state.hw.items.length;
     let word = 'заданий';
@@ -174,7 +171,6 @@ function renderHomework() {
   }
   empty.classList.remove('active');
 
-  // Группируем по срочности
   const byUrgency = { overdue: [], soon: [], week: [], later: [], nodate: [] };
   for (const item of state.hw.items) {
     byUrgency[getUrgencyGroup(item)].push(item);
@@ -189,7 +185,6 @@ function renderHomework() {
 
     const meta = URGENCY_META[groupKey];
 
-    // Внутри группы — сортировка по предметам, потом по дате
     const bySubject = {};
     for (const item of groupItems) {
       if (!bySubject[item.subject]) bySubject[item.subject] = [];
@@ -257,7 +252,6 @@ function renderHomework() {
 
   grid.innerHTML = html;
 
-  // Обработчики — как раньше
   grid.querySelectorAll('.hw-card-head').forEach(head => {
     head.addEventListener('click', () => {
       const card = head.closest('.hw-card');
@@ -291,7 +285,11 @@ function renderHomework() {
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      if (!state.currentUser) { showToast('Войдите, чтобы удалять'); return; }
+      if (!state.currentUser) {
+        showToast('Войдите, чтобы удалять задания');
+        if (typeof openAuthModal === 'function') openAuthModal();
+        return;
+      }
       const id = btn.dataset.id;
       const item = state.hw.items.find(x => String(x.id) === String(id));
       if (!item) return;
@@ -318,9 +316,18 @@ function fillSubjectSelect() {
   const subjects = getAllSubjects();
   hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 }
+
 function openHwModal() {
-  if (!state.currentUser) { showToast('Войдите, чтобы добавлять'); openAuthModal(); return; }
-  fillSubjectSelect();
+  if (!hwModal) {
+    console.error('Модалка #hwModal не найдена в index.html');
+    return;
+  }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы добавлять задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
+  try { fillSubjectSelect(); } catch (_) {}
   hwTaskEl.value = '';
   hwDeadlineEl.value = '';
   hwModal.classList.add('active');
@@ -329,7 +336,11 @@ function openHwModal() {
 function closeHwModal() { hwModal.classList.remove('active'); }
 
 async function saveHwItem() {
-  if (!state.currentUser) { showToast('Войдите'); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы добавлять задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
   const subject = hwSubjectEl.value.trim();
   const task = hwTaskEl.value.trim();
   const deadline = hwDeadlineEl.value || null;
@@ -337,7 +348,12 @@ async function saveHwItem() {
   if (!task) { showToast('Введите текст'); hwTaskEl.focus(); return; }
 
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session || !session.user) { showToast('Сессия истекла'); closeHwModal(); openAuthModal(); return; }
+  if (!session || !session.user) {
+    showToast('Сессия истекла, войдите заново');
+    closeHwModal();
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
 
   const saveBtn = document.getElementById('hwSave');
   saveBtn.disabled = true; saveBtn.textContent = 'Сохраняю…';
@@ -357,7 +373,11 @@ async function saveHwItem() {
 }
 
 async function clearAllHw() {
-  if (!state.currentUser) { showToast('Войдите'); openAuthModal(); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы очистить задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
   if (state.hw.items.length === 0) { showToast('Нет заданий'); return; }
   if (!confirm(`Удалить ВСЕ задания (${state.hw.items.length})?\n\nНельзя отменить.`)) return;
 
@@ -377,14 +397,30 @@ async function clearAllHw() {
   showToast('Все задания удалены');
 }
 
-document.getElementById('hwAddBtn').addEventListener('click', openHwModal);
+// ===== ОБРАБОТЧИКИ КНОПОК =====
+const hwAddBtn = document.getElementById('hwAddBtn');
+if (hwAddBtn) {
+  hwAddBtn.addEventListener('click', () => {
+    if (!state.currentUser) {
+      showToast('Войдите, чтобы добавлять задания');
+      if (typeof openAuthModal === 'function') openAuthModal();
+      return;
+    }
+    openHwModal();
+  });
+}
+
 document.getElementById('hwClearBtn').addEventListener('click', clearAllHw);
 document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
 document.getElementById('hwCancel').addEventListener('click', closeHwModal);
 document.getElementById('hwSave').addEventListener('click', saveHwItem);
-hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
+
+if (hwModal) {
+  hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
+}
+
 document.addEventListener('keydown', e => {
-  if (!hwModal.classList.contains('active')) return;
+  if (!hwModal || !hwModal.classList.contains('active')) return;
   if (e.key === 'Escape') closeHwModal();
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveHwItem();
 });
