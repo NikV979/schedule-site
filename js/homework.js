@@ -74,19 +74,6 @@ function isDeadlineSoon(iso) {
 
 function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
 
-function updateHwAddBtnState() {
-  const btn = document.getElementById('hwAddBtn');
-  const clearBtn = document.getElementById('hwClearBtn');
-  if (btn) {
-    if (state.currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
-    else { btn.disabled = false; btn.title = 'Войдите, чтобы добавлять задания'; }
-  }
-  if (clearBtn) {
-    if (state.currentUser && state.hw.items.length > 0) { clearBtn.disabled = false; clearBtn.title = 'Удалить все задания'; }
-    else { clearBtn.disabled = true; clearBtn.title = 'Нет заданий для удаления'; }
-  }
-}
-
 async function loadHwItemsFromCloud() {
   state.hw.loading = true;
   const { data, error } = await supabaseClient
@@ -101,7 +88,6 @@ async function loadHwItemsFromCloud() {
     state.hw.items = data || [];
   }
   state.hw.loading = false;
-  updateHwAddBtnState();
 }
 
 // ===== Счётчик в шапке =====
@@ -126,7 +112,6 @@ function renderHomework() {
   if (allSubjects.length === 0) {
     grid.innerHTML = '';
     empty.classList.add('active');
-    updateHwAddBtnState();
     return;
   }
 
@@ -211,8 +196,6 @@ function renderHomework() {
       openHwContextMenu(e.clientX, e.clientY, id);
     });
   });
-
-  updateHwAddBtnState();
 }
 
 // ===== Открытие модалки с предзаполненным предметом =====
@@ -308,11 +291,11 @@ function toggleHwDone(id) {
   renderHomework();
 }
 
+// Удаление — без подтверждения
 async function deleteHwItem(id) {
   if (!state.currentUser) { showToast('Войдите'); return; }
   const item = state.hw.items.find(x => String(x.id) === String(id));
   if (!item) return;
-  if (!confirm(`Удалить задание?\n\n«${item.task.slice(0, 80)}»`)) return;
 
   const { error } = await supabaseClient.from('homework').delete().eq('id', id);
   if (error) { console.error(error); showToast('Ошибка удаления'); return; }
@@ -368,7 +351,7 @@ function fillSubjectSelect() {
 }
 
 function openHwModal() {
-  if (!hwModal) { console.error('Модалка #hwModal не найдена'); return; }
+  if (!hwModal) return;
   if (!state.currentUser) {
     showToast('Войдите, чтобы добавлять задания');
     if (typeof openAuthModal === 'function') openAuthModal();
@@ -438,46 +421,7 @@ async function saveHwItem() {
   showToast(isEdit ? 'Задание обновлено' : 'Задание добавлено');
 }
 
-async function clearAllHw() {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы очистить задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
-  if (state.hw.items.length === 0) { showToast('Нет заданий'); return; }
-  if (!confirm(`Удалить ВСЕ задания (${state.hw.items.length})?\n\nНельзя отменить.`)) return;
-
-  const btn = document.getElementById('hwClearBtn');
-  const old = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Удаляю…';
-
-  const { error } = await supabaseClient.from('homework').delete().eq('user_id', state.currentUserId);
-  btn.textContent = old;
-
-  if (error) { console.error(error); showToast('Ошибка удаления'); updateHwAddBtnState(); return; }
-
-  state.hw.items.forEach(item => localStorage.removeItem('hw-done-' + item.id));
-  state.hw.items = [];
-  renderHomework();
-  showToast('Все задания удалены');
-}
-
-// ===== ОБРАБОТЧИКИ =====
-const hwAddBtn = document.getElementById('hwAddBtn');
-if (hwAddBtn) {
-  hwAddBtn.addEventListener('click', () => {
-    if (!state.currentUser) {
-      showToast('Войдите, чтобы добавлять задания');
-      if (typeof openAuthModal === 'function') openAuthModal();
-      return;
-    }
-    openHwModal();
-  });
-}
-
-const hwClearBtnEl = document.getElementById('hwClearBtn');
-if (hwClearBtnEl) hwClearBtnEl.addEventListener('click', clearAllHw);
-
+// ===== ОБРАБОТЧИКИ МОДАЛКИ =====
 const hwModalCloseEl = document.getElementById('hwModalClose');
 if (hwModalCloseEl) hwModalCloseEl.addEventListener('click', closeHwModal);
 
