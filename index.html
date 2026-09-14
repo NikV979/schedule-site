@@ -78,12 +78,26 @@
 
   <div class="tabs">
     <button class="menu-btn" id="menuBtn" title="Меню" type="button">☰</button>
+
     <div class="tabs-center">
       <div class="tab tab-desktop" data-view="even">Чётная неделя</div>
       <div class="tab tab-desktop" data-view="odd">Нечётная неделя</div>
       <div class="tab tab-mobile" data-view="mobile">День</div>
       <div class="tab" data-view="bell">Расписание звонков</div>
     </div>
+
+    <!-- Заголовок для вкладки «Домашка» — показывается только когда открыта домашка -->
+    <div class="tabs-title" id="tabsTitle">
+      <span class="tabs-title-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+      </span>
+      <span class="tabs-title-text">Домашка</span>
+      <span class="tabs-badge" id="hwTabBadge">0</span>
+    </div>
+
     <div class="top-actions">
       <button class="action-btn btn-auth" id="authBtn" title="Войти" type="button">
         <span class="btn-auth-icon" id="authBtnIcon">🔐</span>
@@ -143,38 +157,14 @@
 
     <div class="diary-wrap" data-view="homework">
       <div class="homework-page">
-        <div class="hw-dashboard" id="hwDashboard">
-          <div class="hw-stat">
-            <div class="hw-stat-value" id="hwStatTotal">0</div>
-            <div class="hw-stat-label">Всего заданий</div>
-          </div>
-          <div class="hw-stat hw-stat-urgent">
-            <div class="hw-stat-value" id="hwStatUrgent">0</div>
-            <div class="hw-stat-label">Срочно сдать</div>
-          </div>
-          <div class="hw-stat">
-            <div class="hw-stat-value" id="hwStatWeek">0</div>
-            <div class="hw-stat-label">На этой неделе</div>
-          </div>
+        <!-- Дашборд убран. Остаётся только строка с кнопками -->
+        <div class="hw-actions-row">
+          <button class="hw-clear-btn" id="hwClearBtn" type="button">Очистить всё</button>
+          <button class="hw-add-btn" id="hwAddBtn" type="button">
+            <span>+</span> Добавить задание
+          </button>
         </div>
-        <div class="hw-toolbar">
-          <div class="hw-title">
-            <span class="title-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </span>
-            Домашка
-            <span class="hw-title-count" id="hwTotalCount">0 заданий</span>
-          </div>
-          <div class="hw-actions">
-            <button class="hw-clear-btn" id="hwClearBtn" type="button">Очистить всё</button>
-            <button class="hw-add-btn" id="hwAddBtn" type="button">
-              <span>+</span> Добавить задание
-            </button>
-          </div>
-        </div>
+
         <div class="hw-grid" id="hwGrid"></div>
         <div class="hw-empty" id="hwEmpty">
           <div class="hw-empty-icon">📝</div>
