@@ -272,7 +272,11 @@ async function downloadFileById(id) {
 }
 
 async function deleteFileById(id) {
-  if (!state.currentUser) { showToast('Войдите, чтобы удалять файлы'); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы удалять файлы');
+    openAuthModal();
+    return;
+  }
   const item = state.files.items.find(x => String(x.id) === String(id));
   if (!item) return;
   if (!confirm(`Удалить файл?\n\n«${item.name}»`)) return;
@@ -296,7 +300,11 @@ async function deleteFileById(id) {
 }
 
 async function clearAllFiles() {
-  if (!state.currentUser) { showToast('Войдите, чтобы очистить файлы'); openAuthModal(); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы очистить файлы');
+    openAuthModal();
+    return;
+  }
   const ownFiles = state.files.items.filter(f => f.user_login === state.currentUser);
   if (ownFiles.length === 0) { showToast('Нет файлов для удаления'); return; }
   if (!confirm(`Удалить ВСЕ ваши файлы (${ownFiles.length})?\n\nЭто действие нельзя отменить.`)) return;
@@ -466,14 +474,19 @@ let pickedFile = null;
 function fillFileSubjectSelect() {
   const sel = document.getElementById('fileSubject');
   if (!sel) return;
-  const subjects = getAllSubjects();
+  let subjects = [];
+  try { subjects = getAllSubjects(); } catch (_) { subjects = []; }
   sel.innerHTML =
     `<option value="">— Без предмета —</option>` +
     subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 }
 
 function openFileModal() {
-  if (!state.currentUser) { showToast('Войдите, чтобы загружать файлы'); openAuthModal(); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы загружать файлы');
+    openAuthModal();
+    return;
+  }
   pickedFile = null;
   fileInput.value = '';
   fileDisplayName.value = '';
@@ -526,7 +539,11 @@ fileInput.addEventListener('change', e => {
 });
 
 async function uploadPickedFile() {
-  if (!state.currentUser || !state.currentUserId) { showToast('Войдите в аккаунт'); return; }
+  if (!state.currentUser || !state.currentUserId) {
+    showToast('Войдите в аккаунт, чтобы загружать файлы');
+    openAuthModal();
+    return;
+  }
   if (!pickedFile) { showToast('Сначала выберите файл'); return; }
 
   const saveBtn = document.getElementById('fileSave');
