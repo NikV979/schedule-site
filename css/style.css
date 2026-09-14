@@ -190,11 +190,29 @@ html, body {
   display: inline-block;
 }
 
+/* ============== ПОДСКАЗКА В ШАПКЕ ДОМАШКИ (только ПК) ============== */
+.hw-hint-add {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-light);
+  margin-left: 6px;
+}
+
 @media (max-width: 900px) {
   .header-user-name {
     font-size: 13px;
     max-width: 110px;
     margin-right: 4px;
+  }
+  .hw-hint-add {
+    display: none !important;
   }
 }
 @media (max-width: 500px) {
@@ -1298,6 +1316,11 @@ tr:last-child td { border-bottom: none; }
   opacity: 0.7;
 }
 
+/* Кнопка «+ Добавить задание» — по умолчанию скрыта (показывается только на мобилке) */
+.hw-add-item-btn {
+  display: none;
+}
+
 .hw-item {
   display: flex;
   align-items: flex-start;
@@ -2313,6 +2336,9 @@ tr:last-child td { border-bottom: none; }
   /* 1. Приветствие — убрать */
   .header-user-name { display: none !important; }
 
+  /* Хинт в шапке файлов — скрыть */
+  .files-tabs-hint { display: none !important; }
+
   /* 2. Фото профиля из шапки — убрать */
   .btn-auth { display: none !important; }
 
@@ -2556,7 +2582,7 @@ tr:last-child td { border-bottom: none; }
     padding: 0 12px;
   }
 
-  /* Кнопка «+ добавить» внутри раскрытой карточки */
+  /* Кнопка «+ добавить» внутри раскрытой карточки — на мобилке показываем */
   .hw-card .hw-add-item-btn {
     display: flex !important;
     align-items: center;
