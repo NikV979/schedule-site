@@ -2498,3 +2498,39 @@
     .hw-item .hw-check { display: none !important; }
     .hw-item .hw-item-del { display: none !important; }
   }
+  /* ===== Контекстное меню для задания ===== */
+  .hw-ctx-menu {
+    position: fixed;
+    z-index: 900;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 12px 40px rgba(20, 20, 50, 0.25);
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+    animation: ctxPop 0.12s ease-out;
+  }
+
+  @keyframes ctxPop {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .hw-ctx-btn {
+    padding: 9px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .hw-ctx-btn:hover { background: var(--bg-surface-2); }
+  .hw-ctx-btn.danger { color: var(--accent-odd); }
+  .hw-ctx-btn.danger:hover { background: rgba(217, 100, 74, 0.1); }
