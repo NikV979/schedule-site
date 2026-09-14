@@ -330,6 +330,15 @@
     font-weight: 500;
   }
 
+  .avatar-name-field {
+    width: 100%;
+    margin-top: 4px;
+  }
+  .avatar-name-field .hw-field-label {
+    margin-top: 0;
+    margin-bottom: 6px;
+  }
+
   .avatar-modal-actions {
     display: flex;
     gap: 10px;
