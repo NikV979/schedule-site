@@ -247,7 +247,6 @@ async function submitAuth() {
       openNameModal();
     } else {
       showWelcomeBanner(name);
-      showToast('Добро пожаловать, ' + name + '!');
     }
   } else {
     authError.textContent = res.msg;
@@ -503,7 +502,6 @@ async function saveUserName() {
   closeNameModal();
   await updateAuthUI();
   showWelcomeBanner(res.name);
-  showToast('Приятно познакомиться, ' + res.name + '!');
 }
 
 if (nameModal) {
