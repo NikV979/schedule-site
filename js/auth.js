@@ -84,6 +84,25 @@ async function setUserName(name) {
   return { ok: true, name: clean };
 }
 
+// ========== ПРИВЕТСТВИЕ НА ГЛАВНОЙ ==========
+let welcomeTimer = null;
+
+function showWelcomeBanner(name) {
+  const overlay = document.getElementById('welcomeOverlay');
+  const textEl = document.getElementById('welcomeText');
+  if (!overlay || !textEl) return;
+  if (!name) return;
+
+  clearTimeout(welcomeTimer);
+
+  textEl.textContent = 'Привет, ' + name;
+  overlay.classList.add('active');
+
+  welcomeTimer = setTimeout(() => {
+    overlay.classList.remove('active');
+  }, 4000);
+}
+
 // ========== ЛОГИН / ЛОГАУТ ==========
 function loginFromEmail(email) {
   if (!email) return null;
@@ -105,7 +124,11 @@ async function refreshUser() {
   if (state.currentUserId) {
     subscribeHwRealtime();
     const name = await getUserName();
-    if (!name) openNameModal();
+    if (!name) {
+      openNameModal();
+    } else {
+      showWelcomeBanner(name);
+    }
   } else {
     unsubscribeHwRealtime();
   }
@@ -223,6 +246,7 @@ async function submitAuth() {
     if (!name) {
       openNameModal();
     } else {
+      showWelcomeBanner(name);
       showToast('Добро пожаловать, ' + name + '!');
     }
   } else {
@@ -478,6 +502,7 @@ async function saveUserName() {
 
   closeNameModal();
   await updateAuthUI();
+  showWelcomeBanner(res.name);
   showToast('Приятно познакомиться, ' + res.name + '!');
 }
 
