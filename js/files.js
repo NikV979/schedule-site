@@ -176,14 +176,13 @@ function updateFilesClearBtnState() {
   btn.disabled = !hasOwn;
 }
 
-// ===== СОБИРАЕМ СПИСОК ВСЕХ ПРЕДМЕТОВ ДЛЯ ОТОБРАЖЕНИЯ ВСЕГДА 9 КАРТОЧЕК =====
+// ===== СПИСОК ВСЕХ ПРЕДМЕТОВ (для сетки как в домашке) =====
 function getAllSubjectsForFiles() {
   let subjects = [];
   try {
     if (typeof getAllSubjects === 'function') subjects = getAllSubjects();
   } catch (_) {}
   if (!subjects || subjects.length === 0) {
-    // Заглушка — чтобы не было пустого экрана
     subjects = [
       'КОНЦ. СОВР. ЕСТ-ЗН',
       'ОСН. МЕНЕДЖМЕНТ',
@@ -197,6 +196,20 @@ function getAllSubjectsForFiles() {
     ];
   }
   return subjects;
+}
+
+// ===== КОРОТКАЯ МЕТКА ПО ПРЕДМЕТУ (без обводки, просто текст) =====
+function getFileEmojiBySubject(subj) {
+  if (!subj || subj === 'Без предмета') return 'FILE';
+  const s = subj.toUpperCase();
+  if (s.includes('ПСИХ')) return 'ПСИХ';
+  if (s.includes('МЕНЕДЖ')) return 'МЕН';
+  if (s.includes('ЭКОН')) return 'ЭКОН';
+  if (s.includes('ПЕД')) return 'ПЕД';
+  if (s.includes('ЕСТ')) return 'ЕСТ';
+  if (s.includes('СПОРТ') || s.includes('ФК')) return 'СПОРТ';
+  if (s.includes('УПР')) return 'УПР';
+  return s.slice(0, 4).replace(/[^А-ЯA-Z0-9]/g, '') || 'FILE';
 }
 
 // ===== ОСНОВНОЙ РЕНДЕР =====
@@ -237,10 +250,12 @@ function renderFiles() {
     return;
   }
 
-  // ===== РЕЖИМ "БЕЗ ГРУППИРОВКИ" =====
+  // ===== РЕЖИМ "БЕЗ ГРУППИРОВКИ" — маленькие панельки =====
   if (state.files.groupMode === 'none') {
     grid.innerHTML = filtered.length
-      ? filtered.map(renderFileCard).join('')
+      ? `<div class="files-flat-grid">
+           ${filtered.map(item => `<div class="files-flat-tile">${renderFileCard(item)}</div>`).join('')}
+         </div>`
       : `<div class="files-empty active" style="padding:40px 20px;grid-column:1/-1;">
            <div class="files-empty-text">Файлов нет</div>
          </div>`;
@@ -259,11 +274,10 @@ function renderFiles() {
       const style = getSubjectStyle(subj);
       groups.set(subj, { title: subj, style, items: [], emoji: getFileEmojiBySubject(subj) });
     }
-    // Файлы без предмета — отдельная группа
+    // Файлы без предмета или с предметом вне списка — отдельные группы
     for (const item of filtered) {
       const subj = getFileSubject(item);
       if (!groups.has(subj)) {
-        // Файл с предметом, которого нет в списке (например, "Без предмета")
         const style = getSubjectStyle(subj);
         groups.set(subj, { title: subj, style, items: [], emoji: getFileEmojiBySubject(subj) });
       }
@@ -309,7 +323,6 @@ function renderFiles() {
            data-subject="${escapeHtml(key)}"
            style="--fs-accent: ${group.style.bg}; --fs-text: ${group.style.text};">
         <div class="files-card-head${lightClass}">
-          <span class="files-card-arrow">▸</span>
           <span class="files-card-emoji">${escapeHtml(emojiShort)}</span>
           <span class="files-card-name">${escapeHtml(group.title)}</span>
           <span class="files-card-count">${group.items.length}</span>
@@ -323,7 +336,7 @@ function renderFiles() {
   }
   grid.innerHTML = html;
 
-  // Клики по шапкам — раскрыть/свернуть
+  // Клики по шапкам — раскрыть/свернуть (у пустых не реагируем)
   grid.querySelectorAll('.files-card-head').forEach(head => {
     head.addEventListener('click', () => {
       const grp = head.closest('.files-card');
@@ -338,20 +351,6 @@ function renderFiles() {
 
   bindFileCardEvents(grid);
   updateFilesClearBtnState();
-}
-
-// ===== ЭМОДЗИ-АББРЕВИАТУРА ПО ПРЕДМЕТУ =====
-function getFileEmojiBySubject(subj) {
-  if (!subj || subj === 'Без предмета') return 'FILE';
-  const s = subj.toUpperCase();
-  if (s.includes('ПСИХ')) return 'ПСИХ';
-  if (s.includes('МЕНЕДЖ')) return 'МЕН';
-  if (s.includes('ЭКОН')) return 'ЭКОН';
-  if (s.includes('ПЕД')) return 'ПЕД';
-  if (s.includes('ЕСТ')) return 'ЕСТ';
-  if (s.includes('СПОРТ') || s.includes('ФК')) return 'СПОРТ';
-  if (s.includes('УПР')) return 'УПР';
-  return s.slice(0, 4).replace(/[^А-ЯA-Z0-9]/g, '') || 'FILE';
 }
 
 // ===== СКАЧИВАНИЕ / УДАЛЕНИЕ =====
