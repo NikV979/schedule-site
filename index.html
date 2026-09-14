@@ -1554,6 +1554,108 @@
     margin-top: 4px;
   }
 
+  /* Управление списком файлов */
+  .files-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .files-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+  }
+  .files-search:focus { border-color: #6C5CE7; background: var(--bg-surface); }
+
+  .files-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .files-group-toggle input { accent-color: #6C5CE7; width: 16px; height: 16px; }
+
+  .files-subject-group {
+    border: 2px solid var(--border-main);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+
+  .files-subject-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-surface-2);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 2px solid var(--border-light);
+  }
+  .files-subject-head:hover { filter: brightness(0.98); }
+
+  .files-subject-arrow {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .files-subject-group.expanded .files-subject-arrow { transform: rotate(90deg); }
+
+  .files-subject-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    word-break: break-word;
+  }
+
+  .files-subject-count {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .files-subject-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.2s ease;
+  }
+  .files-subject-group.expanded .files-subject-list {
+    max-height: 20000px;
+    padding: 10px;
+  }
+  .files-subject-list .file-card { border-width: 1px; }
+
+  .files-list-flat {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   /* ============== ПРОСМОТРЩИК ФАЙЛОВ ============== */
 
   .file-viewer-overlay {
@@ -1940,6 +2042,16 @@
           Можно загружать PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT. Максимум 25 МБ на файл.<br>
           Файлы видны только вам. Кликните по имени файла, чтобы открыть его в просмотрщике.
         </div>
+
+        <div class="files-controls">
+          <input type="search" id="filesSearchInput" class="files-search"
+                 placeholder="Поиск по названию файла…" autocomplete="off">
+          <label class="files-group-toggle">
+            <input type="checkbox" id="filesGroupToggle" checked>
+            <span>Группировать по предметам</span>
+          </label>
+        </div>
+
         <div class="files-grid" id="filesGrid"></div>
         <div class="files-empty" id="filesEmpty">
           <div class="files-empty-icon">📁</div>
@@ -1992,6 +2104,9 @@
 
         <label class="hw-field-label" for="fileDisplayName" style="margin-top: 16px;">Название (необязательно)</label>
         <input class="hw-input" id="fileDisplayName" type="text" placeholder="Например: Конспект по матану, лекция 3" autocomplete="off" maxlength="120">
+
+        <label class="hw-field-label" for="fileSubject" style="margin-top: 16px;">Предмет</label>
+        <select class="hw-select" id="fileSubject"></select>
       </div>
       <div class="hw-modal-foot">
         <button class="hw-btn hw-btn-cancel" id="fileCancel" type="button">Отмена</button>
@@ -3014,6 +3129,11 @@ const FILE_ALLOWED_MIME = [
 
 let filesItems = [];
 let filesLoading = false;
+const expandedFileSubjects = new Set(
+  JSON.parse(localStorage.getItem('files-expanded-subjects') || '[]')
+);
+let filesSearchQuery = '';
+let filesGroupEnabled = localStorage.getItem('files-group-enabled') !== '0';
 
 function getFileIconClass(mime) {
   if (!mime) return 'other';
@@ -3064,7 +3184,7 @@ async function loadFilesFromCloud() {
   filesLoading = true;
   const { data, error } = await supabaseClient
     .from('files')
-    .select('id, user_id, user_login, name, size, mime_type, storage_path, created_at')
+    .select('id, user_id, user_login, name, size, mime_type, storage_path, subject, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -3077,6 +3197,55 @@ async function loadFilesFromCloud() {
   filesLoading = false;
 }
 
+function renderFileCard(item) {
+  const cls = getFileIconClass(item.mime_type);
+  const iconText = getFileIconText(item.mime_type, item.name);
+  const canDelete = currentUser && item.user_login === currentUser;
+  const safeName = escapeHtml(item.name);
+  return `
+    <div class="file-card" data-id="${item.id}">
+      <div class="file-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
+      <div class="file-info">
+        <div class="file-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
+        <div class="file-meta">
+          <span>${formatSize(item.size)}</span>
+          <span>·</span>
+          <span>${formatFileDate(item.created_at)}</span>
+        </div>
+      </div>
+      <div class="file-actions">
+        <button class="file-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
+        ${canDelete ? `<button class="file-btn file-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function bindFileCardEvents(root) {
+  root.querySelectorAll('[data-open-id]').forEach(el => {
+    el.addEventListener('click', async e => {
+      e.stopPropagation();
+      await openFileViewer(el.dataset.openId);
+    });
+  });
+  root.querySelectorAll('[data-download-id]').forEach(el => {
+    el.addEventListener('click', async e => {
+      e.stopPropagation();
+      await downloadFileById(el.dataset.downloadId);
+    });
+  });
+  root.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      await deleteFileById(btn.dataset.deleteId);
+    });
+  });
+}
+
+function getFileSubject(item) {
+  const s = (item.subject || '').trim();
+  return s || 'Без предмета';
+}
+
 function renderFiles() {
   const grid = document.getElementById('filesGrid');
   const empty = document.getElementById('filesEmpty');
@@ -3087,7 +3256,6 @@ function renderFiles() {
   if (filesLoading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
   const totalSize = filesItems.reduce((s, f) => s + (f.size || 0), 0);
-
   if (countEl) {
     const n = filesItems.length;
     let word = 'файлов';
@@ -3095,9 +3263,7 @@ function renderFiles() {
     else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'файла';
     countEl.textContent = `${n} ${word}`;
   }
-  if (sizeEl) {
-    sizeEl.textContent = formatSize(totalSize);
-  }
+  if (sizeEl) sizeEl.textContent = formatSize(totalSize);
 
   if (filesItems.length === 0) {
     grid.innerHTML = '';
@@ -3106,55 +3272,68 @@ function renderFiles() {
   }
   empty.classList.remove('active');
 
-  let html = '';
-  for (const item of filesItems) {
-    const cls = getFileIconClass(item.mime_type);
-    const iconText = getFileIconText(item.mime_type, item.name);
-    const canDelete = currentUser && item.user_login === currentUser;
-    const safeName = escapeHtml(item.name);
+  const q = filesSearchQuery.trim().toLowerCase();
+  const filtered = q
+    ? filesItems.filter(f => (f.name || '').toLowerCase().includes(q))
+    : filesItems;
 
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="files-empty active" style="padding:40px 20px;">
+      <div class="files-empty-text">Ничего не найдено</div>
+      <div class="files-empty-hint">Попробуйте изменить запрос.</div>
+    </div>`;
+    return;
+  }
+
+  if (!filesGroupEnabled) {
+    grid.innerHTML = `<div class="files-list-flat">${filtered.map(renderFileCard).join('')}</div>`;
+    bindFileCardEvents(grid);
+    return;
+  }
+
+  const groups = new Map();
+  for (const item of filtered) {
+    const subj = getFileSubject(item);
+    if (!groups.has(subj)) groups.set(subj, []);
+    groups.get(subj).push(item);
+  }
+
+  const subjects = [...groups.keys()].sort((a, b) => {
+    if (a === 'Без предмета') return 1;
+    if (b === 'Без предмета') return -1;
+    return a.localeCompare(b, 'ru');
+  });
+
+  let html = '';
+  for (const subj of subjects) {
+    const items = groups.get(subj);
+    const isExpanded = expandedFileSubjects.has(subj) || q.length > 0;
     html += `
-      <div class="file-card" data-id="${item.id}">
-        <div class="file-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
-        <div class="file-info">
-          <div class="file-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
-          <div class="file-meta">
-            <span>${formatSize(item.size)}</span>
-            <span>·</span>
-            <span>${formatFileDate(item.created_at)}</span>
-          </div>
+      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(subj)}">
+        <div class="files-subject-head">
+          <span class="files-subject-arrow">▸</span>
+          <span class="files-subject-name">📚 ${escapeHtml(subj)}</span>
+          <span class="files-subject-count">${items.length}</span>
         </div>
-        <div class="file-actions">
-          <button class="file-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
-          ${canDelete ? `<button class="file-btn file-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
+        <div class="files-subject-list">
+          ${items.map(renderFileCard).join('')}
         </div>
       </div>`;
   }
   grid.innerHTML = html;
 
-  // Клик по имени/иконке — открыть просмотрщик
-  grid.querySelectorAll('[data-open-id]').forEach(el => {
-    el.addEventListener('click', async e => {
-      e.stopPropagation();
-      await openFileViewer(el.dataset.openId);
+  grid.querySelectorAll('.files-subject-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const group = head.closest('.files-subject-group');
+      const subj = group.dataset.subject;
+      const expanded = group.classList.toggle('expanded');
+      if (expanded) expandedFileSubjects.add(subj);
+      else expandedFileSubjects.delete(subj);
+      localStorage.setItem('files-expanded-subjects', JSON.stringify([...expandedFileSubjects]));
     });
   });
 
-  // Кнопка «Скачать»
-  grid.querySelectorAll('[data-download-id]').forEach(el => {
-    el.addEventListener('click', async e => {
-      e.stopPropagation();
-      await downloadFileById(el.dataset.downloadId);
-    });
-  });
-
-  // Кнопка «Удалить»
-  grid.querySelectorAll('[data-delete-id]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      await deleteFileById(btn.dataset.deleteId);
-    });
-  });
+  bindFileCardEvents(grid);
 }
 
 async function downloadFileById(id) {
@@ -3320,6 +3499,15 @@ const filePickText = document.getElementById('filePickText');
 const fileDisplayName = document.getElementById('fileDisplayName');
 let pickedFile = null;
 
+function fillFileSubjectSelect() {
+  const sel = document.getElementById('fileSubject');
+  if (!sel) return;
+  const subjects = getAllSubjects();
+  sel.innerHTML =
+    `<option value="">— Без предмета —</option>` +
+    subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
 function openFileModal() {
   if (!currentUser) { showToast('Войдите, чтобы загружать файлы'); openAuthModal(); return; }
   pickedFile = null;
@@ -3327,6 +3515,7 @@ function openFileModal() {
   fileDisplayName.value = '';
   filePickText.textContent = 'Нажмите, чтобы выбрать файл';
   filePickArea.classList.remove('has-file', 'error');
+  fillFileSubjectSelect();
   fileModal.classList.add('active');
 }
 function closeFileModal() {
@@ -3391,13 +3580,16 @@ async function uploadPickedFile() {
     if (uploadErr) throw uploadErr;
 
     const displayName = (fileDisplayName.value.trim() || pickedFile.name).slice(0, 120);
+    const subjectValue = (document.getElementById('fileSubject').value || '').trim() || null;
+
     const { error: dbErr } = await supabaseClient.from('files').insert({
       user_id: currentUserId,
       user_login: currentUser,
       name: displayName,
       size: pickedFile.size,
       mime_type: pickedFile.type,
-      storage_path: storagePath
+      storage_path: storagePath,
+      subject: subjectValue
     });
 
     if (dbErr) {
@@ -3423,6 +3615,26 @@ document.getElementById('fileModalClose').addEventListener('click', closeFileMod
 document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
 fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
+
+// Поиск по файлам
+const filesSearchInput = document.getElementById('filesSearchInput');
+if (filesSearchInput) {
+  filesSearchInput.addEventListener('input', e => {
+    filesSearchQuery = e.target.value;
+    renderFiles();
+  });
+}
+
+// Переключатель группировки
+const filesGroupToggle = document.getElementById('filesGroupToggle');
+if (filesGroupToggle) {
+  filesGroupToggle.checked = filesGroupEnabled;
+  filesGroupToggle.addEventListener('change', e => {
+    filesGroupEnabled = e.target.checked;
+    localStorage.setItem('files-group-enabled', filesGroupEnabled ? '1' : '0');
+    renderFiles();
+  });
+}
 
 // ================== ДОМАШКА ==================
 const SUBJECT_FIXED_COLORS = {
