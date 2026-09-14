@@ -26,7 +26,7 @@ function isHwImportant(item) {
   const now = new Date(); now.setHours(0,0,0,0);
   const dl = new Date(y, m - 1, d);
   const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
-  return diff >= 0 && diff <= 1; // сегодня или завтра
+  return diff >= 0 && diff <= 1;
 }
 
 function getAllSubjects() {
@@ -79,7 +79,6 @@ function formatDeadline(iso) {
 
 function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
 
-// ===== Порядок заданий внутри предмета (localStorage) =====
 function getHwOrderKey(subject) {
   return 'hw-order-' + encodeURIComponent(subject);
 }
@@ -94,7 +93,6 @@ function setHwOrder(subject, ids) {
   } catch (_) {}
 }
 
-// ===== Загрузка =====
 async function loadHwItemsFromCloud() {
   state.hw.loading = true;
   const { data, error } = await supabaseClient
@@ -126,19 +124,16 @@ function sortHwItems(subject, items) {
   }
 
   items.sort((a, b) => {
-    // 1) Сделанные — всегда в самый низ
     const aDone = isHwDone(a.id) ? 1 : 0;
     const bDone = isHwDone(b.id) ? 1 : 0;
     if (aDone !== bDone) return aDone - bDone;
 
-    // 2) Среди несделанных — по сохранённому порядку
     if (!aDone && !bDone && savedOrder.length > 0) {
       const ai = orderMap.has(String(a.id)) ? orderMap.get(String(a.id)) : 9999;
       const bi = orderMap.has(String(b.id)) ? orderMap.get(String(b.id)) : 9999;
       if (ai !== bi) return ai - bi;
     }
 
-    // 3) Среди несделанных без сохранённого порядка — по дате сдачи
     if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
     if (a.deadline) return -1;
     if (b.deadline) return 1;
@@ -146,7 +141,6 @@ function sortHwItems(subject, items) {
   });
 }
 
-// ===== Рендер =====
 function renderHomework() {
   const grid = document.getElementById('hwGrid');
   const empty = document.getElementById('hwEmpty');
@@ -176,7 +170,6 @@ function renderHomework() {
 
   const subjectsSorted = [...allSubjects].sort((a, b) => a.localeCompare(b, 'ru'));
 
-  // === Фильтр «Показать важное» ===
   let visibleSubjects = subjectsSorted;
   if (hwImportantOnly) {
     visibleSubjects = subjectsSorted.filter(subj => {
@@ -198,7 +191,6 @@ function renderHomework() {
   for (const subj of visibleSubjects) {
     let items = bySubject[subj] || [];
 
-    // Если режим «важное» — оставляем только важные и несделанные
     if (hwImportantOnly) {
       items = items.filter(item => isHwImportant(item) && !isHwDone(item.id));
     }
@@ -247,7 +239,6 @@ function renderHomework() {
   grid.innerHTML = html;
   empty.classList.remove('active');
 
-  // Клик по карточке — открыть модалку
   grid.querySelectorAll('.hw-card').forEach(card => {
     card.addEventListener('click', e => {
       if (e.target.closest('.hw-item')) return;
@@ -256,7 +247,6 @@ function renderHomework() {
     });
   });
 
-  // ПКМ — контекстное меню
   grid.querySelectorAll('.hw-item').forEach(itemEl => {
     itemEl.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -266,13 +256,11 @@ function renderHomework() {
     });
   });
 
-  // Drag & drop
   grid.querySelectorAll('.hw-card-body').forEach(bodyEl => {
     setupHwDragAndDrop(bodyEl);
   });
 }
 
-// ===== Drag & drop =====
 function setupHwDragAndDrop(bodyEl) {
   const subject = bodyEl.dataset.subject;
   let draggedEl = null;
@@ -319,7 +307,6 @@ function setupHwDragAndDrop(bodyEl) {
   });
 }
 
-// ===== Открытие модалки с предзаполненным предметом =====
 function openHwModalForSubject(subject) {
   if (!state.currentUser) {
     showToast('Войдите, чтобы добавлять задания');
@@ -338,7 +325,6 @@ function openHwModalForSubject(subject) {
   setTimeout(() => hwTaskEl.focus(), 60);
 }
 
-// ===== Контекстное меню =====
 let hwCtxMenu = null;
 
 function openHwContextMenu(x, y, id) {
@@ -454,7 +440,6 @@ function resetHwModalTitle() {
   }
 }
 
-// ===== МОДАЛКА =====
 const hwModal = document.getElementById('hwModal');
 const hwSubjectEl = document.getElementById('hwSubject');
 const hwTaskEl = document.getElementById('hwTask');
@@ -522,7 +507,6 @@ async function saveHwItem() {
   showToast(isEdit ? 'Задание обновлено' : 'Задание добавлено');
 }
 
-// ===== ОБРАБОТЧИКИ =====
 const hwModalCloseEl = document.getElementById('hwModalClose');
 if (hwModalCloseEl) hwModalCloseEl.addEventListener('click', closeHwModal);
 
@@ -551,6 +535,49 @@ if (hwImportantBtn) {
     hwImportantBtn.classList.toggle('active', hwImportantOnly);
     hwImportantBtn.textContent = hwImportantOnly ? 'Показать все' : 'Показать важное';
     renderHomework();
+  });
+}
+
+// ===== Кнопка «Очистить всё дз» =====
+const hwClearAllBtn = document.getElementById('hwClearAllBtn');
+if (hwClearAllBtn) {
+  hwClearAllBtn.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!state.currentUser) {
+      showToast('Войдите, чтобы очистить задания');
+      if (typeof openAuthModal === 'function') openAuthModal();
+      return;
+    }
+    if (state.hw.items.length === 0) {
+      showToast('Нет заданий для удаления');
+      return;
+    }
+    if (!confirm(`Очистить всё дз?\n\nБудет удалено: ${state.hw.items.length} заданий. Это действие нельзя отменить.`)) return;
+
+    const oldText = hwClearAllBtn.textContent;
+    hwClearAllBtn.disabled = true;
+    hwClearAllBtn.textContent = 'Удаляю…';
+
+    try {
+      const { error } = await supabaseClient
+        .from('homework')
+        .delete()
+        .eq('user_id', state.currentUserId);
+
+      if (error) throw error;
+
+      state.hw.items.forEach(item => localStorage.removeItem('hw-done-' + item.id));
+      state.hw.items = [];
+
+      renderHomework();
+      showToast('Все задания удалены');
+    } catch (err) {
+      console.error(err);
+      showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
+    } finally {
+      hwClearAllBtn.disabled = false;
+      hwClearAllBtn.textContent = oldText;
+    }
   });
 }
 
