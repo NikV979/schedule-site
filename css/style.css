@@ -1321,6 +1321,13 @@
   .auth-close:hover { background: rgba(255,255,255,0.32); transform: scale(1.05); }
 
   .auth-body { padding: 20px 22px 8px; display: flex; flex-direction: column; }
+  .auth-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0 0 18px;
+    font-weight: 500;
+  }
   .auth-label {
     font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.8px;
@@ -1945,6 +1952,7 @@
     .auth-modal .auth-head { padding: 14px 18px; }
     .auth-modal .auth-title { font-size: 16px; }
     .auth-modal .auth-body { padding: 16px 18px 4px; }
+    .auth-modal .auth-desc { font-size: 12px; margin-bottom: 14px; }
     .auth-modal .auth-label { margin: 10px 0 5px; }
     .auth-modal .auth-input { padding: 10px 12px; font-size: 15px; }
     .auth-modal .auth-foot { padding: 12px 18px 16px; }
