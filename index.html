@@ -1322,7 +1322,7 @@
     box-shadow: 0 12px 40px rgba(0,0,0,0.25);
     opacity: 0; pointer-events: none;
     transition: all 0.25s;
-    z-index: 600;
+    z-index: 800;
     max-width: 90vw; text-align: center;
   }
   .toast.active {
@@ -1439,6 +1439,7 @@
     color: #fff;
     flex-shrink: 0;
     letter-spacing: 0.5px;
+    cursor: pointer;
   }
   .file-icon.pdf  { background: #E74C3C; }
   .file-icon.doc  { background: #2B579A; }
@@ -1553,6 +1554,157 @@
     margin-top: 4px;
   }
 
+  /* ============== ПРОСМОТРЩИК ФАЙЛОВ ============== */
+
+  .file-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.85);
+    z-index: 700;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .file-viewer-overlay.active { display: flex; }
+
+  .file-viewer {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 1100px;
+    height: 92vh;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalPop 0.2s ease-out;
+  }
+
+  .file-viewer-head {
+    padding: 14px 20px;
+    background: #6C5CE7;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .file-viewer-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-viewer-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .file-viewer-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .file-viewer-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .file-viewer-body {
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    position: relative;
+  }
+
+  .file-viewer-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .file-viewer-body img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .file-viewer-body pre {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 24px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .file-viewer-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+  }
+  .file-viewer-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-light);
+    border-top-color: #6C5CE7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .file-viewer-error {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-secondary);
+    max-width: 400px;
+  }
+  .file-viewer-error-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .file-viewer-error-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .file-viewer-error-hint {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
     .tab-mobile  { display: inline-block; }
@@ -1630,6 +1782,15 @@
     .file-icon { width: 40px; height: 40px; font-size: 11px; }
     .file-name { font-size: 14px; }
     .file-meta { font-size: 11px; }
+
+    .file-viewer-overlay { padding: 0; }
+    .file-viewer {
+      max-width: 100%;
+      height: 100vh;
+      border-radius: 0;
+    }
+    .file-viewer-title { font-size: 13px; }
+    .file-viewer-btn { padding: 7px 10px; font-size: 12px; }
   }
 
   @media (max-width: 500px) {
@@ -1777,7 +1938,7 @@
         </div>
         <div class="files-hint">
           Можно загружать PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT. Максимум 25 МБ на файл.<br>
-          Файлы видны только вам.
+          Файлы видны только вам. Кликните по имени файла, чтобы открыть его в просмотрщике.
         </div>
         <div class="files-grid" id="filesGrid"></div>
         <div class="files-empty" id="filesEmpty">
@@ -1836,6 +1997,19 @@
         <button class="hw-btn hw-btn-cancel" id="fileCancel" type="button">Отмена</button>
         <button class="hw-btn hw-btn-save" id="fileSave" type="button">Загрузить</button>
       </div>
+    </div>
+  </div>
+
+  <div class="file-viewer-overlay" id="fileViewerOverlay">
+    <div class="file-viewer">
+      <div class="file-viewer-head">
+        <div class="file-viewer-title" id="fileViewerTitle">—</div>
+        <div class="file-viewer-actions">
+          <button class="file-viewer-btn" id="fileViewerDownloadBtn" type="button">⬇ Скачать</button>
+          <button class="file-viewer-btn" id="fileViewerCloseBtn" type="button" title="Закрыть">✕</button>
+        </div>
+      </div>
+      <div class="file-viewer-body" id="fileViewerBody"></div>
     </div>
   </div>
 
@@ -2941,9 +3115,9 @@ function renderFiles() {
 
     html += `
       <div class="file-card" data-id="${item.id}">
-        <div class="file-icon ${cls}">${iconText}</div>
+        <div class="file-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
         <div class="file-info">
-          <div class="file-name" data-open-id="${item.id}">${safeName}</div>
+          <div class="file-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
           <div class="file-meta">
             <span>${formatSize(item.size)}</span>
             <span>·</span>
@@ -2958,19 +3132,27 @@ function renderFiles() {
   }
   grid.innerHTML = html;
 
-  grid.querySelectorAll('[data-open-id], [data-download-id]').forEach(el => {
+  // Клик по имени/иконке — открыть просмотрщик
+  grid.querySelectorAll('[data-open-id]').forEach(el => {
     el.addEventListener('click', async e => {
       e.stopPropagation();
-      const id = el.dataset.openId || el.dataset.downloadId;
-      await downloadFileById(id);
+      await openFileViewer(el.dataset.openId);
     });
   });
 
+  // Кнопка «Скачать»
+  grid.querySelectorAll('[data-download-id]').forEach(el => {
+    el.addEventListener('click', async e => {
+      e.stopPropagation();
+      await downloadFileById(el.dataset.downloadId);
+    });
+  });
+
+  // Кнопка «Удалить»
   grid.querySelectorAll('[data-delete-id]').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      const id = btn.dataset.deleteId;
-      await deleteFileById(id);
+      await deleteFileById(btn.dataset.deleteId);
     });
   });
 }
@@ -3021,6 +3203,115 @@ async function deleteFileById(id) {
     showToast('Ошибка удаления: ' + err.message);
   }
 }
+
+// ================== ПРОСМОТРЩИК ФАЙЛОВ ==================
+const fileViewerOverlay = document.getElementById('fileViewerOverlay');
+const fileViewerBody = document.getElementById('fileViewerBody');
+const fileViewerTitle = document.getElementById('fileViewerTitle');
+let currentViewerItem = null;
+
+const VIEWER_GOOGLE = [
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+];
+
+async function openFileViewer(id) {
+  const item = filesItems.find(x => String(x.id) === String(id));
+  if (!item) return;
+
+  currentViewerItem = item;
+  fileViewerTitle.textContent = item.name;
+  fileViewerBody.innerHTML = `
+    <div class="file-viewer-loading">
+      <div class="file-viewer-spinner"></div>
+      <div>Открываю файл…</div>
+    </div>
+  `;
+  fileViewerOverlay.classList.add('active');
+
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from(FILES_BUCKET)
+      .createSignedUrl(item.storage_path, 3600);
+    if (error || !data) throw new Error(error ? error.message : 'Нет ссылки');
+
+    const url = data.signedUrl;
+    const mime = item.mime_type || '';
+
+    if (mime === 'application/pdf') {
+      fileViewerBody.innerHTML = `<iframe src="${url}#toolbar=1" type="application/pdf"></iframe>`;
+      return;
+    }
+
+    if (mime === 'image/jpeg' || mime === 'image/png') {
+      fileViewerBody.innerHTML = `<img src="${url}" alt="">`;
+      return;
+    }
+
+    if (mime === 'text/plain') {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Не удалось прочитать файл');
+      const text = await resp.text();
+      const pre = document.createElement('pre');
+      pre.textContent = text;
+      fileViewerBody.innerHTML = '';
+      fileViewerBody.appendChild(pre);
+      return;
+    }
+
+    if (VIEWER_GOOGLE.includes(mime)) {
+      const googleUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true';
+      fileViewerBody.innerHTML = `<iframe src="${googleUrl}" allowfullscreen></iframe>`;
+      return;
+    }
+
+    showViewerFallback();
+  } catch (err) {
+    console.error(err);
+    fileViewerBody.innerHTML = `
+      <div class="file-viewer-error">
+        <div class="file-viewer-error-icon">⚠️</div>
+        <div class="file-viewer-error-text">Не удалось открыть файл</div>
+        <div class="file-viewer-error-hint">${escapeHtml(err.message || 'Неизвестная ошибка')}. Попробуйте скачать файл.</div>
+      </div>
+    `;
+  }
+}
+
+function showViewerFallback() {
+  fileViewerBody.innerHTML = `
+    <div class="file-viewer-error">
+      <div class="file-viewer-error-icon">📄</div>
+      <div class="file-viewer-error-text">Формат не поддерживается для просмотра</div>
+      <div class="file-viewer-error-hint">Нажмите «Скачать», чтобы открыть файл на устройстве.</div>
+    </div>
+  `;
+}
+
+function closeFileViewer() {
+  fileViewerOverlay.classList.remove('active');
+  fileViewerBody.innerHTML = '';
+  currentViewerItem = null;
+}
+
+document.getElementById('fileViewerCloseBtn').addEventListener('click', closeFileViewer);
+
+document.getElementById('fileViewerDownloadBtn').addEventListener('click', async () => {
+  if (!currentViewerItem) return;
+  await downloadFileById(currentViewerItem.id);
+});
+
+fileViewerOverlay.addEventListener('click', e => {
+  if (e.target === fileViewerOverlay) closeFileViewer();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && fileViewerOverlay.classList.contains('active')) {
+    closeFileViewer();
+  }
+});
 
 const fileModal = document.getElementById('fileModal');
 const fileInput = document.getElementById('fileInput');
@@ -3088,8 +3379,8 @@ async function uploadPickedFile() {
 
   try {
     const unique = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const safeName = pickedFile.name.replace(/[^\w\s.\-а-яА-ЯёЁ]/g, '_');
-    const storagePath = `${currentUserId}/${unique}_${safeName}`;
+    const cleanName = pickedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_').slice(-80);
+    const storagePath = `${currentUserId}/${unique}_${cleanName}`;
 
     const { error: uploadErr } = await supabaseClient.storage
       .from(FILES_BUCKET)
