@@ -333,7 +333,7 @@
   <div class="avatar-modal-overlay" id="avatarModal">
     <div class="avatar-modal">
       <div class="avatar-modal-head">
-        <h2>Моё фото</h2>
+        <h2>Мой профиль</h2>
         <button class="avatar-modal-close" id="avatarModalClose" type="button" title="Закрыть">✕</button>
       </div>
       <div class="avatar-modal-body">
@@ -343,12 +343,17 @@
 
         <div class="avatar-modal-hint">JPG, PNG, WebP · до 2 МБ</div>
 
+        <div class="avatar-name-field">
+          <label class="hw-field-label" for="profileNameInput">Имя</label>
+          <input class="hw-input" id="profileNameInput" type="text" maxlength="40" placeholder="Ваше имя" autocomplete="given-name">
+        </div>
+
         <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="avatar-file-input">
 
         <div class="avatar-modal-actions">
           <button class="avatar-btn avatar-btn-upload" id="avatarUploadBtn" type="button">Выбрать фото</button>
           <button class="avatar-btn avatar-btn-upload" id="avatarSaveBtn" type="button" style="display:none; background: #42855A;">Сохранить</button>
-          <button class="avatar-btn avatar-btn-remove" id="avatarRemoveBtn" type="button" style="display:none">Удалить</button>
+          <button class="avatar-btn avatar-btn-remove" id="avatarRemoveBtn" type="button" style="display:none">Удалить фото</button>
         </div>
         <button class="avatar-btn" id="avatarLogoutBtn" type="button" style="background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border-light); margin-top: 4px;">Выйти из аккаунта</button>
       </div>
