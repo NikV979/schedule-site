@@ -204,7 +204,7 @@ html, body {
   }
 }
 
-/* Кнопки со значками по умолчанию: показываем текст, скрываем иконку */
+/* Иконки/тексты в кнопках */
 .btn-icon,
 .btn-text-plus {
   display: none;
@@ -290,7 +290,6 @@ html, body {
   box-shadow: 0 4px 12px rgba(91, 75, 214, 0.35);
 }
 .files-upload-btn-top:active { transform: translateY(0); }
-.files-upload-btn-top > .btn-text-plus { font-size: 14px; line-height: 1; }
 
 /* Хинт в шапке «Файлы» */
 .files-tabs-hint {
@@ -307,7 +306,16 @@ html, body {
   margin-left: 6px;
 }
 
-/* Поиск прямо в шапке «Файлы» */
+/* Поиск в шапке «Файлы» */
+.files-search-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.files-search-wrap .files-search-icon {
+  display: none;
+}
 .files-search-top {
   width: 160px;
   height: 32px;
@@ -361,9 +369,7 @@ html, body {
 [data-theme="dark"] .files-group-select-top {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%239A9AB8' d='M5 6L0 0h10z'/></svg>");
 }
-.files-group-select-top:hover {
-  border-color: var(--accent-even);
-}
+.files-group-select-top:hover { border-color: var(--accent-even); }
 .files-group-select-top:focus {
   border-color: var(--accent-even);
   background-color: var(--bg-surface);
@@ -467,14 +473,8 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
 .btn-theme:hover, .btn-fs:hover, .btn-auth:hover { filter: brightness(0.96); }
 .btn-theme:active, .btn-fs:active, .btn-auth:active { transform: scale(0.94); }
 
-.btn-auth.logged-in {
-  background: #E4F7EE;
-  color: #00876A;
-}
-[data-theme="dark"] .btn-auth.logged-in {
-  background: #123A2E;
-  color: #4FE0B8;
-}
+.btn-auth.logged-in { background: #E4F7EE; color: #00876A; }
+[data-theme="dark"] .btn-auth.logged-in { background: #123A2E; color: #4FE0B8; }
 
 .sidebar-logo { position: relative; overflow: hidden; }
 
@@ -499,7 +499,6 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
 }
 
 .btn-auth { position: relative; overflow: hidden; padding: 0; }
-
 .btn-auth-icon {
   font-size: 16px;
   line-height: 1;
@@ -509,7 +508,6 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
   width: 100%;
   height: 100%;
 }
-
 .btn-auth-photo {
   position: absolute;
   inset: 0;
@@ -519,7 +517,6 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
   display: block;
   border-radius: 8px;
 }
-
 .btn-auth:hover .btn-auth-photo { filter: brightness(0.85); }
 
 /* ============== AVATAR MODAL ============== */
@@ -612,14 +609,8 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
   font-weight: 500;
 }
 
-.avatar-name-field {
-  width: 100%;
-  margin-top: 4px;
-}
-.avatar-name-field .hw-field-label {
-  margin-top: 0;
-  margin-bottom: 6px;
-}
+.avatar-name-field { width: 100%; margin-top: 4px; }
+.avatar-name-field .hw-field-label { margin-top: 0; margin-bottom: 6px; }
 
 .avatar-modal-actions {
   display: flex;
@@ -684,14 +675,12 @@ body.view-files .banner { display: none !important; }
 .week-nav.hidden { display: none; }
 
 .nav-btn {
-  width: 38px;
-  height: 38px;
+  width: 38px; height: 38px;
   border-radius: 50%;
   border: 2px solid var(--border-light);
   background: var(--bg-surface-2);
   color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 20px; font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -709,12 +698,10 @@ body.view-files .banner { display: none !important; }
   border-color: var(--accent-even);
   transform: scale(1.04);
 }
-
 .week-nav.odd .nav-btn:hover {
   background: var(--accent-odd);
   border-color: var(--accent-odd);
 }
-
 .nav-btn:active { transform: scale(0.96); }
 .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .nav-btn:disabled:hover,
@@ -1600,8 +1587,7 @@ tr:last-child td { border-bottom: none; }
   user-select: none;
 }
 .auth-consent input {
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   margin-top: 1px;
   flex-shrink: 0;
   accent-color: var(--accent-even);
@@ -1646,26 +1632,20 @@ tr:last-child td { border-bottom: none; }
 /* ============== PRIVACY ============== */
 .privacy-block { margin-bottom: 16px; }
 .privacy-block h3 {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 13px; font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 8px;
   letter-spacing: 0.2px;
 }
-.privacy-block ul {
-  padding-left: 20px;
-  margin: 0;
-}
+.privacy-block ul { padding-left: 20px; margin: 0; }
 .privacy-block li {
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 13px; line-height: 1.55;
   color: var(--text-primary);
   margin-bottom: 6px;
   font-weight: 500;
 }
 .privacy-block p {
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 13px; line-height: 1.55;
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -1911,11 +1891,7 @@ tr:last-child td { border-bottom: none; }
   letter-spacing: 0.5px;
 }
 
-.files-flat-tile .file-tile-info {
-  width: 100%;
-  min-width: 0;
-}
-
+.files-flat-tile .file-tile-info { width: 100%; min-width: 0; }
 .files-flat-tile .file-tile-name {
   font-size: 12px !important;
   -webkit-line-clamp: 2 !important;
@@ -1923,7 +1899,6 @@ tr:last-child td { border-bottom: none; }
   font-weight: 600;
   text-align: center;
 }
-
 .files-flat-tile .file-tile-meta {
   font-size: 10.5px !important;
   margin-top: 2px !important;
@@ -2132,14 +2107,11 @@ tr:last-child td { border-bottom: none; }
 .file-viewer-body iframe { width: 100%; height: 100%; border: none; display: block; }
 .file-viewer-body img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 .file-viewer-body pre {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 24px;
+  width: 100%; height: 100%;
+  margin: 0; padding: 24px;
   overflow: auto;
   font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 13px; line-height: 1.6;
   color: var(--text-primary);
   background: var(--bg-surface);
   white-space: pre-wrap;
@@ -2155,8 +2127,7 @@ tr:last-child td { border-bottom: none; }
   font-weight: 500;
 }
 .file-viewer-spinner {
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
   border: 3px solid var(--border-light);
   border-top-color: var(--accent-even);
   border-radius: 50%;
@@ -2365,86 +2336,256 @@ tr:last-child td { border-bottom: none; }
     font-family: inherit;
     line-height: 1;
   }
-  .sidebar-theme-btn:active {
-    transform: scale(0.92);
-  }
+  .sidebar-theme-btn:active { transform: scale(0.92); }
 
   /* Аватарка в сайдбаре кликабельная */
   .sidebar-logo { cursor: pointer; }
   .sidebar-logo:active { transform: scale(0.96); }
 
-  /* 4. Шапка «Файлы» — только значки */
-  .tabs-title-files .tabs-title-text { display: none; }
-  .tabs-title-files { gap: 6px; }
-
-  .files-search-top {
-    width: 90px;
-    height: 30px;
-    padding: 0 10px;
-    font-size: 11px;
-    border-radius: 16px;
-  }
-  .files-search-top:focus { width: 130px; }
-
-  .files-group-select-top {
-    height: 30px;
-    padding: 0 24px 0 10px;
-    font-size: 11px;
-    min-width: 90px;
-    background-size: 8px 5px;
-    background-position: right 9px center;
-    border-radius: 16px;
-  }
-
-  .hw-clear-all-btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 4px;
-    font-size: 12px;
-  }
-  .hw-clear-all-btn .btn-text { display: none; }
-  .hw-clear-all-btn .btn-icon { display: inline-block; font-size: 14px; }
-
+  /* ===== ВСЕ КНОПКИ В ШАПКАХ — ЕДИНЫЙ РАЗМЕР 32×32 ===== */
+  .hw-important-btn,
+  .hw-clear-all-btn,
   .files-upload-btn-top {
-    width: 30px;
-    height: 30px;
+    height: 32px;
+    width: 32px;
+    min-width: 32px;
     padding: 0;
     border-radius: 50%;
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     margin-left: 4px;
-    box-shadow: none;
+    font-size: 13px;
   }
+
+  /* Прячем текст, показываем иконки */
+  .hw-important-btn .btn-text,
+  .hw-clear-all-btn .btn-text,
   .files-upload-btn-top .btn-text,
-  .files-upload-btn-top .btn-text-plus { display: none; }
-  .files-upload-btn-top .btn-icon { display: inline-block; font-size: 14px; }
+  .files-upload-btn-top .btn-text-plus {
+    display: none;
+  }
+  .hw-important-btn .btn-icon,
+  .hw-clear-all-btn .btn-icon,
+  .files-upload-btn-top .btn-icon {
+    display: inline-block;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  /* Кнопка «Показать важное» — «!» */
+  .hw-important-btn {
+    border: 1.5px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 800;
+  }
+  .hw-important-btn.active {
+    background: var(--accent-even);
+    border-color: var(--accent-even);
+    color: #fff;
+  }
+  .hw-important-btn .btn-icon {
+    font-weight: 800;
+    font-size: 16px;
+  }
+
+  /* Кнопка «Очистить» — корзина */
+  .hw-clear-all-btn {
+    border: 1.5px solid var(--accent-odd);
+    background: transparent;
+    color: var(--accent-odd);
+  }
+
+  /* Кнопка «Загрузить» — стрелка вверх */
+  .files-upload-btn-top {
+    border: none;
+    background: var(--accent-even);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(91, 75, 214, 0.25);
+  }
   .files-upload-btn-top:hover,
   .files-upload-btn-top:active { transform: none; }
 
-  /* 5. Шапка «Домашка» — только значки */
-  .tabs-title-hw .tabs-title-text { display: none; }
-  .tabs-title-hw { gap: 6px; }
-
-  .hw-important-btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border-radius: 50%;
+  /* ===== ПОИСК — КРУГЛАЯ КНОПКА С ЛУПОЙ ===== */
+  .files-search-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 50% !important;
+    background: var(--bg-surface-2);
+    flex-shrink: 0;
     margin-left: 4px;
-    font-size: 12px;
+    overflow: hidden;
+    transition: width 0.25s ease, border-radius 0.2s ease, border-color 0.15s, box-shadow 0.15s, background 0.15s;
   }
-  .hw-important-btn .btn-text { display: none; }
-  .hw-important-btn .btn-icon { display: inline-block; font-size: 14px; }
+  .files-search-wrap .files-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    pointer-events: none;
+    color: var(--text-secondary);
+    z-index: 1;
+    transition: width 0.25s ease;
+  }
+  .files-search-wrap .files-search-top {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    box-shadow: none !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, padding 0.25s ease;
+    outline: none;
+  }
+  .files-search-wrap:focus-within {
+    width: 150px !important;
+    border-radius: 16px !important;
+    border-color: var(--accent-even);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 3px rgba(91, 75, 214, 0.12);
+  }
+  .files-search-wrap:focus-within .files-search-icon {
+    width: 32px;
+  }
+  .files-search-wrap:focus-within .files-search-top {
+    padding: 0 12px 0 32px !important;
+    opacity: 1;
+    pointer-events: auto;
+  }
 
+  /* ===== СОРТИРОВКА — КОМПАКТНЫЙ СЕЛЕКТ ===== */
+  .files-group-select-top {
+    height: 32px !important;
+    padding: 0 22px 0 10px;
+    font-size: 11px;
+    min-width: 80px;
+    max-width: 110px;
+    background-size: 8px 5px;
+    background-position: right 9px center;
+    border-radius: 16px !important;
+    margin-left: 4px;
+  }
+
+  /* ===== ЗНАЧКИ В ШАПКАХ ПО ЦЕНТРУ (как табы в расписании) ===== */
+  body.view-homework .tabs-title-hw,
+  body.view-files .tabs-title-files {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0;
+    gap: 4px;
+    justify-content: center;
+    flex: initial;
+    overflow: visible;
+    max-width: calc(100vw - 96px);
+  }
+  /* Скрываем иконку и текст, оставляем только кнопки/бейдж */
+  body.view-homework .tabs-title-hw .tabs-title-icon,
+  body.view-files .tabs-title-files .tabs-title-icon {
+    display: none;
+  }
+  body.view-homework .tabs-title-hw .tabs-title-text,
+  body.view-files .tabs-title-files .tabs-title-text {
+    display: none;
+  }
+
+  .tabs-badge {
+    min-width: 22px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 11px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== БЛОКИ ЗАДАНИЙ В ДОМАШКЕ — РАСКРЫТИЕ ===== */
+  .diary-wrap[data-view="homework"] .hw-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .diary-wrap[data-view="homework"] .hw-card {
+    display: flex !important;
+    flex-direction: column;
+    height: auto !important;
+    min-height: 0 !important;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .diary-wrap[data-view="homework"] .hw-card-head {
+    padding: 12px 14px !important;
+    flex-shrink: 0;
+  }
+  .diary-wrap[data-view="homework"] .hw-card-subject {
+    font-size: 14px !important;
+    font-weight: 700;
+    -webkit-line-clamp: 1;
+    word-break: break-word;
+  }
+  .diary-wrap[data-view="homework"] .hw-card-body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.2s ease;
+    flex: initial !important;
+  }
+  .diary-wrap[data-view="homework"] .hw-card.expanded .hw-card-body {
+    max-height: 20000px;
+    padding: 8px 12px 10px;
+  }
+  .diary-wrap[data-view="homework"] .hw-card:not(.expanded) .hw-card-body {
+    padding: 0 12px;
+  }
+
+  /* Кнопка «+ добавить» внутри раскрытой карточки */
+  .hw-card .hw-add-item-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(91, 75, 214, 0.08);
+    color: var(--accent-even);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px dashed rgba(91, 75, 214, 0.3);
+    transition: all 0.15s;
+  }
+  .hw-card .hw-add-item-btn:active {
+    background: rgba(91, 75, 214, 0.16);
+    transform: scale(0.98);
+  }
+  .hw-card .hw-add-item-btn::before {
+    content: '+';
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* ===== ОБЩИЕ МОБИЛЬНЫЕ СТИЛИ ===== */
   .auth-overlay,
   .avatar-modal-overlay,
   .hw-modal-overlay {
@@ -2502,7 +2643,6 @@ tr:last-child td { border-bottom: none; }
   .top-actions { gap: 6px; }
 
   .tabs-title-text { font-size: 15px; }
-  .tabs-badge { min-width: 20px; height: 20px; font-size: 11px; padding: 0 6px; }
   .tabs-title-icon { width: 18px; height: 18px; }
   .tabs-title-icon svg { width: 16px; height: 16px; }
 
@@ -2550,7 +2690,6 @@ tr:last-child td { border-bottom: none; }
   .bell-break-cell { font-size: 12px; }
 
   .homework-page { padding: 14px; gap: 14px; }
-  .hw-card-subject { font-size: 14px; }
   .hw-item-task { font-size: 13px; }
 
   .files-page { padding: 14px; gap: 14px; }
@@ -2609,12 +2748,10 @@ tr:last-child td { border-bottom: none; }
   .mob-nav-btn { width: 40px; height: 40px; font-size: 20px; }
   .tabs-title-text { font-size: 14px; }
 
-  .files-search-top { width: 70px; }
-  .files-search-top:focus { width: 110px; }
   .files-group-select-top {
-    min-width: 80px;
+    min-width: 70px;
     font-size: 10px;
-    padding: 0 22px 0 8px;
+    padding: 0 20px 0 8px;
   }
 
   .files-flat-grid {
