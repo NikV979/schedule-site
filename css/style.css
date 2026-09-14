@@ -1853,7 +1853,37 @@
     user-select: none;
     white-space: nowrap;
   }
-  .files-group-toggle input { accent-color: var(--accent-even); width: 16px; height: 16px; cursor: pointer; }
+    .files-group-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .files-group-select {
+    padding: 9px 34px 9px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-input);
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236A6A85' d='M6 8L0 0h12z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    white-space: nowrap;
+  }
+  .files-group-select:focus {
+    border-color: var(--accent-even);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 4px rgba(91, 75, 214, 0.12);
+  }
+  .files-group-select:hover { filter: brightness(0.98); }
 
   .files-subject-group {
     border: 1px solid var(--border-light);
