@@ -328,3 +328,33 @@ avatarModal.addEventListener('click', e => { if (e.target === avatarModal) close
 document.getElementById('avatarLogoutBtn').addEventListener('click', async () => {
   if (confirm('Выйти из аккаунта?')) { closeAvatarModal(); await logout(); }
 });
+
+// ========== ПОДСТРОЙКА ПОД КЛАВИАТУРУ (мобильные) ==========
+// Записываем реальную высоту видимой области в CSS-переменную --vvh.
+// Когда клавиатура открывается — visualViewport.height уменьшается,
+// и переменная автоматически обновляется.
+if (window.visualViewport) {
+  const updateVVH = () => {
+    document.documentElement.style.setProperty('--vvh', window.visualViewport.height + 'px');
+  };
+  window.visualViewport.addEventListener('resize', updateVVH);
+  window.visualViewport.addEventListener('scroll', updateVVH);
+  updateVVH();
+}
+
+// ========== АВТОСКРОЛЛ К ПОЛЮ ПРИ ФОКУСЕ ==========
+// Когда пользователь тапает в поле на телефоне — плавно прокручиваем
+// модалку так, чтобы поле оказалось видно над клавиатурой.
+function attachFocusScroll(input) {
+  if (!input) return;
+  input.addEventListener('focus', () => {
+    setTimeout(() => {
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350);
+  });
+}
+attachFocusScroll(authLoginInput);
+attachFocusScroll(authPasswordInput);
+attachFocusScroll(document.getElementById('hwTask'));
+attachFocusScroll(document.getElementById('hwDeadline'));
+attachFocusScroll(document.getElementById('fileDisplayName'));
