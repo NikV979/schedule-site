@@ -1185,6 +1185,9 @@
   }
   .hw-modal-overlay.active { display: flex; }
 
+  /* Политика ПДН — поверх окна входа */
+  #privacyModal.hw-modal-overlay { z-index: 600; }
+
   .hw-modal {
     background: var(--bg-surface);
     border-radius: 16px;
@@ -1409,7 +1412,7 @@
   .auth-btn-submit:active { transform: translateY(0); }
   .auth-btn-submit:disabled, .auth-btn-skip:disabled { opacity: 0.6; cursor: default; transform: none; }
 
-  /* ============== PRIVACY (политика ПДН) ============== */
+  /* ============== PRIVACY ============== */
   .privacy-block { margin-bottom: 16px; }
   .privacy-block h3 {
     font-size: 13px;
