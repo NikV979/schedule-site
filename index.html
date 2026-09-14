@@ -181,8 +181,6 @@
     color: #4FE0B8;
   }
 
-  /* ============== АВАТАРЫ ============== */
-
   .sidebar-logo {
     position: relative;
     overflow: hidden;
@@ -800,8 +798,6 @@
     background: var(--bg-surface);
   }
 
-  /* ============== БОКОВОЕ МЕНЮ ============== */
-
   .sidebar-backdrop {
     position: fixed; inset: 0;
     background: rgba(10, 10, 30, 0.55);
@@ -874,8 +870,6 @@
     color: var(--text-secondary);
     border-top: 2px solid var(--border-light);
   }
-
-  /* ============== ДОМАШКА ============== */
 
   .diary-wrap[data-view="homework"] {
     display: none;
@@ -1127,8 +1121,6 @@
   .hw-empty-text { font-size: 17px; font-weight: 700; color: var(--text-primary); }
   .hw-empty-hint { font-size: 13px; max-width: 360px; line-height: 1.4; }
 
-  /* ============== МОДАЛКИ ============== */
-
   .hw-modal-overlay {
     position: fixed; inset: 0;
     background: rgba(10, 10, 30, 0.55);
@@ -1225,8 +1217,6 @@
   .hw-btn-cancel:hover { filter: brightness(0.95); }
   .hw-btn-save { background: #6C5CE7; color: #fff; }
   .hw-btn-save:hover { filter: brightness(1.1); }
-
-  /* ============== АВТОРИЗАЦИЯ ============== */
 
   .auth-overlay {
     position: fixed; inset: 0;
@@ -1417,7 +1407,6 @@
 </head>
 <body>
 
-  <!-- БОКОВОЕ МЕНЮ -->
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
@@ -1444,7 +1433,6 @@
     <div class="sidebar-foot">Р144С · дневник и расписание</div>
   </aside>
 
-  <!-- ШАПКА -->
   <div class="tabs">
     <button class="menu-btn" id="menuBtn" title="Меню" type="button">☰</button>
     <div class="tabs-center">
@@ -1463,14 +1451,12 @@
     </div>
   </div>
 
-  <!-- НАВИГАЦИЯ ПО НЕДЕЛЯМ -->
   <div class="week-nav" id="weekNav">
     <button class="nav-btn" id="navPrev" title="Предыдущая неделя" type="button">‹</button>
     <div class="nav-info" id="navInfo">—</div>
     <button class="nav-btn" id="navNext" title="Следующая неделя" type="button">›</button>
   </div>
 
-  <!-- КОНТЕНТ -->
   <div class="viewport">
     <div class="banner" id="banner">
       <span class="banner-text" id="bannerText">—</span>
@@ -1512,7 +1498,6 @@
       </div>
     </div>
 
-    <!-- ДОМАШКА -->
     <div class="diary-wrap" data-view="homework">
       <div class="homework-page">
         <div class="hw-toolbar">
@@ -1537,7 +1522,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА ДЗ -->
   <div class="hw-modal-overlay" id="hwModal">
     <div class="hw-modal">
       <div class="hw-modal-head">
@@ -1561,7 +1545,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА ВХОДА -->
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
       <div class="auth-head">
@@ -1585,7 +1568,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА СМЕНЫ ФОТО -->
   <div class="avatar-modal-overlay" id="avatarModal">
     <div class="avatar-modal">
       <div class="avatar-modal-head">
@@ -1599,7 +1581,7 @@
 
         <div class="avatar-modal-hint">
           Загрузите фото в формате JPG, PNG или WebP. Максимум 2 МБ.<br>
-          Оно будет видно только вашей группе.
+          Фото видны только вам.
         </div>
 
         <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="avatar-file-input">
@@ -1640,21 +1622,24 @@ function displayName(login) {
   return USER_NAMES[login] || login;
 }
 
-// ================== АВАТАРЫ ==================
+// ================== АВАТАРЫ (приватные) ==================
 const AVATAR_BUCKET = 'avatars';
 let currentAvatarUrl = null;
 let avatarObjectUrl = null;
+let avatarSignedUrlTimer = null;
 
 function avatarPath(userId) {
   return `${userId}/avatar.jpg`;
 }
 
-async function getAvatarPublicUrl(userId) {
+// Генерирует временную подписанную ссылку (действует 1 час)
+async function getAvatarSignedUrl(userId, expiresIn = 3600) {
   if (!userId) return null;
-  const { data } = supabaseClient.storage
+  const { data, error } = await supabaseClient.storage
     .from(AVATAR_BUCKET)
-    .getPublicUrl(avatarPath(userId));
-  return data && data.publicUrl ? data.publicUrl : null;
+    .createSignedUrl(avatarPath(userId), expiresIn);
+  if (error || !data) return null;
+  return data.signedUrl;
 }
 
 async function avatarExists(userId) {
@@ -1673,6 +1658,11 @@ async function refreshAvatarUI() {
   const btnPhoto = document.getElementById('authBtnPhoto');
   const sideFallback = document.querySelector('#sidebarAvatar .sidebar-logo-fallback');
   const sideImg = document.getElementById('sidebarAvatarImg');
+
+  if (avatarSignedUrlTimer) {
+    clearTimeout(avatarSignedUrlTimer);
+    avatarSignedUrlTimer = null;
+  }
 
   if (!currentUserId) {
     currentAvatarUrl = null;
@@ -1693,15 +1683,26 @@ async function refreshAvatarUI() {
     return;
   }
 
-  const url = await getAvatarPublicUrl(currentUserId);
-  if (!url) return;
-  currentAvatarUrl = url + '?t=' + Date.now();
+  const url = await getAvatarSignedUrl(currentUserId, 3600);
+  if (!url) {
+    if (btnIcon) btnIcon.style.display = '';
+    if (btnPhoto) { btnPhoto.style.display = 'none'; }
+    if (sideFallback) sideFallback.style.display = '';
+    if (sideImg) { sideImg.style.display = 'none'; }
+    return;
+  }
+  currentAvatarUrl = url;
 
   if (btnIcon) btnIcon.style.display = 'none';
   if (btnPhoto) { btnPhoto.src = currentAvatarUrl; btnPhoto.style.display = 'block'; }
 
   if (sideFallback) sideFallback.style.display = 'none';
   if (sideImg) { sideImg.src = currentAvatarUrl; sideImg.style.display = 'block'; }
+
+  // Обновляем ссылку за 5 минут до истечения, чтобы фото не пропало
+  avatarSignedUrlTimer = setTimeout(() => {
+    refreshAvatarUI();
+  }, (3600 - 300) * 1000);
 }
 
 // --- Модалка смены фото ---
@@ -2901,7 +2902,7 @@ function updateAuthUI() {
   if (currentUser) {
     btn.classList.add('logged-in');
     btn.title = 'Вы вошли как ' + displayName(currentUser) + '. Нажмите, чтобы открыть профиль.';
-    if (sideUser) { sideUser.textContent = 'Вошёл: ' + displayName(currentUser); sideUser.classList.add('visible'); }
+    if (sideUser) { sideUser.textContent = displayName(currentUser); sideUser.classList.add('visible'); }
   } else {
     btn.classList.remove('logged-in');
     btn.title = 'Войти';
