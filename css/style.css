@@ -2496,3 +2496,37 @@ tr:last-child td { border-bottom: none; }
     grid-template-columns: 1fr !important;
   }
 }
+  /* Кнопка «Очистить всё дз» */
+  .hw-clear-all-btn {
+    margin-left: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--accent-odd);
+    background: transparent;
+    color: var(--accent-odd);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .hw-clear-all-btn:hover {
+    background: rgba(217, 100, 74, 0.1);
+  }
+  [data-theme="dark"] .hw-clear-all-btn:hover {
+    background: rgba(240, 141, 114, 0.12);
+  }
+  .hw-clear-all-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 900px) {
+    .hw-clear-all-btn {
+      font-size: 11px;
+      padding: 4px 9px;
+      margin-left: 6px;
+    }
+  }
