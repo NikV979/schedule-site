@@ -364,6 +364,11 @@
   body.view-homework .week-nav { display: none !important; }
   body.view-homework .banner { display: none !important; }
 
+  body.view-files .tab[data-view],
+  body.view-files .tab-today { display: none !important; }
+  body.view-files .week-nav { display: none !important; }
+  body.view-files .banner { display: none !important; }
+
   .week-nav {
     position: fixed;
     top: calc(60px + env(safe-area-inset-top));
@@ -1325,6 +1330,229 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* ============== ФАЙЛЫ ============== */
+
+  .diary-wrap[data-view="files"] {
+    display: none;
+    width: 100%; flex: 1; min-height: 0;
+    overflow-y: auto;
+    align-items: flex-start; justify-content: center;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+  }
+  .diary-wrap[data-view="files"].active { display: flex; }
+
+  .files-page {
+    width: 100%;
+    max-width: 1300px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .files-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .files-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .files-title-count,
+  .files-title-size {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--bg-surface-2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+  }
+
+  .files-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .files-upload-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #6C5CE7;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .files-upload-btn:hover { filter: brightness(1.1); }
+  .files-upload-btn:active { transform: scale(0.96); }
+  .files-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+
+  .files-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding: 10px 14px;
+    background: var(--bg-surface-2);
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+  }
+
+  .files-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .file-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background 0.15s;
+  }
+  .file-card:hover { background: var(--bg-surface-2); }
+
+  .file-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+  .file-icon.pdf  { background: #E74C3C; }
+  .file-icon.doc  { background: #2B579A; }
+  .file-icon.ppt  { background: #D24726; }
+  .file-icon.img  { background: #00B894; }
+  .file-icon.txt  { background: #6A6A8A; }
+  .file-icon.other { background: #6C5CE7; }
+
+  .file-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: break-word;
+    line-height: 1.3;
+    cursor: pointer;
+  }
+  .file-name:hover { text-decoration: underline; }
+
+  .file-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .file-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .file-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .file-btn:hover { filter: brightness(0.94); }
+  .file-btn-del { color: #E17055; }
+  .file-btn-del:hover { background: #FFF0EB; }
+  [data-theme="dark"] .file-btn-del:hover { background: #3A2A22; }
+
+  .files-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .files-empty.active { display: flex; }
+  .files-empty-icon { font-size: 56px; opacity: 0.5; line-height: 1; }
+  .files-empty-text { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+  .files-empty-hint { font-size: 13px; max-width: 380px; line-height: 1.4; }
+
+  .file-input-hidden { display: none; }
+
+  .file-pick-area {
+    border: 2px dashed var(--border-light);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg-surface-2);
+  }
+  .file-pick-area:hover {
+    border-color: #6C5CE7;
+    background: var(--bg-surface-3);
+  }
+  .file-pick-area.has-file {
+    border-style: solid;
+    border-color: #00B894;
+    background: #E4F7EE;
+  }
+  [data-theme="dark"] .file-pick-area.has-file { background: #123A2E; }
+  .file-pick-area.error {
+    border-color: #E17055;
+    background: #FFF0EB;
+  }
+  [data-theme="dark"] .file-pick-area.error { background: #3A2A22; }
+
+  .file-pick-icon { font-size: 36px; margin-bottom: 6px; line-height: 1; }
+  .file-pick-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: break-word;
+  }
+  .file-pick-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
   @media (max-width: 900px) {
     .tab-desktop { display: none; }
     .tab-mobile  { display: inline-block; }
@@ -1394,6 +1622,14 @@
     .hw-item { padding: 10px 12px; gap: 10px; }
     .hw-check { width: 22px; height: 22px; }
     .hw-check.done::after { top: 2px; left: 6px; width: 5px; height: 10px; }
+
+    .files-page { padding: 12px; gap: 12px; }
+    .files-title { font-size: 20px; }
+    .files-upload-btn { padding: 9px 14px; font-size: 13px; }
+    .file-card { padding: 10px 12px; gap: 10px; }
+    .file-icon { width: 40px; height: 40px; font-size: 11px; }
+    .file-name { font-size: 14px; }
+    .file-meta { font-size: 11px; }
   }
 
   @media (max-width: 500px) {
@@ -1428,6 +1664,10 @@
       <button class="sidebar-item" data-page="homework" type="button">
         <span class="sidebar-icon">📝</span>
         <span>Домашка</span>
+      </button>
+      <button class="sidebar-item" data-page="files" type="button">
+        <span class="sidebar-icon">📁</span>
+        <span>Файлы</span>
       </button>
     </nav>
     <div class="sidebar-foot">Р144С · дневник и расписание</div>
@@ -1520,6 +1760,33 @@
         </div>
       </div>
     </div>
+
+    <div class="diary-wrap" data-view="files">
+      <div class="files-page">
+        <div class="files-toolbar">
+          <div class="files-title">
+            Файлы
+            <span class="files-title-count" id="filesTotalCount">0 файлов</span>
+            <span class="files-title-size" id="filesTotalSize">0 МБ</span>
+          </div>
+          <div class="files-actions">
+            <button class="files-upload-btn" id="filesUploadBtn" type="button">
+              <span>+</span> Загрузить файл
+            </button>
+          </div>
+        </div>
+        <div class="files-hint">
+          Можно загружать PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT. Максимум 25 МБ на файл.<br>
+          Файлы видны только вам.
+        </div>
+        <div class="files-grid" id="filesGrid"></div>
+        <div class="files-empty" id="filesEmpty">
+          <div class="files-empty-icon">📁</div>
+          <div class="files-empty-text">Пока нет ни одного файла</div>
+          <div class="files-empty-hint">Нажмите «Загрузить файл», чтобы добавить книгу, методичку или конспект. Файлы хранятся в облаке и доступны вам на любом устройстве.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="hw-modal-overlay" id="hwModal">
@@ -1541,6 +1808,33 @@
       <div class="hw-modal-foot">
         <button class="hw-btn hw-btn-cancel" id="hwCancel" type="button">Отмена</button>
         <button class="hw-btn hw-btn-save" id="hwSave" type="button">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hw-modal-overlay" id="fileModal">
+    <div class="hw-modal">
+      <div class="hw-modal-head">
+        <h2>Загрузить файл</h2>
+        <button class="hw-modal-close" id="fileModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="hw-modal-body">
+        <label class="hw-field-label" for="fileInput">Выберите файл</label>
+        <input type="file" id="fileInput" class="file-input-hidden"
+               accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/png,text/plain">
+
+        <div class="file-pick-area" id="filePickArea">
+          <div class="file-pick-icon">📄</div>
+          <div class="file-pick-text" id="filePickText">Нажмите, чтобы выбрать файл</div>
+          <div class="file-pick-hint">PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT · до 25 МБ</div>
+        </div>
+
+        <label class="hw-field-label" for="fileDisplayName" style="margin-top: 16px;">Название (необязательно)</label>
+        <input class="hw-input" id="fileDisplayName" type="text" placeholder="Например: Конспект по матану, лекция 3" autocomplete="off" maxlength="120">
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-cancel" id="fileCancel" type="button">Отмена</button>
+        <button class="hw-btn hw-btn-save" id="fileSave" type="button">Загрузить</button>
       </div>
     </div>
   </div>
@@ -1632,7 +1926,6 @@ function avatarPath(userId) {
   return `${userId}/avatar.jpg`;
 }
 
-// Генерирует временную подписанную ссылку (действует 1 час)
 async function getAvatarSignedUrl(userId, expiresIn = 3600) {
   if (!userId) return null;
   const { data, error } = await supabaseClient.storage
@@ -1699,13 +1992,11 @@ async function refreshAvatarUI() {
   if (sideFallback) sideFallback.style.display = 'none';
   if (sideImg) { sideImg.src = currentAvatarUrl; sideImg.style.display = 'block'; }
 
-  // Обновляем ссылку за 5 минут до истечения, чтобы фото не пропало
   avatarSignedUrlTimer = setTimeout(() => {
     refreshAvatarUI();
   }, (3600 - 300) * 1000);
 }
 
-// --- Модалка смены фото ---
 const avatarModal = document.getElementById('avatarModal');
 const avatarFileInput = document.getElementById('avatarFileInput');
 const avatarPreview = document.getElementById('avatarPreview');
@@ -2168,7 +2459,7 @@ function renderBellPage() {
 }
 
 function renderActiveDiary() {
-  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') return;
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework' || currentView === 'files') return;
   const monday = getCurrentMonday();
   const thursday = addDays(monday, 3);
   const type = getCurrentType();
@@ -2317,7 +2608,7 @@ function updateNavInfo() {
   const prevBtn = document.getElementById('navPrev');
   const nextBtn = document.getElementById('navNext');
 
-  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') {
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework' || currentView === 'files') {
     nav.classList.add('hidden');
     return;
   }
@@ -2333,7 +2624,7 @@ function updateBanner() {
   const bannerText = document.getElementById('bannerText');
   const bannerBtn = document.getElementById('bannerBtn');
 
-  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework') {
+  if (currentView === 'bell' || currentView === 'mobile' || currentView === 'homework' || currentView === 'files') {
     banner.classList.remove('active');
     return;
   }
@@ -2371,6 +2662,8 @@ function setViewUI(view) {
 }
 
 async function applyView(type) {
+  document.body.classList.remove('view-homework', 'view-files');
+
   if (type === 'homework') {
     currentView = 'homework';
     document.body.classList.add('view-homework');
@@ -2384,7 +2677,18 @@ async function applyView(type) {
     return;
   }
 
-  document.body.classList.remove('view-homework');
+  if (type === 'files') {
+    currentView = 'files';
+    document.body.classList.add('view-files');
+    await loadFilesFromCloud();
+    renderFiles();
+    setViewUI('files');
+    updateNavInfo();
+    updateBanner();
+    updateSidebarActive('files');
+    return;
+  }
+
   previousScheduleView = type;
   updateSidebarActive('schedule');
 
@@ -2484,9 +2788,13 @@ sidebarItems.forEach(item => {
     closeSidebar();
     const page = item.dataset.page;
     if (page === 'homework') applyView('homework');
+    else if (page === 'files') applyView('files');
     else {
-      if (previousScheduleView && previousScheduleView !== 'homework') applyView(previousScheduleView);
-      else applyView(isMobileLayout() ? 'mobile' : getCurrentType());
+      if (previousScheduleView && previousScheduleView !== 'homework' && previousScheduleView !== 'files') {
+        applyView(previousScheduleView);
+      } else {
+        applyView(isMobileLayout() ? 'mobile' : getCurrentType());
+      }
     }
   });
 });
@@ -2515,6 +2823,315 @@ function unsubscribeHwRealtime() {
   supabaseClient.removeChannel(hwRealtimeChannel);
   hwRealtimeChannel = null;
 }
+
+// ================== ФАЙЛЫ ==================
+const FILES_BUCKET = 'files';
+const FILE_MAX_SIZE = 25 * 1024 * 1024;
+const FILE_ALLOWED_MIME = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'image/jpeg',
+  'image/png',
+  'text/plain'
+];
+
+let filesItems = [];
+let filesLoading = false;
+
+function getFileIconClass(mime) {
+  if (!mime) return 'other';
+  if (mime === 'application/pdf') return 'pdf';
+  if (mime.startsWith('image/')) return 'img';
+  if (mime.includes('word')) return 'doc';
+  if (mime.includes('presentation') || mime.includes('powerpoint')) return 'ppt';
+  if (mime.startsWith('text/')) return 'txt';
+  return 'other';
+}
+
+function getFileIconText(mime, name) {
+  if (!mime && name) {
+    const ext = name.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return 'PDF';
+    if (['doc','docx'].includes(ext)) return 'DOC';
+    if (['ppt','pptx'].includes(ext)) return 'PPT';
+    if (['jpg','jpeg','png'].includes(ext)) return 'IMG';
+    if (ext === 'txt') return 'TXT';
+  }
+  const cls = getFileIconClass(mime);
+  if (cls === 'pdf') return 'PDF';
+  if (cls === 'doc') return 'DOC';
+  if (cls === 'ppt') return 'PPT';
+  if (cls === 'img') return 'IMG';
+  if (cls === 'txt') return 'TXT';
+  return 'FILE';
+}
+
+function formatSize(bytes) {
+  if (!bytes && bytes !== 0) return '';
+  if (bytes < 1024) return bytes + ' Б';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' МБ';
+}
+
+function formatFileDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const day = d.getDate();
+  const months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${day} ${months[d.getMonth()]} ${hh}:${mm}`;
+}
+
+async function loadFilesFromCloud() {
+  filesLoading = true;
+  const { data, error } = await supabaseClient
+    .from('files')
+    .select('id, user_id, user_login, name, size, mime_type, storage_path, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Ошибка загрузки файлов:', error);
+    showToast('Не удалось загрузить файлы');
+    filesItems = [];
+  } else {
+    filesItems = data || [];
+  }
+  filesLoading = false;
+}
+
+function renderFiles() {
+  const grid = document.getElementById('filesGrid');
+  const empty = document.getElementById('filesEmpty');
+  const countEl = document.getElementById('filesTotalCount');
+  const sizeEl = document.getElementById('filesTotalSize');
+  if (!grid || !empty) return;
+
+  if (filesLoading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
+
+  const totalSize = filesItems.reduce((s, f) => s + (f.size || 0), 0);
+
+  if (countEl) {
+    const n = filesItems.length;
+    let word = 'файлов';
+    if (n % 10 === 1 && n % 100 !== 11) word = 'файл';
+    else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'файла';
+    countEl.textContent = `${n} ${word}`;
+  }
+  if (sizeEl) {
+    sizeEl.textContent = formatSize(totalSize);
+  }
+
+  if (filesItems.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.add('active');
+    return;
+  }
+  empty.classList.remove('active');
+
+  let html = '';
+  for (const item of filesItems) {
+    const cls = getFileIconClass(item.mime_type);
+    const iconText = getFileIconText(item.mime_type, item.name);
+    const canDelete = currentUser && item.user_login === currentUser;
+    const safeName = escapeHtml(item.name);
+
+    html += `
+      <div class="file-card" data-id="${item.id}">
+        <div class="file-icon ${cls}">${iconText}</div>
+        <div class="file-info">
+          <div class="file-name" data-open-id="${item.id}">${safeName}</div>
+          <div class="file-meta">
+            <span>${formatSize(item.size)}</span>
+            <span>·</span>
+            <span>${formatFileDate(item.created_at)}</span>
+          </div>
+        </div>
+        <div class="file-actions">
+          <button class="file-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
+          ${canDelete ? `<button class="file-btn file-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
+        </div>
+      </div>`;
+  }
+  grid.innerHTML = html;
+
+  grid.querySelectorAll('[data-open-id], [data-download-id]').forEach(el => {
+    el.addEventListener('click', async e => {
+      e.stopPropagation();
+      const id = el.dataset.openId || el.dataset.downloadId;
+      await downloadFileById(id);
+    });
+  });
+
+  grid.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const id = btn.dataset.deleteId;
+      await deleteFileById(id);
+    });
+  });
+}
+
+async function downloadFileById(id) {
+  const item = filesItems.find(x => String(x.id) === String(id));
+  if (!item) return;
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from(FILES_BUCKET)
+      .createSignedUrl(item.storage_path, 300);
+    if (error || !data) throw new Error(error ? error.message : 'Нет ссылки');
+
+    const a = document.createElement('a');
+    a.href = data.signedUrl;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.download = item.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка скачивания: ' + err.message);
+  }
+}
+
+async function deleteFileById(id) {
+  if (!currentUser) { showToast('Войдите, чтобы удалять файлы'); return; }
+  const item = filesItems.find(x => String(x.id) === String(id));
+  if (!item) return;
+  if (!confirm(`Удалить файл?\n\n«${item.name}»`)) return;
+
+  try {
+    const { error: storageErr } = await supabaseClient.storage
+      .from(FILES_BUCKET)
+      .remove([item.storage_path]);
+    if (storageErr) console.warn('Storage delete error:', storageErr);
+
+    const { error } = await supabaseClient.from('files').delete().eq('id', id);
+    if (error) throw error;
+
+    filesItems = filesItems.filter(x => String(x.id) !== String(id));
+    renderFiles();
+    showToast('Файл удалён');
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка удаления: ' + err.message);
+  }
+}
+
+const fileModal = document.getElementById('fileModal');
+const fileInput = document.getElementById('fileInput');
+const filePickArea = document.getElementById('filePickArea');
+const filePickText = document.getElementById('filePickText');
+const fileDisplayName = document.getElementById('fileDisplayName');
+let pickedFile = null;
+
+function openFileModal() {
+  if (!currentUser) { showToast('Войдите, чтобы загружать файлы'); openAuthModal(); return; }
+  pickedFile = null;
+  fileInput.value = '';
+  fileDisplayName.value = '';
+  filePickText.textContent = 'Нажмите, чтобы выбрать файл';
+  filePickArea.classList.remove('has-file', 'error');
+  fileModal.classList.add('active');
+}
+function closeFileModal() {
+  fileModal.classList.remove('active');
+  pickedFile = null;
+  fileInput.value = '';
+}
+
+filePickArea.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+
+  if (!FILE_ALLOWED_MIME.includes(f.type)) {
+    filePickArea.classList.add('error');
+    filePickArea.classList.remove('has-file');
+    filePickText.textContent = 'Формат не разрешён';
+    showToast('Можно загружать только PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT');
+    pickedFile = null;
+    return;
+  }
+  if (f.size > FILE_MAX_SIZE) {
+    filePickArea.classList.add('error');
+    filePickArea.classList.remove('has-file');
+    filePickText.textContent = 'Файл слишком большой';
+    showToast('Максимум 25 МБ на файл');
+    pickedFile = null;
+    return;
+  }
+
+  pickedFile = f;
+  filePickArea.classList.add('has-file');
+  filePickArea.classList.remove('error');
+  filePickText.textContent = f.name + ' (' + formatSize(f.size) + ')';
+
+  if (!fileDisplayName.value) {
+    const baseName = f.name.replace(/\.[^.]+$/, '');
+    fileDisplayName.value = baseName;
+  }
+});
+
+async function uploadPickedFile() {
+  if (!currentUser || !currentUserId) { showToast('Войдите в аккаунт'); return; }
+  if (!pickedFile) { showToast('Сначала выберите файл'); return; }
+
+  const saveBtn = document.getElementById('fileSave');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Загружаю…';
+
+  try {
+    const unique = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const safeName = pickedFile.name.replace(/[^\w\s.\-а-яА-ЯёЁ]/g, '_');
+    const storagePath = `${currentUserId}/${unique}_${safeName}`;
+
+    const { error: uploadErr } = await supabaseClient.storage
+      .from(FILES_BUCKET)
+      .upload(storagePath, pickedFile, {
+        contentType: pickedFile.type,
+        upsert: false
+      });
+    if (uploadErr) throw uploadErr;
+
+    const displayName = (fileDisplayName.value.trim() || pickedFile.name).slice(0, 120);
+    const { error: dbErr } = await supabaseClient.from('files').insert({
+      user_id: currentUserId,
+      user_login: currentUser,
+      name: displayName,
+      size: pickedFile.size,
+      mime_type: pickedFile.type,
+      storage_path: storagePath
+    });
+
+    if (dbErr) {
+      await supabaseClient.storage.from(FILES_BUCKET).remove([storagePath]);
+      throw dbErr;
+    }
+
+    showToast('Файл загружен');
+    closeFileModal();
+    await loadFilesFromCloud();
+    renderFiles();
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка загрузки: ' + (err.message || 'неизвестная'));
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Загрузить';
+  }
+}
+
+document.getElementById('filesUploadBtn').addEventListener('click', openFileModal);
+document.getElementById('fileModalClose').addEventListener('click', closeFileModal);
+document.getElementById('fileCancel').addEventListener('click', closeFileModal);
+document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
+fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
 
 // ================== ДОМАШКА ==================
 const SUBJECT_FIXED_COLORS = {
@@ -2902,7 +3519,7 @@ function updateAuthUI() {
   if (currentUser) {
     btn.classList.add('logged-in');
     btn.title = 'Вы вошли как ' + displayName(currentUser) + '. Нажмите, чтобы открыть профиль.';
-    if (sideUser) { sideUser.textContent = displayName(currentUser); sideUser.classList.add('visible'); }
+    if (sideUser) { sideUser.textContent = 'Вошёл: ' + displayName(currentUser); sideUser.classList.add('visible'); }
   } else {
     btn.classList.remove('logged-in');
     btn.title = 'Войти';
@@ -2944,6 +3561,7 @@ async function logout() {
   await refreshAvatarUI();
   updateAuthUI();
   if (currentView === 'homework') { hwItems = []; renderHomework(); }
+  if (currentView === 'files') { filesItems = []; renderFiles(); }
   showToast('Вы вышли из аккаунта');
 }
 
@@ -2967,6 +3585,7 @@ async function submitAuth() {
     closeAuthModal();
     updateAuthUI();
     if (currentView === 'homework') { await loadHwItemsFromCloud(); renderHomework(); }
+    if (currentView === 'files') { await loadFilesFromCloud(); renderFiles(); }
     showToast('Добро пожаловать, ' + displayName(res.login) + '!');
   } else {
     authError.textContent = res.msg;
@@ -3017,7 +3636,7 @@ window.addEventListener('resize', () => {
   const nowMobile = isMobileLayout();
   if (nowMobile !== lastMobileState) {
     lastMobileState = nowMobile;
-    if (currentView === 'homework') {}
+    if (currentView === 'homework' || currentView === 'files') {}
     else if (nowMobile) { if (!mobileDate) initMobileDate(); applyView('mobile'); }
     else applyView(getCurrentType());
   }
@@ -3055,6 +3674,7 @@ window.addEventListener('load', async () => {
 
   const savedPage = localStorage.getItem('r144s-page') || 'schedule';
   if (savedPage === 'homework') applyView('homework');
+  else if (savedPage === 'files') applyView('files');
   else {
     if (isMobileLayout()) applyView('mobile');
     else applyView(getCurrentType());
