@@ -65,7 +65,7 @@ if (sidebarThemeBtnEl) {
   });
 }
 
-// Синхронизация иконок при загрузке (на случай, если тема уже сохранена)
+// Синхронизация иконок при загрузке
 window.addEventListener('load', () => {
   const saved = document.documentElement.getAttribute('data-theme') || 'light';
   applyTheme(saved);
