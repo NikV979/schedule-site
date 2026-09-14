@@ -242,7 +242,7 @@ authOverlay.addEventListener('click', e => { if (e.target === authOverlay) close
 authPasswordInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
 authLoginInput.addEventListener('keydown', e => { if (e.key === 'Enter') authPasswordInput.focus(); });
 
-// ========== МОДАЛКА АВАТАРА ==========
+// ========== МОДАЛКА ПРОФИЛЯ ==========
 const avatarModal = document.getElementById('avatarModal');
 const avatarFileInput = document.getElementById('avatarFileInput');
 const avatarPreview = document.getElementById('avatarPreview');
@@ -250,11 +250,24 @@ const avatarPreviewPlaceholder = document.getElementById('avatarPreviewPlacehold
 const avatarUploadBtn = document.getElementById('avatarUploadBtn');
 const avatarRemoveBtn = document.getElementById('avatarRemoveBtn');
 
-function openAvatarModal() {
+async function openAvatarModal() {
   if (!state.currentUser) { showToast('Сначала войдите'); openAuthModal(); return; }
   updateAvatarPreview();
+
+  // Загружаем текущее имя в поле
+  const nameInput = document.getElementById('profileNameInput');
+  if (nameInput) {
+    const currentName = await getUserName();
+    nameInput.value = currentName || '';
+  }
+
+  // Скрываем кнопку «Сохранить» до первого изменения
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  if (saveBtn) saveBtn.style.display = 'none';
+
   avatarModal.classList.add('active');
 }
+
 function closeAvatarModal() {
   avatarModal.classList.remove('active');
   if (state.avatar.objectUrl) {
@@ -306,6 +319,18 @@ avatarFileInput.addEventListener('change', e => {
   if (saveBtn) saveBtn.style.display = '';
 });
 
+// При изменении имени показываем кнопку «Сохранить»
+const profileNameInput = document.getElementById('profileNameInput');
+if (profileNameInput) {
+  profileNameInput.addEventListener('input', () => {
+    const saveBtn = document.getElementById('avatarSaveBtn');
+    if (saveBtn) saveBtn.style.display = '';
+  });
+  profileNameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('avatarSaveBtn').click();
+  });
+}
+
 function compressImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -328,26 +353,53 @@ function compressImage(file) {
   });
 }
 
+// Кнопка «Сохранить» — сохраняет и фото, и имя
 document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
   if (!state.currentUser || !state.currentUserId) return;
+
   const f = avatarFileInput.files && avatarFileInput.files[0];
-  if (!f) { showToast('Выберите фото'); return; }
+  const nameInput = document.getElementById('profileNameInput');
+  const newName = nameInput ? nameInput.value.trim() : '';
+
+  // Смотрим, изменилось ли имя
+  const currentName = await getUserName();
+  const nameChanged = newName && newName !== currentName;
+
+  if (!f && !nameChanged) {
+    showToast('Ничего не изменилось');
+    return;
+  }
+
   const saveBtn = document.getElementById('avatarSaveBtn');
-  saveBtn.disabled = true; saveBtn.textContent = 'Загружаю…';
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Сохраняю…';
+
   try {
-    const blob = await compressImage(f);
-    const { error } = await supabaseClient.storage
-      .from(AVATAR_BUCKET)
-      .upload(avatarPath(state.currentUserId), blob, { contentType: 'image/jpeg', upsert: true });
-    if (error) throw error;
-    showToast('Фото обновлено');
+    // 1. Сохраняем фото, если выбрано
+    if (f) {
+      const blob = await compressImage(f);
+      const { error } = await supabaseClient.storage
+        .from(AVATAR_BUCKET)
+        .upload(avatarPath(state.currentUserId), blob, { contentType: 'image/jpeg', upsert: true });
+      if (error) throw error;
+    }
+
+    // 2. Сохраняем имя, если изменилось
+    if (nameChanged) {
+      const res = await setUserName(newName);
+      if (!res.ok) throw new Error(res.msg);
+    }
+
+    showToast('Профиль обновлён');
     closeAvatarModal();
     await refreshAvatarUI();
+    await updateAuthUI();
   } catch (err) {
     console.error(err);
-    showToast('Ошибка загрузки: ' + (err.message || 'неизвестная'));
+    showToast('Ошибка сохранения: ' + (err.message || 'неизвестная'));
   } finally {
-    saveBtn.disabled = false; saveBtn.textContent = 'Сохранить';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Сохранить';
   }
 });
 
@@ -366,7 +418,7 @@ avatarRemoveBtn.addEventListener('click', async () => {
     console.error(err);
     showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
   } finally {
-    avatarRemoveBtn.disabled = false; avatarRemoveBtn.textContent = 'Удалить';
+    avatarRemoveBtn.disabled = false; avatarRemoveBtn.textContent = 'Удалить фото';
   }
 });
 
@@ -400,6 +452,7 @@ attachFocusScroll(authPasswordInput);
 attachFocusScroll(document.getElementById('hwTask'));
 attachFocusScroll(document.getElementById('hwDeadline'));
 attachFocusScroll(document.getElementById('fileDisplayName'));
+attachFocusScroll(document.getElementById('profileNameInput'));
 
 // ========== МОДАЛКА ВВОДА ИМЕНИ ==========
 const nameModal = document.getElementById('nameModal');
@@ -447,7 +500,6 @@ if (nameModal) {
 // ========== СОГЛАСИЕ И ПОЛИТИКА ПДН ==========
 const privacyModal = document.getElementById('privacyModal');
 
-// Запоминаем, откуда открыли политику, чтобы вернуть окно входа
 let privacyCameFromAuth = false;
 
 function openPrivacyModal() {
