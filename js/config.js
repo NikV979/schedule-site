@@ -38,16 +38,9 @@ const state = {
   },
 };
 
-// ========== ИМЕНА ПОЛЬЗОВАТЕЛЕЙ ==========
-const USER_NAMES = {
-  'user01': 'Мария',
-  'user02': 'Вера',
-  'user03': 'Анастасия',
-  'user04': 'Елизавета',
-  'user05': 'Ксения',
-};
-
+// Имена пользователей хранятся в профиле (Supabase metadata),
+// не в коде. Каждый вводит своё имя при первом входе.
 function displayName(login) {
   if (!login) return '';
-  return USER_NAMES[login] || login;
+  return login;
 }
