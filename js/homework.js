@@ -62,18 +62,25 @@ function formatDeadline(iso) {
   if (diffDays === 1) return `завтра`;
   return `до ${dateStr}`;
 }
-function isDeadlineSoon(iso) {
-  if (!iso) return false;
-  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return false;
-  const now = new Date(); now.setHours(0,0,0,0);
-  const dl = new Date(y, m - 1, d);
-  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
-  return diff <= 2;
-}
 
 function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
 
+// ===== Порядок заданий внутри предмета (localStorage) =====
+function getHwOrderKey(subject) {
+  return 'hw-order-' + encodeURIComponent(subject);
+}
+function getHwOrder(subject) {
+  try {
+    return JSON.parse(localStorage.getItem(getHwOrderKey(subject)) || '[]');
+  } catch (_) { return []; }
+}
+function setHwOrder(subject, ids) {
+  try {
+    localStorage.setItem(getHwOrderKey(subject), JSON.stringify(ids));
+  } catch (_) {}
+}
+
+// ===== Загрузка =====
 async function loadHwItemsFromCloud() {
   state.hw.loading = true;
   const { data, error } = await supabaseClient
@@ -90,12 +97,36 @@ async function loadHwItemsFromCloud() {
   state.hw.loading = false;
 }
 
-// ===== Счётчик в шапке =====
 function updateTabBadge() {
   const badge = document.getElementById('hwTabBadge');
   if (!badge) return;
   badge.textContent = state.hw.items.length;
   badge.style.display = 'inline-flex';
+}
+
+// ===== Сортировка: по сохранённому порядку, потом по дате =====
+function sortHwItems(subject, items) {
+  const savedOrder = getHwOrder(subject);
+  if (savedOrder.length > 0) {
+    const orderMap = new Map();
+    savedOrder.forEach((id, idx) => orderMap.set(String(id), idx));
+    items.sort((a, b) => {
+      const ai = orderMap.has(String(a.id)) ? orderMap.get(String(a.id)) : 9999;
+      const bi = orderMap.has(String(b.id)) ? orderMap.get(String(b.id)) : 9999;
+      if (ai !== bi) return ai - bi;
+      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
+    });
+  } else {
+    items.sort((a, b) => {
+      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
+    });
+  }
 }
 
 // ===== Рендер =====
@@ -123,12 +154,7 @@ function renderHomework() {
   }
 
   for (const subj of Object.keys(bySubject)) {
-    bySubject[subj].sort((a, b) => {
-      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-      if (a.deadline) return -1;
-      if (b.deadline) return 1;
-      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-    });
+    sortHwItems(subj, bySubject[subj]);
   }
 
   const subjectsSorted = [...allSubjects].sort((a, b) => a.localeCompare(b, 'ru'));
@@ -146,15 +172,15 @@ function renderHomework() {
     if (hasItems) {
       for (const item of items) {
         const dlText = formatDeadline(item.deadline);
-        const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
         const isDone = isHwDone(item.id);
         const doneClass = isDone ? ' done' : '';
 
         itemsHtml += `
-          <div class="hw-item${doneClass}" data-id="${item.id}">
+          <div class="hw-item${doneClass}" data-id="${item.id}" draggable="true">
+            <span class="hw-item-grip" title="Перетащить">⋮⋮</span>
             <div class="hw-item-main">
               <div class="hw-item-task">${escapeHtml(item.task)}</div>
-              <div class="hw-item-meta">${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}</div>
+              ${dlText ? `<div class="hw-item-deadline">${escapeHtml(dlText)}</div>` : ''}
             </div>
           </div>`;
       }
@@ -171,14 +197,14 @@ function renderHomework() {
           </div>
           <span class="hw-card-count">${items.length}</span>
         </div>
-        <div class="hw-card-body">${itemsHtml}</div>
+        <div class="hw-card-body" data-subject="${escapeHtml(subj)}">${itemsHtml}</div>
       </div>`;
   }
 
   grid.innerHTML = html;
   empty.classList.remove('active');
 
-  // Клик по карточке предмета — открыть модалку с предзаполненным предметом
+  // Клик по карточке — открыть модалку
   grid.querySelectorAll('.hw-card').forEach(card => {
     card.addEventListener('click', e => {
       if (e.target.closest('.hw-item')) return;
@@ -187,7 +213,7 @@ function renderHomework() {
     });
   });
 
-  // ПКМ по заданию — контекстное меню
+  // ПКМ — контекстное меню
   grid.querySelectorAll('.hw-item').forEach(itemEl => {
     itemEl.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -195,6 +221,59 @@ function renderHomework() {
       const id = itemEl.dataset.id;
       openHwContextMenu(e.clientX, e.clientY, id);
     });
+  });
+
+  // Drag & drop внутри каждого .hw-card-body
+  grid.querySelectorAll('.hw-card-body').forEach(bodyEl => {
+    setupHwDragAndDrop(bodyEl);
+  });
+}
+
+// ===== Drag & drop =====
+function setupHwDragAndDrop(bodyEl) {
+  const subject = bodyEl.dataset.subject;
+  let draggedEl = null;
+
+  bodyEl.querySelectorAll('.hw-item').forEach(itemEl => {
+    itemEl.addEventListener('dragstart', e => {
+      draggedEl = itemEl;
+      itemEl.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', itemEl.dataset.id); } catch (_) {}
+    });
+
+    itemEl.addEventListener('dragend', () => {
+      itemEl.classList.remove('dragging');
+      // Снять выделение с остальных
+      bodyEl.querySelectorAll('.hw-item').forEach(el => el.classList.remove('drag-over'));
+      // Сохранить порядок
+      const ids = [...bodyEl.querySelectorAll('.hw-item')].map(el => el.dataset.id);
+      setHwOrder(subject, ids);
+      draggedEl = null;
+    });
+
+    itemEl.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!draggedEl || draggedEl === itemEl) return;
+      const rect = itemEl.getBoundingClientRect();
+      const isAfter = (e.clientY - rect.top) > (rect.height / 2);
+      bodyEl.querySelectorAll('.hw-item').forEach(el => el.classList.remove('drag-over'));
+      itemEl.classList.add('drag-over');
+      if (isAfter) {
+        itemEl.parentNode.insertBefore(draggedEl, itemEl.nextSibling);
+      } else {
+        itemEl.parentNode.insertBefore(draggedEl, itemEl);
+      }
+    });
+  });
+
+  bodyEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (!draggedEl) return;
+    // Если перетаскиваем на пустое место — в конец
+    if (e.target === bodyEl) {
+      bodyEl.appendChild(draggedEl);
+    }
   });
 }
 
@@ -208,7 +287,6 @@ function openHwModalForSubject(subject) {
   if (!hwModal) return;
 
   try { fillSubjectSelect(); } catch (_) {}
-
   if (hwSubjectEl) hwSubjectEl.value = subject;
 
   hwTaskEl.value = '';
@@ -283,15 +361,11 @@ function closeHwContextMenu() {
 
 function toggleHwDone(id) {
   const isDone = isHwDone(id);
-  if (isDone) {
-    localStorage.removeItem('hw-done-' + id);
-  } else {
-    localStorage.setItem('hw-done-' + id, '1');
-  }
+  if (isDone) localStorage.removeItem('hw-done-' + id);
+  else localStorage.setItem('hw-done-' + id, '1');
   renderHomework();
 }
 
-// Удаление — без подтверждения
 async function deleteHwItem(id) {
   if (!state.currentUser) { showToast('Войдите'); return; }
   const item = state.hw.items.find(x => String(x.id) === String(id));
@@ -309,7 +383,6 @@ async function deleteHwItem(id) {
 function editHwItem(id) {
   const item = state.hw.items.find(x => String(x.id) === String(id));
   if (!item) return;
-
   if (!hwModal) return;
   try { fillSubjectSelect(); } catch (_) {}
 
@@ -350,20 +423,6 @@ function fillSubjectSelect() {
   hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 }
 
-function openHwModal() {
-  if (!hwModal) return;
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы добавлять задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
-  try { fillSubjectSelect(); } catch (_) {}
-  hwTaskEl.value = '';
-  hwDeadlineEl.value = '';
-  resetHwModalTitle();
-  hwModal.classList.add('active');
-  setTimeout(() => hwTaskEl.focus(), 60);
-}
 function closeHwModal() {
   hwModal.classList.remove('active');
   resetHwModalTitle();
@@ -421,7 +480,7 @@ async function saveHwItem() {
   showToast(isEdit ? 'Задание обновлено' : 'Задание добавлено');
 }
 
-// ===== ОБРАБОТЧИКИ МОДАЛКИ =====
+// ===== ОБРАБОТЧИКИ =====
 const hwModalCloseEl = document.getElementById('hwModalClose');
 if (hwModalCloseEl) hwModalCloseEl.addEventListener('click', closeHwModal);
 
