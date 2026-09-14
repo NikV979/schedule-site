@@ -72,27 +72,6 @@ function isDeadlineSoon(iso) {
   return diff <= 2;
 }
 
-function getUrgencyGroup(item) {
-  if (!item.deadline) return 'nodate';
-  const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return 'nodate';
-  const now = new Date(); now.setHours(0,0,0,0);
-  const dl = new Date(y, m - 1, d);
-  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
-  if (diff < 0) return 'overdue';
-  if (diff <= 1) return 'soon';
-  if (diff <= 7) return 'week';
-  return 'later';
-}
-
-const URGENCY_META = {
-  overdue: { title: 'Просрочено',  emoji: '🔴', order: 0 },
-  soon:    { title: 'Срочно',       emoji: '🟡', order: 1 },
-  week:    { title: 'На неделе',    emoji: '📅', order: 2 },
-  later:   { title: 'Позже',        emoji: '🕐', order: 3 },
-  nodate:  { title: 'Без даты',     emoji: '📝', order: 4 },
-};
-
 function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
 
 function updateHwAddBtnState() {
@@ -129,9 +108,28 @@ async function loadHwItemsFromCloud() {
 function updateTabBadge() {
   const badge = document.getElementById('hwTabBadge');
   if (!badge) return;
-  const n = state.hw.items.length;
-  badge.textContent = n;
+  badge.textContent = state.hw.items.length;
   badge.style.display = 'inline-flex';
+}
+
+// ===== Рендер карточки задания =====
+function renderHwItem(item, style) {
+  const dlText = formatDeadline(item.deadline);
+  const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
+  const canDelete = state.currentUser && item.user_login === state.currentUser;
+  const isDone = isHwDone(item.id);
+  const doneClass = isDone ? ' done' : '';
+  const checkDoneClass = isDone ? ' done' : '';
+
+  return `
+    <div class="hw-item${doneClass}" data-id="${item.id}">
+      <div class="hw-check${checkDoneClass}" data-check-id="${item.id}"></div>
+      <div class="hw-item-main">
+        <div class="hw-item-task">${escapeHtml(item.task)}</div>
+        <div class="hw-item-meta">${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}</div>
+      </div>
+      ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" type="button">✕</button>` : ''}
+    </div>`;
 }
 
 function renderHomework() {
@@ -141,109 +139,73 @@ function renderHomework() {
 
   if (state.hw.loading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
-  // Обновляем счётчик в шапке
   updateTabBadge();
 
-  if (state.hw.items.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.add('active');
-    updateHwAddBtnState();
-    return;
-  }
-  empty.classList.remove('active');
+  // Всегда показываем все предметы
+  const allSubjects = getAllSubjects();
 
-  const byUrgency = { overdue: [], soon: [], week: [], later: [], nodate: [] };
+  // Группируем задания по предметам
+  const bySubject = {};
+  for (const subj of allSubjects) bySubject[subj] = [];
   for (const item of state.hw.items) {
-    byUrgency[getUrgencyGroup(item)].push(item);
+    if (!bySubject[item.subject]) bySubject[item.subject] = [];
+    bySubject[item.subject].push(item);
   }
+
+  // Сортируем задания внутри каждого предмета: по дате сдачи, потом по дате создания
+  for (const subj of Object.keys(bySubject)) {
+    bySubject[subj].sort((a, b) => {
+      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
+    });
+  }
+
+  // Сортируем предметы по алфавиту (или по фиксированному порядку, если хочешь)
+  const subjectsSorted = [...allSubjects].sort((a, b) => a.localeCompare(b, 'ru'));
 
   let html = '';
-  const groups = ['overdue', 'soon', 'week', 'later', 'nodate'];
+  for (const subj of subjectsSorted) {
+    const items = bySubject[subj] || [];
+    const hasItems = items.length > 0;
+    const style = getSubjectStyle(subj);
+    const light = isLightColor(style.bg);
+    const lightClass = light ? ' light' : '';
+    const emptyClass = hasItems ? '' : ' hw-card-empty';
 
-  for (const groupKey of groups) {
-    const groupItems = byUrgency[groupKey];
-    if (groupItems.length === 0) continue;
-
-    const meta = URGENCY_META[groupKey];
-
-    const bySubject = {};
-    for (const item of groupItems) {
-      if (!bySubject[item.subject]) bySubject[item.subject] = [];
-      bySubject[item.subject].push(item);
-    }
-    const subjects = Object.keys(bySubject).sort((a, b) => a.localeCompare(b, 'ru'));
-
-    html += `<div class="hw-group">
-      <div class="hw-group-head">
-        <span class="hw-group-emoji">${meta.emoji}</span>
-        <span class="hw-group-title">${meta.title}</span>
-        <span class="hw-group-count">${groupItems.length}</span>
-      </div>
-      <div class="hw-group-body">`;
-
-    for (const subj of subjects) {
-      const items = bySubject[subj];
-      items.sort((a, b) => {
-        if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-        if (a.deadline) return -1;
-        if (b.deadline) return 1;
-        return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-      });
-
-      const style = getSubjectStyle(subj);
-      const light = isLightColor(style.bg);
-      const expandedClass = state.hw.expandedSubjects.has(subj) ? ' expanded' : '';
-      const lightClass = light ? ' light' : '';
-
-      let itemsHtml = '';
+    let itemsHtml = '';
+    if (hasItems) {
       for (const item of items) {
-        const dlText = formatDeadline(item.deadline);
-        const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
-        const canDelete = state.currentUser && item.user_login === state.currentUser;
-        const isDone = isHwDone(item.id);
-        const doneClass = isDone ? ' done' : '';
-        const checkDoneClass = isDone ? ' done' : '';
-
-        itemsHtml += `
-          <div class="hw-item${doneClass}" data-id="${item.id}" style="border-left-color: ${style.bg};">
-            <div class="hw-check${checkDoneClass}" data-check-id="${item.id}"></div>
-            <div class="hw-item-main">
-              <div class="hw-item-task">${escapeHtml(item.task)}</div>
-              <div class="hw-item-meta">${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}</div>
-            </div>
-            ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" type="button">✕</button>` : ''}
-          </div>`;
+        itemsHtml += renderHwItem(item, style);
       }
-
-      html += `
-        <div class="hw-card${expandedClass}" data-subject="${escapeHtml(subj)}" style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
-          <div class="hw-card-head${lightClass}">
-            <div class="hw-card-head-left">
-              <span class="hw-card-arrow">▸</span>
-              <span class="hw-card-subject">${escapeHtml(subj)}</span>
-            </div>
-            <span class="hw-card-count">${items.length}</span>
-          </div>
-          <div class="hw-card-list">${itemsHtml}</div>
-        </div>`;
+    } else {
+      itemsHtml = `<div class="hw-card-noitems">Нет заданий</div>`;
     }
 
-    html += `</div></div>`;
+    html += `
+      <div class="hw-card${emptyClass}" data-subject="${escapeHtml(subj)}"
+           style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
+        <div class="hw-card-head${lightClass}">
+          <div class="hw-card-head-left">
+            <span class="hw-card-subject">${escapeHtml(subj)}</span>
+          </div>
+          <span class="hw-card-count">${items.length}</span>
+        </div>
+        <div class="hw-card-body">${itemsHtml}</div>
+      </div>`;
   }
 
   grid.innerHTML = html;
 
-  grid.querySelectorAll('.hw-card-head').forEach(head => {
-    head.addEventListener('click', () => {
-      const card = head.closest('.hw-card');
-      if (!card) return;
-      const subj = card.dataset.subject;
-      const isExp = card.classList.toggle('expanded');
-      if (isExp) state.hw.expandedSubjects.add(subj);
-      else state.hw.expandedSubjects.delete(subj);
-    });
-  });
+  // Пустое состояние — только если вообще нет предметов
+  if (subjectsSorted.length === 0) {
+    empty.classList.add('active');
+  } else {
+    empty.classList.remove('active');
+  }
 
+  // Обработчики чекбоксов
   grid.querySelectorAll('.hw-check').forEach(check => {
     check.addEventListener('click', e => {
       e.stopPropagation();
@@ -263,6 +225,7 @@ function renderHomework() {
     });
   });
 
+  // Обработчики удаления
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
@@ -344,7 +307,6 @@ async function saveHwItem() {
   if (error) { console.error(error); showToast('Ошибка сохранения'); return; }
 
   closeHwModal();
-  state.hw.expandedSubjects.add(subject);
   await loadHwItemsFromCloud();
   renderHomework();
   showToast('Задание добавлено');
@@ -370,12 +332,11 @@ async function clearAllHw() {
 
   state.hw.items.forEach(item => localStorage.removeItem('hw-done-' + item.id));
   state.hw.items = [];
-  state.hw.expandedSubjects.clear();
   renderHomework();
   showToast('Все задания удалены');
 }
 
-// ===== ОБРАБОТЧИКИ КНОПОК =====
+// ===== ОБРАБОТЧИКИ =====
 const hwAddBtn = document.getElementById('hwAddBtn');
 if (hwAddBtn) {
   hwAddBtn.addEventListener('click', () => {
