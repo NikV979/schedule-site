@@ -86,8 +86,8 @@
       <div class="tab" data-view="bell">Расписание звонков</div>
     </div>
 
-    <!-- Заголовок для вкладки «Домашка» -->
-    <div class="tabs-title" id="tabsTitle">
+    <!-- ======== Шапка «Домашка» ======== -->
+    <div class="tabs-title tabs-title-hw" id="tabsTitle">
       <span class="tabs-title-icon">
         <svg viewBox="0 0 24 24">
           <path d="M12 20h9"></path>
@@ -100,8 +100,8 @@
       <button class="hw-clear-all-btn" id="hwClearAllBtn" type="button" title="Удалить все задания">Очистить всё дз</button>
     </div>
 
-    <!-- Заголовок для вкладки «Файлы» -->
-    <div class="tabs-title files-tabs-title" id="filesTabsTitle">
+    <!-- ======== Шапка «Файлы» ======== -->
+    <div class="tabs-title tabs-title-files" id="filesTabsTitle">
       <span class="tabs-title-icon">
         <svg viewBox="0 0 24 24">
           <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -109,11 +109,21 @@
       </span>
       <span class="tabs-title-text">Файлы</span>
       <span class="tabs-badge" id="filesTabBadge">0</span>
+
+      <input type="search" id="filesSearchInput" class="files-search-top"
+             placeholder="Поиск" autocomplete="off">
+
+      <select class="files-group-select-top" id="filesGroupMode" title="Группировка">
+        <option value="subject">По предметам</option>
+        <option value="type">По типам</option>
+        <option value="none">Без группировки</option>
+      </select>
+
       <button class="hw-clear-all-btn" id="filesClearAllBtn" type="button" title="Удалить все файлы">Очистить всё</button>
+
       <button class="files-upload-btn-top" id="filesUploadTopBtn" type="button">
         <span>+</span> Загрузить файл
       </button>
-      <span class="files-tabs-hint">PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT · до 25 МБ</span>
     </div>
 
     <div class="top-actions">
@@ -185,19 +195,8 @@
     </div>
 
     <div class="diary-wrap" data-view="files">
-      <div class="files-page">
-        <div class="files-controls">
-          <input type="search" id="filesSearchInput" class="files-search"
-                 placeholder="Поиск по названию файла…" autocomplete="off">
-          <label class="files-group-label" for="filesGroupMode">Группировать:</label>
-          <select class="files-group-select" id="filesGroupMode">
-            <option value="subject">По предметам</option>
-            <option value="type">По типам файлов</option>
-            <option value="none">Без группировки</option>
-          </select>
-        </div>
-
-        <div class="files-grid" id="filesGrid"></div>
+      <div class="homework-page">
+        <div class="hw-grid" id="filesGrid"></div>
         <div class="files-empty" id="filesEmpty">
           <div class="files-empty-icon">📁</div>
           <div class="files-empty-text">Пока нет ни одного файла</div>
