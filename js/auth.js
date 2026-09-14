@@ -84,23 +84,19 @@ async function setUserName(name) {
   return { ok: true, name: clean };
 }
 
-// ========== ПРИВЕТСТВИЕ НА ГЛАВНОЙ ==========
-let welcomeTimer = null;
-
-function showWelcomeBanner(name) {
-  const overlay = document.getElementById('welcomeOverlay');
-  const textEl = document.getElementById('welcomeText');
-  if (!overlay || !textEl) return;
-  if (!name) return;
-
-  clearTimeout(welcomeTimer);
-
-  textEl.textContent = 'Привет, ' + name;
-  overlay.classList.add('active');
-
-  welcomeTimer = setTimeout(() => {
-    overlay.classList.remove('active');
-  }, 4000);
+// ========== ИМЯ В ШАПКЕ ==========
+function setHeaderUserName(name) {
+  const el = document.getElementById('headerUserName');
+  if (!el) return;
+  if (name) {
+    el.textContent = 'Привет, ' + name;
+    el.title = name;
+    el.classList.add('visible');
+  } else {
+    el.textContent = '';
+    el.title = '';
+    el.classList.remove('visible');
+  }
 }
 
 // ========== ЛОГИН / ЛОГАУТ ==========
@@ -126,11 +122,13 @@ async function refreshUser() {
     const name = await getUserName();
     if (!name) {
       openNameModal();
+      setHeaderUserName('');
     } else {
-      showWelcomeBanner(name);
+      setHeaderUserName(name);
     }
   } else {
     unsubscribeHwRealtime();
+    setHeaderUserName('');
   }
   await refreshAvatarUI();
 }
@@ -151,13 +149,14 @@ async function updateAuthUI() {
       sideUser.textContent = name;
       sideUser.classList.add('visible');
     }
+    setHeaderUserName(name);
   } else {
     btn.classList.remove('logged-in');
     btn.title = 'Войти';
     if (sideUser) { sideUser.textContent = ''; sideUser.classList.remove('visible'); }
+    setHeaderUserName('');
   }
 
-  // Обновляем состояние кнопки «Очистить всё» в файлах (если она есть)
   if (typeof updateFilesClearBtnState === 'function') updateFilesClearBtnState();
 }
 
@@ -188,6 +187,7 @@ async function logout() {
   state.files.items = [];
   state.files.searchQuery = '';
 
+  setHeaderUserName('');
   await refreshAvatarUI();
   await updateAuthUI();
 
@@ -246,7 +246,7 @@ async function submitAuth() {
     if (!name) {
       openNameModal();
     } else {
-      showWelcomeBanner(name);
+      setHeaderUserName(name);
     }
   } else {
     authError.textContent = res.msg;
@@ -501,7 +501,8 @@ async function saveUserName() {
 
   closeNameModal();
   await updateAuthUI();
-  showWelcomeBanner(res.name);
+  setHeaderUserName(res.name);
+  showToast('Приятно познакомиться, ' + res.name + '!');
 }
 
 if (nameModal) {
