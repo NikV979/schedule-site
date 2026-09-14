@@ -2542,3 +2542,48 @@ tr:last-child td { border-bottom: none; }
     border-radius: 9px;
   }
 }
+/* ============== ПРИВЕТСТВИЕ ============== */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 850;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(80px + env(safe-area-inset-top));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.welcome-overlay.active {
+  opacity: 1;
+}
+
+.welcome-text {
+  font-family: inherit;
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-align: center;
+  padding: 0 20px;
+  background: linear-gradient(135deg, var(--accent-even) 0%, var(--accent-odd) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  transform: translateY(-12px);
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow: 0 8px 40px rgba(91, 75, 214, 0.15);
+  word-break: break-word;
+}
+.welcome-overlay.active .welcome-text {
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .welcome-text { font-size: 40px; }
+}
+@media (max-width: 500px) {
+  .welcome-text { font-size: 30px; }
+}
