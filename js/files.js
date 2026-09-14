@@ -114,18 +114,13 @@ function getFileTypeGroup(item) {
 function renderFileCard(item) {
   const cls = getFileIconClass(item.mime_type);
   const iconText = getFileIconText(item.mime_type, item.name);
-  const canDelete = state.currentUser && item.user_login === state.currentUser;
   const safeName = escapeHtml(item.name);
   return `
     <div class="file-tile" data-id="${item.id}">
       <div class="file-tile-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
-      <div class="file-tile-info">
-        <div class="file-tile-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
+      <div class="file-tile-info" data-open-id="${item.id}" title="Открыть">
+        <div class="file-tile-name">${safeName}</div>
         <div class="file-tile-meta">${formatSize(item.size)}</div>
-      </div>
-      <div class="file-tile-actions">
-        <button class="file-tile-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
-        ${canDelete ? `<button class="file-tile-btn file-tile-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
       </div>
     </div>`;
 }
@@ -137,19 +132,90 @@ function bindFileCardEvents(root) {
       await openFileViewer(el.dataset.openId);
     });
   });
-  root.querySelectorAll('[data-download-id]').forEach(el => {
-    el.addEventListener('click', async e => {
+
+  // Правый клик по файлу — контекстное меню
+  root.querySelectorAll('.file-tile').forEach(tile => {
+    tile.addEventListener('contextmenu', e => {
+      e.preventDefault();
       e.stopPropagation();
-      await downloadFileById(el.dataset.downloadId);
-    });
-  });
-  root.querySelectorAll('[data-delete-id]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      await deleteFileById(btn.dataset.deleteId);
+      openFileContextMenu(tile.dataset.id, e.clientX, e.clientY);
     });
   });
 }
+
+// ===== КОНТЕКСТНОЕ МЕНЮ ФАЙЛА =====
+let fileCtxMenuEl = null;
+
+function closeFileContextMenu() {
+  if (fileCtxMenuEl && fileCtxMenuEl.parentNode) {
+    fileCtxMenuEl.parentNode.removeChild(fileCtxMenuEl);
+  }
+  fileCtxMenuEl = null;
+}
+
+function openFileContextMenu(fileId, x, y) {
+  closeFileContextMenu();
+
+  const item = state.files.items.find(f => String(f.id) === String(fileId));
+  if (!item) return;
+
+  const canDelete = state.currentUser && item.user_login === state.currentUser;
+
+  const menu = document.createElement('div');
+  menu.className = 'file-ctx-menu';
+
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'file-ctx-btn';
+  downloadBtn.innerHTML = '⬇ Скачать';
+  downloadBtn.addEventListener('click', async () => {
+    closeFileContextMenu();
+    await downloadFileById(fileId);
+  });
+  menu.appendChild(downloadBtn);
+
+  if (canDelete) {
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'file-ctx-btn danger';
+    deleteBtn.innerHTML = '✕ Удалить';
+    deleteBtn.addEventListener('click', async () => {
+      closeFileContextMenu();
+      await deleteFileById(fileId);
+    });
+    menu.appendChild(deleteBtn);
+  }
+
+  menu.style.left = '0px';
+  menu.style.top = '0px';
+  document.body.appendChild(menu);
+  fileCtxMenuEl = menu;
+
+  // Позиционируем с учётом размеров
+  const rect = menu.getBoundingClientRect();
+  let left = x;
+  let top = y;
+  if (left + rect.width > window.innerWidth - 8) {
+    left = window.innerWidth - rect.width - 8;
+  }
+  if (top + rect.height > window.innerHeight - 8) {
+    top = window.innerHeight - rect.height - 8;
+  }
+  if (left < 8) left = 8;
+  if (top < 8) top = 8;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+// Глобальные обработчики закрытия контекстного меню
+document.addEventListener('click', () => closeFileContextMenu());
+document.addEventListener('contextmenu', e => {
+  // если клик не по файлу — закрываем
+  if (!e.target.closest('.file-tile')) closeFileContextMenu();
+});
+window.addEventListener('scroll', () => closeFileContextMenu(), true);
+window.addEventListener('resize', () => closeFileContextMenu());
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeFileContextMenu();
+});
 
 function getFileSubject(item) {
   const s = (item.subject || '').trim();
