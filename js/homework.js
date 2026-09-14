@@ -104,29 +104,32 @@ function updateTabBadge() {
   badge.style.display = 'inline-flex';
 }
 
-// ===== Сортировка: по сохранённому порядку, потом по дате =====
 function sortHwItems(subject, items) {
   const savedOrder = getHwOrder(subject);
+  const orderMap = new Map();
   if (savedOrder.length > 0) {
-    const orderMap = new Map();
     savedOrder.forEach((id, idx) => orderMap.set(String(id), idx));
-    items.sort((a, b) => {
+  }
+
+  items.sort((a, b) => {
+    // 1) Сделанные — всегда в самый низ
+    const aDone = isHwDone(a.id) ? 1 : 0;
+    const bDone = isHwDone(b.id) ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+
+    // 2) Среди несделанных — по сохранённому порядку
+    if (!aDone && !bDone && savedOrder.length > 0) {
       const ai = orderMap.has(String(a.id)) ? orderMap.get(String(a.id)) : 9999;
       const bi = orderMap.has(String(b.id)) ? orderMap.get(String(b.id)) : 9999;
       if (ai !== bi) return ai - bi;
-      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-      if (a.deadline) return -1;
-      if (b.deadline) return 1;
-      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-    });
-  } else {
-    items.sort((a, b) => {
-      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-      if (a.deadline) return -1;
-      if (b.deadline) return 1;
-      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-    });
-  }
+    }
+
+    // 3) Среди несделанных без сохранённого порядка — по дате сдачи
+    if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+    if (a.deadline) return -1;
+    if (b.deadline) return 1;
+    return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
+  });
 }
 
 // ===== Рендер =====
