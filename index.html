@@ -86,7 +86,6 @@
       <div class="tab" data-view="bell">Расписание звонков</div>
     </div>
 
-    <!-- Заголовок для вкладки «Домашка» — показывается только когда открыта домашка -->
     <div class="tabs-title" id="tabsTitle">
       <span class="tabs-title-icon">
         <svg viewBox="0 0 24 24">
@@ -157,19 +156,11 @@
 
     <div class="diary-wrap" data-view="homework">
       <div class="homework-page">
-        <!-- Дашборд убран. Остаётся только строка с кнопками -->
-        <div class="hw-actions-row">
-          <button class="hw-clear-btn" id="hwClearBtn" type="button">Очистить всё</button>
-          <button class="hw-add-btn" id="hwAddBtn" type="button">
-            <span>+</span> Добавить задание
-          </button>
-        </div>
-
         <div class="hw-grid" id="hwGrid"></div>
         <div class="hw-empty" id="hwEmpty">
           <div class="hw-empty-icon">📝</div>
           <div class="hw-empty-text">Пока нет ни одного задания</div>
-          <div class="hw-empty-hint">Нажмите «Добавить задание», чтобы создать первое. Задания синхронизируются с вашим аккаунтом и видны на любом устройстве.</div>
+          <div class="hw-empty-hint">Нажмите на предмет, чтобы добавить задание.</div>
         </div>
       </div>
     </div>
@@ -409,7 +400,6 @@
     </div>
   </div>
 
-  <!-- ============== TOAST ============== -->
   <div class="toast" id="toast"></div>
 
 </body>
