@@ -2261,6 +2261,26 @@
 
   /* ====== Файлы на телефоне — список строк вместо плиток ====== */
   @media (max-width: 700px) {
+        /* Фильтры на телефоне — поиск на всю ширину, потом селект ниже */
+    .files-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .files-search {
+      width: 100%;
+      min-width: 0;
+      flex: none;
+    }
+    .files-group-label {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .files-group-select {
+      width: 100%;
+      padding: 10px 34px 10px 14px;
+      font-size: 14px;
+    }
     .files-tiles-grid {
       grid-template-columns: 1fr !important;
       gap: 8px !important;
