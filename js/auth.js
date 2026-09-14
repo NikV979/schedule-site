@@ -60,7 +60,7 @@ document.addEventListener('visibilitychange', () => {
   refreshAvatarUI();
 });
 
-// ========== ИМЯ ПОЛЬЗОВАТЕЛЯ (хранится в Supabase metadata) ==========
+// ========== ИМЯ ПОЛЬЗОВАТЕЛЯ ==========
 function displayName(login) {
   if (!login) return '';
   return login;
@@ -133,7 +133,8 @@ async function updateAuthUI() {
     btn.title = 'Войти';
     if (sideUser) { sideUser.textContent = ''; sideUser.classList.remove('visible'); }
   }
-  updateHwAddBtnState();
+
+  // Обновляем состояние кнопки «Очистить всё» в файлах (если она есть)
   if (typeof updateFilesClearBtnState === 'function') updateFilesClearBtnState();
 }
 
@@ -254,14 +255,12 @@ async function openAvatarModal() {
   if (!state.currentUser) { showToast('Сначала войдите'); openAuthModal(); return; }
   updateAvatarPreview();
 
-  // Загружаем текущее имя в поле
   const nameInput = document.getElementById('profileNameInput');
   if (nameInput) {
     const currentName = await getUserName();
     nameInput.value = currentName || '';
   }
 
-  // Скрываем кнопку «Сохранить» до первого изменения
   const saveBtn = document.getElementById('avatarSaveBtn');
   if (saveBtn) saveBtn.style.display = 'none';
 
@@ -319,7 +318,6 @@ avatarFileInput.addEventListener('change', e => {
   if (saveBtn) saveBtn.style.display = '';
 });
 
-// При изменении имени показываем кнопку «Сохранить»
 const profileNameInput = document.getElementById('profileNameInput');
 if (profileNameInput) {
   profileNameInput.addEventListener('input', () => {
@@ -353,7 +351,6 @@ function compressImage(file) {
   });
 }
 
-// Кнопка «Сохранить» — сохраняет и фото, и имя
 document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
   if (!state.currentUser || !state.currentUserId) return;
 
@@ -361,7 +358,6 @@ document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
   const nameInput = document.getElementById('profileNameInput');
   const newName = nameInput ? nameInput.value.trim() : '';
 
-  // Смотрим, изменилось ли имя
   const currentName = await getUserName();
   const nameChanged = newName && newName !== currentName;
 
@@ -375,7 +371,6 @@ document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
   saveBtn.textContent = 'Сохраняю…';
 
   try {
-    // 1. Сохраняем фото, если выбрано
     if (f) {
       const blob = await compressImage(f);
       const { error } = await supabaseClient.storage
@@ -384,7 +379,6 @@ document.getElementById('avatarSaveBtn').addEventListener('click', async () => {
       if (error) throw error;
     }
 
-    // 2. Сохраняем имя, если изменилось
     if (nameChanged) {
       const res = await setUserName(newName);
       if (!res.ok) throw new Error(res.msg);
@@ -428,7 +422,7 @@ document.getElementById('avatarLogoutBtn').addEventListener('click', async () =>
   if (confirm('Выйти из аккаунта?')) { closeAvatarModal(); await logout(); }
 });
 
-// ========== ПОДСТРОЙКА ПОД КЛАВИАТУРУ (мобильные) ==========
+// ========== ПОДСТРОЙКА ПОД КЛАВИАТУРУ ==========
 if (window.visualViewport) {
   const updateVVH = () => {
     document.documentElement.style.setProperty('--vvh', window.visualViewport.height + 'px');
