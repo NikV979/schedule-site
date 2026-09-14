@@ -1631,7 +1631,7 @@ tr:last-child td { border-bottom: none; }
 }
 
 /* ============================================================ */
-/* ===== FILES — в стиле ДОМАШКИ (3×3, карточки, поиск в шапке) */
+/* ===== FILES — в стиле ДОМАШКИ ============================= */
 /* ============================================================ */
 
 .diary-wrap[data-view="files"] {
@@ -1664,7 +1664,7 @@ tr:last-child td { border-bottom: none; }
   font-weight: 500;
 }
 
-/* Карточка-группа файлов (аналог hw-card) */
+/* Карточка-группа файлов */
 .files-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -1691,30 +1691,24 @@ tr:last-child td { border-bottom: none; }
 }
 .files-card-head:hover { filter: brightness(1.06); }
 
-.files-card-arrow {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
-  opacity: 0.85;
-  transition: transform 0.25s ease;
-  flex-shrink: 0;
-}
-.files-card.expanded .files-card-arrow { transform: rotate(90deg); }
-
+/* Метка группы — БЕЗ обводки, просто текст мелким шрифтом */
 .files-card-emoji {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.3px;
-  color: #fff;
-  background: rgba(255,255,255,0.22);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.75;
   flex-shrink: 0;
   line-height: 1;
+  color: currentColor;
+  background: transparent;
+  border: none;
+  padding: 0;
+  min-width: 0;
+  width: auto;
+  height: auto;
+  display: inline-block;
+  border-radius: 0;
 }
 
 .files-card-name {
@@ -1759,7 +1753,7 @@ tr:last-child td { border-bottom: none; }
   opacity: 0.7;
 }
 
-/* Плитка файла внутри карточки */
+/* Плитка файла */
 .file-tile {
   display: flex;
   align-items: center;
@@ -1841,6 +1835,31 @@ tr:last-child td { border-bottom: none; }
 .file-tile-btn-del { color: var(--accent-odd); }
 .file-tile-btn-del:hover { background: rgba(217, 100, 74, 0.12); }
 [data-theme="dark"] .file-tile-btn-del:hover { background: rgba(240, 141, 114, 0.15); }
+
+/* ===== РЕЖИМ «БЕЗ ГРУППИРОВКИ» — маленькие панельки ===== */
+.files-flat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+.files-flat-tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 0.18s, transform 0.18s;
+  overflow: hidden;
+}
+.files-flat-tile:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+.files-flat-tile .file-tile {
+  padding: 10px 12px;
+  border-bottom: none;
+}
 
 /* Загрузка / пусто */
 .files-loading {
@@ -2116,7 +2135,6 @@ tr:last-child td { border-bottom: none; }
     overflow: hidden;
   }
 
-  /* Карточки — домашка и файлы — одинаковые */
   .hw-card,
   .files-card {
     display: flex !important;
@@ -2176,7 +2194,6 @@ tr:last-child td { border-bottom: none; }
     border-radius: 6px;
   }
 
-  /* Пустые карточки — серые */
   .hw-card.hw-card-empty,
   .files-card.files-card-empty {
     opacity: 0.5;
@@ -2194,10 +2211,6 @@ tr:last-child td { border-bottom: none; }
   }
   .hw-card.hw-card-empty .hw-card-count,
   .files-card.files-card-empty .files-card-count {
-    background: var(--bg-surface-3) !important;
-    color: var(--text-secondary) !important;
-  }
-  .files-card.files-card-empty .files-card-emoji {
     background: var(--bg-surface-3) !important;
     color: var(--text-secondary) !important;
   }
@@ -2290,7 +2303,6 @@ tr:last-child td { border-bottom: none; }
   }
   .files-tabs-hint { display: none; }
 
-  /* Поиск и селект в шапке на мобилке — компактнее */
   .files-search-top {
     width: 90px;
     height: 28px;
@@ -2344,7 +2356,6 @@ tr:last-child td { border-bottom: none; }
   .hw-card-subject { font-size: 14px; }
   .hw-item-task { font-size: 13px; }
 
-  /* Файлы на мобилке — карточки в столбик */
   .files-page { padding: 14px; gap: 14px; }
   .files-card-head { padding: 12px 14px; }
   .files-card-name { font-size: 14px; }
@@ -2368,18 +2379,17 @@ tr:last-child td { border-bottom: none; }
     padding: 8px 12px 10px;
   }
 
-  .file-tile {
-    padding: 8px 4px;
-    gap: 10px;
-  }
-  .file-tile-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 10px;
-  }
+  .file-tile { padding: 8px 4px; gap: 10px; }
+  .file-tile-icon { width: 34px; height: 34px; font-size: 10px; }
   .file-tile-name { font-size: 13px; }
   .file-tile-meta { font-size: 11px; }
   .file-tile-btn { width: 30px; height: 30px; font-size: 13px; }
+
+  /* Без группировки — столбик */
+  .files-flat-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 
   .file-viewer-overlay { padding: 0; }
   .file-viewer { max-width: 100%; height: 100vh; border-radius: 0; }
