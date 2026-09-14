@@ -90,7 +90,7 @@ function updateAuthUI() {
     btn.classList.add('logged-in');
     btn.title = 'Вы вошли как ' + displayName(state.currentUser);
     if (sideUser) {
-      sideUser.textContent = 'Вошёл: ' + displayName(state.currentUser);
+      sideUser.textContent = displayName(state.currentUser);
       sideUser.classList.add('visible');
     }
   } else {
