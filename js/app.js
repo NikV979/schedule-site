@@ -66,14 +66,14 @@ window.addEventListener('load', async () => {
 
   await refreshUser();
 
-  const savedPage = localStorage.getItem('r144s-page') || 'schedule';
-  if (savedPage === 'homework') applyView('homework');
-  else if (savedPage === 'files') applyView('files');
-  else if (savedPage === 'bell') applyView('bell');
-  else {
-    if (isMobileLayout()) applyView('mobile');
-    else applyView(getCurrentType());
-  }
+  const savedPage = localStorage.getItem('r144s-page');
+if (savedPage === 'homework') applyView('homework');
+else if (savedPage === 'files') applyView('files');
+else if (savedPage === 'bell') applyView('bell');
+else {
+  if (isMobileLayout()) applyView('mobile');
+  else applyView(getCurrentType());
+}
 
   fitAll();
   setTimeout(fitAll, 100);
