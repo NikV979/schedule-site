@@ -1,4 +1,4 @@
-:root {
+  :root {
     --bg-page:        #EDEFF5;
     --bg-surface:     #FFFFFF;
     --bg-surface-2:   #F5F6FA;
@@ -1922,6 +1922,43 @@
 
     .week-nav { display: none !important; }
     .banner { display: none !important; }
+
+    /* ===== Модалки на мобильных — прижимаем к верху, чтобы клавиатура не перекрывала ===== */
+    .auth-overlay,
+    .avatar-modal-overlay,
+    .hw-modal-overlay {
+      align-items: flex-start;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: 16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .auth-modal,
+    .avatar-modal,
+    .hw-modal {
+      max-height: calc(var(--vvh, 100dvh) - 32px);
+      overflow-y: auto;
+      margin: 0 auto;
+    }
+
+    /* Компактнее отступы — дают запас по высоте */
+    .auth-modal .auth-head { padding: 14px 18px; }
+    .auth-modal .auth-title { font-size: 16px; }
+    .auth-modal .auth-body { padding: 16px 18px 4px; }
+    .auth-modal .auth-label { margin: 10px 0 5px; }
+    .auth-modal .auth-input { padding: 10px 12px; font-size: 15px; }
+    .auth-modal .auth-foot { padding: 12px 18px 16px; }
+    .auth-modal .auth-btn { padding: 10px 18px; }
+
+    .hw-modal .hw-modal-head { padding: 14px 18px; }
+    .hw-modal .hw-modal-head h2 { font-size: 16px; }
+    .hw-modal .hw-modal-body { padding: 16px 18px 4px; }
+    .hw-modal .hw-modal-foot { padding: 12px 18px 16px; }
+
+    .avatar-modal .avatar-modal-head { padding: 14px 18px; }
+    .avatar-modal .avatar-modal-head h2 { font-size: 16px; }
+    .avatar-modal .avatar-modal-body { padding: 18px; gap: 14px; }
+    .avatar-preview { width: 120px; height: 120px; }
 
     .tabs {
       grid-template-columns: 44px 1fr 84px;
