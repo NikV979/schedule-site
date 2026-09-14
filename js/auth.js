@@ -447,19 +447,29 @@ if (nameModal) {
 // ========== СОГЛАСИЕ И ПОЛИТИКА ПДН ==========
 const privacyModal = document.getElementById('privacyModal');
 
+// Запоминаем, откуда открыли политику, чтобы вернуть окно входа
+let privacyCameFromAuth = false;
+
 function openPrivacyModal() {
   if (!privacyModal) return;
   privacyModal.classList.add('active');
 }
+
 function closePrivacyModal() {
   if (!privacyModal) return;
   privacyModal.classList.remove('active');
+  if (privacyCameFromAuth) {
+    privacyCameFromAuth = false;
+    setTimeout(() => openAuthModal(), 160);
+  }
 }
 
 const privacyLink = document.getElementById('privacyLink');
 if (privacyLink) {
   privacyLink.addEventListener('click', e => {
     e.preventDefault();
+    privacyCameFromAuth = authOverlay.classList.contains('active');
+    if (privacyCameFromAuth) closeAuthModal();
     openPrivacyModal();
   });
 }
