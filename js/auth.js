@@ -84,19 +84,29 @@ async function setUserName(name) {
   return { ok: true, name: clean };
 }
 
-// ========== ИМЯ В ШАПКЕ ==========
+// ========== ИМЯ В ШАПКЕ (показываем на 5 секунд) ==========
+let headerNameTimer = null;
+
 function setHeaderUserName(name) {
   const el = document.getElementById('headerUserName');
   if (!el) return;
-  if (name) {
-    el.textContent = 'Привет, ' + name;
-    el.title = name;
-    el.classList.add('visible');
-  } else {
+
+  clearTimeout(headerNameTimer);
+
+  if (!name) {
     el.textContent = '';
     el.title = '';
     el.classList.remove('visible');
+    return;
   }
+
+  el.textContent = 'Привет, ' + name;
+  el.title = name;
+  el.classList.add('visible');
+
+  headerNameTimer = setTimeout(() => {
+    el.classList.remove('visible');
+  }, 5000);
 }
 
 // ========== ЛОГИН / ЛОГАУТ ==========
