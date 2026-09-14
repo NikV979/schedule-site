@@ -100,6 +100,61 @@
     overflow: hidden;
   }
 
+  /* Заголовок для вкладки Домашка (показывается только когда домашка открыта) */
+  .tabs-title {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 0 4px;
+    min-width: 0;
+    justify-self: start;
+    overflow: hidden;
+  }
+  .tabs-title-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    color: var(--accent-even);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tabs-title-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .tabs-title-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tabs-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    background: var(--accent-even);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  body.view-homework .tabs-center { display: none; }
+  body.view-homework .tabs-title { display: flex; }
+
   .tab {
     padding: 10px 24px;
     border-radius: 10px;
@@ -927,36 +982,14 @@
     display: flex; flex-direction: column; gap: 20px;
   }
 
-  .hw-dashboard {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 4px;
+  /* Кнопки «Очистить всё» и «Добавить задание» сверху */
+  .hw-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
   }
-  .hw-stat {
-    padding: 16px 18px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-soft);
-    transition: all 0.15s;
-  }
-  .hw-stat:hover { box-shadow: var(--shadow-hover); }
-  .hw-stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .hw-stat-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-top: 6px;
-    letter-spacing: 0.2px;
-  }
-  .hw-stat-urgent .hw-stat-value { color: var(--accent-odd); }
 
   .hw-grid { gap: 20px; }
   .hw-group {
@@ -990,36 +1023,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-
-  .hw-toolbar {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-  }
-  .hw-title {
-    font-size: 26px; font-weight: 700; color: var(--text-primary);
-    display: flex; align-items: center; gap: 12px;
-    letter-spacing: -0.02em;
-  }
-  .title-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: rgba(91, 75, 214, 0.1);
-    color: var(--accent-even);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  [data-theme="dark"] .title-icon { background: rgba(143, 132, 245, 0.15); }
-  .title-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .hw-title-count {
-    font-size: 12px; font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--bg-surface-2);
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--border-light);
   }
 
   .hw-actions {
@@ -1645,7 +1648,6 @@
     gap: 10px;
   }
 
-  /* ===== Сетка плиток файлов ===== */
   .files-tiles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -2138,6 +2140,12 @@
     .action-btn { width: 34px; height: 34px; font-size: 15px; }
     .top-actions { gap: 6px; }
 
+    /* Заголовок домашки в шапке — компактнее */
+    .tabs-title-text { font-size: 15px; }
+    .tabs-badge { min-width: 20px; height: 20px; font-size: 11px; padding: 0 6px; }
+    .tabs-title-icon { width: 18px; height: 18px; }
+    .tabs-title-icon svg { width: 16px; height: 16px; }
+
     .viewport {
       padding: calc(78px + env(safe-area-inset-top)) 0 0;
       justify-content: flex-start;
@@ -2175,10 +2183,7 @@
     .bell-break-cell { font-size: 12px; }
 
     .homework-page { padding: 14px; gap: 14px; }
-    .hw-title { font-size: 22px; }
-    .hw-toolbar { gap: 10px; }
-    .title-icon { width: 32px; height: 32px; border-radius: 9px; }
-    .title-icon svg { width: 18px; height: 18px; }
+    .hw-actions-row { gap: 8px; }
     .hw-add-btn { padding: 9px 14px; font-size: 13px; }
     .hw-clear-btn { padding: 9px 14px; font-size: 12px; }
     .hw-card-subject { font-size: 14px; }
@@ -2186,14 +2191,6 @@
     .hw-item { padding: 10px 12px; gap: 10px; }
     .hw-check { width: 20px; height: 20px; }
     .hw-check.done::after { top: 2px; left: 5px; width: 5px; height: 9px; }
-
-    .hw-dashboard {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .hw-stat { padding: 12px 12px; }
-    .hw-stat-value { font-size: 22px; }
-    .hw-stat-label { font-size: 11px; }
 
     .files-page { padding: 14px; gap: 14px; }
     .files-title { font-size: 22px; }
@@ -2214,6 +2211,7 @@
     .mob-day-title .mob-title-day { font-size: 15px; }
     .mob-pair-subj { font-size: 14px; }
     .mob-nav-btn { width: 40px; height: 40px; font-size: 20px; }
+    .tabs-title-text { font-size: 14px; }
   }
 
   /* ====== Компактное окно входа на узких телефонах ====== */
@@ -2270,7 +2268,7 @@
 
   /* ====== Файлы на телефоне — список строк вместо плиток ====== */
   @media (max-width: 700px) {
-        /* Фильтры на телефоне — поиск на всю ширину, потом селект ниже */
+    /* Фильтры на телефоне — поиск на всю ширину, потом селект ниже */
     .files-controls {
       flex-direction: column;
       align-items: stretch;
@@ -2290,6 +2288,7 @@
       padding: 10px 34px 10px 14px;
       font-size: 14px;
     }
+
     .files-tiles-grid {
       grid-template-columns: 1fr !important;
       gap: 8px !important;
