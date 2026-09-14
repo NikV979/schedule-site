@@ -1,605 +1,438 @@
-const SUBJECT_FIXED_COLORS = {
-  'УПР. ЧЕЛ. РЕС.':     { bg: '#C75B5B', text: '#FFFFFF' },
-  'ЭК ПО ФК И СПОРТУ':  { bg: '#C8B68A', text: '#2A2418' },
-  'ОСН. МЕНЕДЖМЕНТ':    { bg: '#B87BA0', text: '#FFFFFF' },
-  'ПСИХОДИАГНОСТИКА':   { bg: '#3E3E5C', text: '#FFFFFF' },
-  'КОНЦ. СОВР. ЕСТ-ЗН': { bg: '#7B8FA1', text: '#FFFFFF' },
-  'ЭКОНОМИЧ. ТЕОРИЯ':   { bg: '#6B8E7F', text: '#FFFFFF' },
-  'ПСИХ. ЭКСТРЕМ И ЧС': { bg: '#A56A6A', text: '#FFFFFF' },
-  'ПЕД. ПСИХОЛОГИЯ':    { bg: '#7E7BA8', text: '#FFFFFF' },
-  'ПСИХ. ЛИЧНОСТИ':     { bg: '#5B7A99', text: '#FFFFFF' },
-};
+// ================== ДОМАШКА ==================
+const HW_BUCKET = 'homework';
 
+// ===== СПИСОК ПРЕДМЕТОВ =====
+function getAllSubjects() {
+  return [
+    'КОНЦ. СОВР. ЕСТ-ЗН',
+    'ОСН. МЕНЕДЖМЕНТ',
+    'ПЕД. ПСИХОЛОГИЯ',
+    'ПСИХ. ЛИЧНОСТИ',
+    'ПСИХ. ЭКСТРЕМ И ЧС',
+    'ПСИХОДИАГНОСТИКА',
+    'УПР. ЧЕЛ. РЕС.',
+    'ЭК ПО ФК И СПОРТУ',
+    'ЭКОНОМИЧ. ТЕОРИЯ'
+  ];
+}
+
+// ===== ЦВЕТА ПО ПРЕДМЕТУ =====
 const SUBJECT_PALETTE = [
-  '#7E7BA8', '#A56A6A', '#6B8E7F', '#5B7A99', '#B87BA0',
-  '#C7A05B', '#5B9A8E', '#8E7B5B', '#8F6BA5', '#7B8FA1',
+  { bg: '#5B4BD6', text: '#FFFFFF' },
+  { bg: '#4A7AB8', text: '#FFFFFF' },
+  { bg: '#6E9E7C', text: '#FFFFFF' },
+  { bg: '#C77E5B', text: '#FFFFFF' },
+  { bg: '#9B5B9B', text: '#FFFFFF' },
+  { bg: '#4A6FA5', text: '#FFFFFF' },
+  { bg: '#C75B5B', text: '#FFFFFF' },
+  { bg: '#7B8FA1', text: '#FFFFFF' },
+  { bg: '#5B8A6E', text: '#FFFFFF' },
 ];
 
-// ===== Флаг «Показать важное» =====
-let hwImportantOnly = false;
-
-// «Важное» = дедлайн сегодня или завтра и не сделано
-function isHwImportant(item) {
-  if (!item.deadline) return false;
-  const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return false;
-  const now = new Date(); now.setHours(0,0,0,0);
-  const dl = new Date(y, m - 1, d);
-  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
-  return diff >= 0 && diff <= 1;
+function getSubjectStyle(subject) {
+  const all = getAllSubjects();
+  const idx = all.indexOf(subject);
+  if (idx >= 0) return SUBJECT_PALETTE[idx % SUBJECT_PALETTE.length];
+  // Хеш для предметов не из списка
+  let h = 0;
+  for (let i = 0; i < subject.length; i++) h = (h * 31 + subject.charCodeAt(i)) | 0;
+  return SUBJECT_PALETTE[Math.abs(h) % SUBJECT_PALETTE.length];
 }
 
-function getAllSubjects() {
-  const set = new Set();
-  ['even','odd'].forEach(w => {
-    DAY_KEYS.forEach(d => {
-      (state.schedule[w][d] || []).forEach(l => set.add(l.subject));
-    });
-  });
-  return [...set].sort();
-}
-
-function getContrastText(hex) {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.substr(0, 2), 16);
-  const g = parseInt(h.substr(2, 2), 16);
-  const b = parseInt(h.substr(4, 2), 16);
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq >= 150 ? '#2A2418' : '#FFFFFF';
-}
+// ===== СВЕТЛЫЙ ЛИ ЦВЕТ =====
 function isLightColor(hex) {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.substr(0, 2), 16);
-  const g = parseInt(h.substr(2, 2), 16);
-  const b = parseInt(h.substr(4, 2), 16);
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq >= 150;
-}
-function getSubjectStyle(subj) {
-  if (SUBJECT_FIXED_COLORS[subj]) return SUBJECT_FIXED_COLORS[subj];
-  let hash = 0;
-  for (let i = 0; i < subj.length; i++) hash = ((hash << 5) - hash) + subj.charCodeAt(i);
-  const bg = SUBJECT_PALETTE[Math.abs(hash) % SUBJECT_PALETTE.length];
-  return { bg, text: getContrastText(bg) };
+  if (!hex) return false;
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16);
+  const g = parseInt(c.substr(2, 2), 16);
+  const b = parseInt(c.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 180;
 }
 
-function formatDeadline(iso) {
-  if (!iso) return '';
-  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  const now = new Date(); now.setHours(0,0,0,0);
-  const dl = new Date(y, m - 1, d);
-  const diffDays = Math.round((dl - now) / (24 * 60 * 60 * 1000));
-  const dateStr = `${d} ${MONTHS_GEN[m - 1]}`;
-  if (diffDays < 0) return `просрочено (${dateStr})`;
-  if (diffDays === 0) return `сегодня`;
-  if (diffDays === 1) return `завтра`;
-  return `до ${dateStr}`;
-}
-
-function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
-
-function getHwOrderKey(subject) {
-  return 'hw-order-' + encodeURIComponent(subject);
-}
-function getHwOrder(subject) {
-  try {
-    return JSON.parse(localStorage.getItem(getHwOrderKey(subject)) || '[]');
-  } catch (_) { return []; }
-}
-function setHwOrder(subject, ids) {
-  try {
-    localStorage.setItem(getHwOrderKey(subject), JSON.stringify(ids));
-  } catch (_) {}
-}
-
+// ===== ЗАГРУЗКА ИЗ SUPABASE =====
 async function loadHwItemsFromCloud() {
-  state.hw.loading = true;
   const { data, error } = await supabaseClient
     .from('homework')
-    .select('id, user_id, user_login, subject, task, deadline, created_at')
-    .order('created_at', { ascending: false });
+    .select('id, user_login, subject, task, deadline, done, position, created_at')
+    .order('position', { ascending: true });
+
   if (error) {
-    console.error('Ошибка загрузки ДЗ:', error);
-    showToast('Не удалось загрузить задания');
+    console.error('Ошибка загрузки домашки:', error);
+    showToast('Не удалось загрузить домашку');
     state.hw.items = [];
-  } else {
-    state.hw.items = data || [];
+    return;
   }
-  state.hw.loading = false;
+  state.hw.items = data || [];
 }
 
-function updateTabBadge() {
-  const badge = document.getElementById('hwTabBadge');
-  if (!badge) return;
-  badge.textContent = state.hw.items.length;
-  badge.style.display = 'inline-flex';
+// ===== ФИЛЬТР =====
+function isImportant(hw) {
+  if (!hw.deadline) return false;
+  if (hw.done) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(hw.deadline); d.setHours(0,0,0,0);
+  const diffDays = Math.round((d - today) / (1000 * 60 * 60 * 24));
+  return diffDays >= 0 && diffDays <= 1;
 }
 
-function sortHwItems(subject, items) {
-  const savedOrder = getHwOrder(subject);
-  const orderMap = new Map();
-  if (savedOrder.length > 0) {
-    savedOrder.forEach((id, idx) => orderMap.set(String(id), idx));
-  }
-
-  items.sort((a, b) => {
-    const aDone = isHwDone(a.id) ? 1 : 0;
-    const bDone = isHwDone(b.id) ? 1 : 0;
-    if (aDone !== bDone) return aDone - bDone;
-
-    if (!aDone && !bDone && savedOrder.length > 0) {
-      const ai = orderMap.has(String(a.id)) ? orderMap.get(String(a.id)) : 9999;
-      const bi = orderMap.has(String(b.id)) ? orderMap.get(String(b.id)) : 9999;
-      if (ai !== bi) return ai - bi;
-    }
-
-    if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-    if (a.deadline) return -1;
-    if (b.deadline) return 1;
-    return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-  });
-}
-
+// ===== РЕНДЕР =====
 function renderHomework() {
   const grid = document.getElementById('hwGrid');
   const empty = document.getElementById('hwEmpty');
   if (!grid || !empty) return;
 
-  if (state.hw.loading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
+  const subjects = getAllSubjects();
+  const q = ''; // поиска пока нет
 
-  updateTabBadge();
-
-  const allSubjects = getAllSubjects();
-  if (allSubjects.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.add('active');
-    return;
-  }
-
-  const bySubject = {};
-  for (const subj of allSubjects) bySubject[subj] = [];
-  for (const item of state.hw.items) {
-    if (!bySubject[item.subject]) bySubject[item.subject] = [];
-    bySubject[item.subject].push(item);
-  }
-
-  for (const subj of Object.keys(bySubject)) {
-    sortHwItems(subj, bySubject[subj]);
-  }
-
-  const subjectsSorted = [...allSubjects].sort((a, b) => a.localeCompare(b, 'ru'));
-
-  let visibleSubjects = subjectsSorted;
-  if (hwImportantOnly) {
-    visibleSubjects = subjectsSorted.filter(subj => {
-      return (bySubject[subj] || []).some(item => isHwImportant(item) && !isHwDone(item.id));
-    });
-
-    if (visibleSubjects.length === 0) {
-      grid.innerHTML = `<div class="hw-empty active" style="grid-column:1/-1;">
-        <div class="hw-empty-icon">✅</div>
-        <div class="hw-empty-text">Нет важных заданий</div>
-        <div class="hw-empty-hint">На сегодня и завтра ничего не задано.</div>
-      </div>`;
-      empty.classList.remove('active');
-      return;
-    }
+  if (!state.hw.items.length && !state.hw.onlyImportant) {
+    // Ничего нет — показываем ВСЕ карточки пустыми, чтобы можно было добавить
   }
 
   let html = '';
-  for (const subj of visibleSubjects) {
-    let items = bySubject[subj] || [];
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
-    if (hwImportantOnly) {
-      items = items.filter(item => isHwImportant(item) && !isHwDone(item.id));
-    }
+  for (const subject of subjects) {
+    const items = state.hw.items.filter(it => it.subject === subject);
+    const filteredItems = state.hw.onlyImportant
+      ? items.filter(isImportant)
+      : items;
 
-    const hasItems = items.length > 0;
-    const style = getSubjectStyle(subj);
+    if (state.hw.onlyImportant && filteredItems.length === 0) continue;
+
+    const style = getSubjectStyle(subject);
     const light = isLightColor(style.bg);
     const lightClass = light ? ' light' : '';
-    const emptyClass = hasItems ? '' : ' hw-card-empty';
+    const isEmpty = items.length === 0;
 
-    let itemsHtml = '';
-    if (hasItems) {
-      for (const item of items) {
-        const dlText = formatDeadline(item.deadline);
-        const isDone = isHwDone(item.id);
-        const important = isHwImportant(item) && !isDone;
-        const doneClass = isDone ? ' done' : '';
-        const importantClass = important ? ' important' : '';
-
-        itemsHtml += `
-          <div class="hw-item${doneClass}${importantClass}" data-id="${item.id}" draggable="${isDone ? 'false' : 'true'}">
-            <span class="hw-item-grip" title="Перетащить">⋮⋮</span>
-            <div class="hw-item-main">
-              <div class="hw-item-task">${escapeHtml(item.task)}</div>
-              ${dlText ? `<div class="hw-item-deadline">${escapeHtml(dlText)}</div>` : ''}
-            </div>
-          </div>`;
-      }
-    } else {
-      itemsHtml = `<div class="hw-card-noitems">Нет заданий</div>`;
-    }
+    // На мобилке карточки свёрнуты по умолчанию (expanded только если в состоянии)
+    const isExpanded = state.hw.expandedSubjects.has(subject);
 
     html += `
-      <div class="hw-card${emptyClass}" data-subject="${escapeHtml(subj)}"
+      <div class="hw-card${isEmpty ? ' hw-card-empty' : ''}${isExpanded ? ' expanded' : ''}"
+           data-subject="${escapeHtml(subject)}"
            style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
         <div class="hw-card-head${lightClass}">
           <div class="hw-card-head-left">
-            <span class="hw-card-subject">${escapeHtml(subj)}</span>
+            <span class="hw-card-subject">${escapeHtml(subject)}</span>
           </div>
           <span class="hw-card-count">${items.length}</span>
         </div>
-        <div class="hw-card-body" data-subject="${escapeHtml(subj)}">${itemsHtml}</div>
+        <div class="hw-card-body">
+          ${filteredItems.length
+            ? filteredItems.map(renderHwItem).join('')
+            : `<div class="hw-card-noitems">Нет заданий</div>`}
+          <div class="hw-add-item-btn" data-add-subject="${escapeHtml(subject)}">Добавить задание</div>
+        </div>
       </div>`;
   }
 
   grid.innerHTML = html;
-  empty.classList.remove('active');
 
-  grid.querySelectorAll('.hw-card').forEach(card => {
-    card.addEventListener('click', e => {
-      if (e.target.closest('.hw-item')) return;
+  // ===== ОБРАБОТЧИКИ =====
+
+  // Клик по шапке карточки
+  grid.querySelectorAll('.hw-card-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.hw-card');
       const subj = card.dataset.subject;
-      openHwModalForSubject(subj);
+
+      // На мобилке:
+      // - Пустая карточка → открыть модалку добавления
+      // - Карточка с заданиями → раскрыть/свернуть
+      if (isMobile) {
+        if (card.classList.contains('hw-card-empty')) {
+          openHwModal(subj);
+          return;
+        }
+        const expanded = card.classList.toggle('expanded');
+        if (expanded) state.hw.expandedSubjects.add(subj);
+        else state.hw.expandedSubjects.delete(subj);
+        return;
+      }
+
+      // На десктопе: клик = открыть модалку добавления
+      openHwModal(subj);
     });
   });
 
-  grid.querySelectorAll('.hw-item').forEach(itemEl => {
-    itemEl.addEventListener('contextmenu', e => {
+  // Клик по кнопке «+ Добавить задание» внутри карточки
+  grid.querySelectorAll('.hw-add-item-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const subj = btn.dataset.addSubject;
+      openHwModal(subj);
+    });
+  });
+
+  // Клик по заданию — открыть контекстное меню
+  grid.querySelectorAll('.hw-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.stopPropagation();
+      openHwContextMenu(item.dataset.id, e.clientX, e.clientY);
+    });
+    item.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
-      const id = itemEl.dataset.id;
-      openHwContextMenu(e.clientX, e.clientY, id);
+      openHwContextMenu(item.dataset.id, e.clientX, e.clientY);
     });
   });
 
-  grid.querySelectorAll('.hw-card-body').forEach(bodyEl => {
-    setupHwDragAndDrop(bodyEl);
-  });
+  // Бейдж
+  const badge = document.getElementById('hwTabBadge');
+  if (badge) badge.textContent = state.hw.items.length;
 }
 
-function setupHwDragAndDrop(bodyEl) {
-  const subject = bodyEl.dataset.subject;
-  let draggedEl = null;
-
-  bodyEl.querySelectorAll('.hw-item').forEach(itemEl => {
-    if (itemEl.classList.contains('done')) return;
-
-    itemEl.addEventListener('dragstart', e => {
-      draggedEl = itemEl;
-      itemEl.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      try { e.dataTransfer.setData('text/plain', itemEl.dataset.id); } catch (_) {}
-    });
-
-    itemEl.addEventListener('dragend', () => {
-      itemEl.classList.remove('dragging');
-      bodyEl.querySelectorAll('.hw-item').forEach(el => el.classList.remove('drag-over'));
-      const ids = [...bodyEl.querySelectorAll('.hw-item')].map(el => el.dataset.id);
-      setHwOrder(subject, ids);
-      draggedEl = null;
-    });
-
-    itemEl.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (!draggedEl || draggedEl === itemEl) return;
-      const rect = itemEl.getBoundingClientRect();
-      const isAfter = (e.clientY - rect.top) > (rect.height / 2);
-      bodyEl.querySelectorAll('.hw-item').forEach(el => el.classList.remove('drag-over'));
-      itemEl.classList.add('drag-over');
-      if (isAfter) {
-        itemEl.parentNode.insertBefore(draggedEl, itemEl.nextSibling);
-      } else {
-        itemEl.parentNode.insertBefore(draggedEl, itemEl);
-      }
-    });
-  });
-
-  bodyEl.addEventListener('dragover', e => {
-    e.preventDefault();
-    if (!draggedEl) return;
-    if (e.target === bodyEl) {
-      bodyEl.appendChild(draggedEl);
-    }
-  });
+function renderHwItem(it) {
+  const imp = isImportant(it);
+  const classes = ['hw-item'];
+  if (it.done) classes.push('done');
+  if (imp && !it.done) classes.push('important');
+  return `
+    <div class="${classes.join(' ')}" data-id="${it.id}">
+      <span class="hw-item-grip">⋮⋮</span>
+      <div class="hw-item-main">
+        <div class="hw-item-task">${escapeHtml(it.task)}</div>
+        ${it.deadline ? `<div class="hw-item-deadline">до ${formatHwDate(it.deadline)}</div>` : ''}
+      </div>
+    </div>`;
 }
 
-function openHwModalForSubject(subject) {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы добавлять задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
+function formatHwDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const day = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}.${mm}`;
+}
+
+// ===== КОНТЕКСТНОЕ МЕНЮ =====
+let hwCtxMenuEl = null;
+
+function closeHwContextMenu() {
+  if (hwCtxMenuEl && hwCtxMenuEl.parentNode) {
+    hwCtxMenuEl.parentNode.removeChild(hwCtxMenuEl);
   }
-  if (!hwModal) return;
-
-  try { fillSubjectSelect(); } catch (_) {}
-  if (hwSubjectEl) hwSubjectEl.value = subject;
-
-  hwTaskEl.value = '';
-  hwDeadlineEl.value = '';
-  resetHwModalTitle();
-  hwModal.classList.add('active');
-  setTimeout(() => hwTaskEl.focus(), 60);
+  hwCtxMenuEl = null;
 }
 
-let hwCtxMenu = null;
-
-function openHwContextMenu(x, y, id) {
+function openHwContextMenu(hwId, x, y) {
   closeHwContextMenu();
 
-  const item = state.hw.items.find(v => String(v.id) === String(id));
+  const item = state.hw.items.find(h => String(h.id) === String(hwId));
   if (!item) return;
 
-  const isDone = isHwDone(id);
   const canEdit = state.currentUser && item.user_login === state.currentUser;
 
   const menu = document.createElement('div');
   menu.className = 'hw-ctx-menu';
-  menu.style.left = x + 'px';
-  menu.style.top = y + 'px';
 
-  const items = [];
-
-  items.push({
-    label: isDone ? 'Вернуть в работу' : 'Сделано',
-    action: () => toggleHwDone(id)
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'hw-ctx-btn';
+  doneBtn.textContent = item.done ? '↺ Не сделано' : '✓ Сделано';
+  doneBtn.addEventListener('click', async () => {
+    closeHwContextMenu();
+    await toggleHwDone(hwId, !item.done);
   });
+  menu.appendChild(doneBtn);
 
   if (canEdit) {
-    items.push({ label: 'Редактировать', action: () => editHwItem(id) });
-    items.push({ label: 'Удалить', action: () => deleteHwItem(id), danger: true });
+    const delBtn = document.createElement('button');
+    delBtn.className = 'hw-ctx-btn danger';
+    delBtn.textContent = '✕ Удалить';
+    delBtn.addEventListener('click', async () => {
+      closeHwContextMenu();
+      await deleteHwById(hwId);
+    });
+    menu.appendChild(delBtn);
   }
 
-  menu.innerHTML = items.map((it, i) =>
-    `<button type="button" class="hw-ctx-btn${it.danger ? ' danger' : ''}" data-i="${i}">${it.label}</button>`
-  ).join('');
-
+  menu.style.left = '0px';
+  menu.style.top = '0px';
   document.body.appendChild(menu);
-
-  menu.querySelectorAll('.hw-ctx-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const i = parseInt(btn.dataset.i, 10);
-      closeHwContextMenu();
-      items[i].action();
-    });
-  });
+  hwCtxMenuEl = menu;
 
   const rect = menu.getBoundingClientRect();
-  if (rect.right > window.innerWidth) menu.style.left = (x - rect.width) + 'px';
-  if (rect.bottom > window.innerHeight) menu.style.top = (y - rect.height) + 'px';
-
-  hwCtxMenu = menu;
-
-  setTimeout(() => {
-    document.addEventListener('click', closeHwContextMenu, { once: true });
-    document.addEventListener('contextmenu', closeHwContextMenu, { once: true });
-    window.addEventListener('scroll', closeHwContextMenu, { once: true });
-  }, 0);
+  let left = x, top = y;
+  if (left + rect.width > window.innerWidth - 8) left = window.innerWidth - rect.width - 8;
+  if (top + rect.height > window.innerHeight - 8) top = window.innerHeight - rect.height - 8;
+  if (left < 8) left = 8;
+  if (top < 8) top = 8;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
 }
 
-function closeHwContextMenu() {
-  if (hwCtxMenu && hwCtxMenu.parentNode) {
-    hwCtxMenu.parentNode.removeChild(hwCtxMenu);
+document.addEventListener('click', () => closeHwContextMenu());
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('.hw-item')) closeHwContextMenu();
+});
+window.addEventListener('scroll', () => closeHwContextMenu(), true);
+
+// ===== ДОБАВЛЕНИЕ / УДАЛЕНИЕ / TOGGLE =====
+async function addHwItem(subject, task, deadline) {
+  if (!state.currentUser || !state.currentUserId) {
+    showToast('Войдите, чтобы добавлять задания');
+    openAuthModal();
+    return false;
   }
-  hwCtxMenu = null;
+  try {
+    const maxPos = state.hw.items
+      .filter(h => h.subject === subject)
+      .reduce((m, h) => Math.max(m, h.position || 0), 0);
+
+    const { error } = await supabaseClient.from('homework').insert({
+      user_id: state.currentUserId,
+      user_login: state.currentUser,
+      subject,
+      task,
+      deadline: deadline || null,
+      done: false,
+      position: maxPos + 1
+    });
+    if (error) throw error;
+
+    await loadHwItemsFromCloud();
+    renderHomework();
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + (err.message || 'неизвестная'));
+    return false;
+  }
 }
 
-function toggleHwDone(id) {
-  const isDone = isHwDone(id);
-  if (isDone) localStorage.removeItem('hw-done-' + id);
-  else localStorage.setItem('hw-done-' + id, '1');
-  renderHomework();
-}
-
-async function deleteHwItem(id) {
-  if (!state.currentUser) { showToast('Войдите'); return; }
-  const item = state.hw.items.find(x => String(x.id) === String(id));
+async function toggleHwDone(id, done) {
+  const item = state.hw.items.find(h => String(h.id) === String(id));
   if (!item) return;
-
-  const { error } = await supabaseClient.from('homework').delete().eq('id', id);
-  if (error) { console.error(error); showToast('Ошибка удаления'); return; }
-
-  localStorage.removeItem('hw-done-' + id);
-  state.hw.items = state.hw.items.filter(x => String(x.id) !== String(id));
-  renderHomework();
-  showToast('Задание удалено');
+  try {
+    const { error } = await supabaseClient.from('homework').update({ done }).eq('id', id);
+    if (error) throw error;
+    item.done = done;
+    renderHomework();
+    showToast(done ? 'Отмечено как сделано' : 'Снова активно');
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + (err.message || 'неизвестная'));
+  }
 }
 
-function editHwItem(id) {
-  const item = state.hw.items.find(x => String(x.id) === String(id));
+async function deleteHwById(id) {
+  if (!state.currentUser) { showToast('Войдите, чтобы удалять'); openAuthModal(); return; }
+  const item = state.hw.items.find(h => String(h.id) === String(id));
   if (!item) return;
-  if (!hwModal) return;
-  try { fillSubjectSelect(); } catch (_) {}
-
-  hwSubjectEl.value = item.subject;
-  hwTaskEl.value = item.task;
-  hwDeadlineEl.value = item.deadline || '';
-
-  const modalTitle = hwModal.querySelector('.hw-modal-head h2');
-  const saveBtn = document.getElementById('hwSave');
-  if (modalTitle) modalTitle.textContent = 'Редактировать задание';
-  if (saveBtn) {
-    saveBtn.textContent = 'Сохранить';
-    saveBtn.dataset.editId = id;
-  }
-
-  hwModal.classList.add('active');
-  setTimeout(() => hwTaskEl.focus(), 60);
-}
-
-function resetHwModalTitle() {
-  const modalTitle = hwModal && hwModal.querySelector('.hw-modal-head h2');
-  if (modalTitle) modalTitle.textContent = 'Новое задание';
-  const saveBtn = document.getElementById('hwSave');
-  if (saveBtn) {
-    saveBtn.textContent = 'Добавить';
-    delete saveBtn.dataset.editId;
+  if (!confirm(`Удалить задание?\n\n«${item.task}»`)) return;
+  try {
+    const { error } = await supabaseClient.from('homework').delete().eq('id', id);
+    if (error) throw error;
+    state.hw.items = state.hw.items.filter(h => String(h.id) !== String(id));
+    renderHomework();
+    showToast('Задание удалено');
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
   }
 }
 
+// ===== МОДАЛКА «НОВОЕ ЗАДАНИЕ» =====
 const hwModal = document.getElementById('hwModal');
-const hwSubjectEl = document.getElementById('hwSubject');
-const hwTaskEl = document.getElementById('hwTask');
-const hwDeadlineEl = document.getElementById('hwDeadline');
+const hwSubject = document.getElementById('hwSubject');
+const hwTask = document.getElementById('hwTask');
+const hwDeadline = document.getElementById('hwDeadline');
 
-function fillSubjectSelect() {
+function fillHwSubjectSelect() {
+  if (!hwSubject) return;
   const subjects = getAllSubjects();
-  hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  hwSubject.innerHTML = subjects
+    .map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`)
+    .join('');
+}
+
+function openHwModal(preselect) {
+  if (!state.currentUser) { showToast('Войдите, чтобы добавлять'); openAuthModal(); return; }
+  fillHwSubjectSelect();
+  if (preselect) hwSubject.value = preselect;
+  hwTask.value = '';
+  hwDeadline.value = '';
+  hwModal.classList.add('active');
+  setTimeout(() => hwTask.focus(), 80);
 }
 
 function closeHwModal() {
   hwModal.classList.remove('active');
-  resetHwModalTitle();
 }
 
-async function saveHwItem() {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы добавлять задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
-  const subject = hwSubjectEl.value.trim();
-  const task = hwTaskEl.value.trim();
-  const deadline = hwDeadlineEl.value || null;
-  if (!subject) { showToast('Выберите предмет'); return; }
-  if (!task) { showToast('Введите текст'); hwTaskEl.focus(); return; }
+document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
+document.getElementById('hwCancel').addEventListener('click', closeHwModal);
+hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
 
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session || !session.user) {
-    showToast('Сессия истекла, войдите заново');
+document.getElementById('hwSave').addEventListener('click', async () => {
+  const subj = hwSubject.value;
+  const task = hwTask.value.trim();
+  const deadline = hwDeadline.value || null;
+
+  if (!task) { showToast('Введите задание'); hwTask.focus(); return; }
+
+  const btn = document.getElementById('hwSave');
+  btn.disabled = true; btn.textContent = 'Добавляю…';
+
+  const ok = await addHwItem(subj, task, deadline);
+
+  btn.disabled = false; btn.textContent = 'Добавить';
+
+  if (ok) {
     closeHwModal();
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
+    showToast('Задание добавлено');
   }
-
-  const saveBtn = document.getElementById('hwSave');
-  const editId = saveBtn.dataset.editId;
-  const isEdit = !!editId;
-
-  saveBtn.disabled = true;
-  saveBtn.textContent = isEdit ? 'Сохраняю…' : 'Добавляю…';
-
-  let error;
-  if (isEdit) {
-    ({ error } = await supabaseClient
-      .from('homework')
-      .update({ subject, task, deadline })
-      .eq('id', editId));
-  } else {
-    ({ error } = await supabaseClient.from('homework').insert({
-      user_id: session.user.id, user_login: state.currentUser, subject, task, deadline,
-    }));
-  }
-
-  saveBtn.disabled = false;
-  saveBtn.textContent = isEdit ? 'Сохранить' : 'Добавить';
-
-  if (error) { console.error(error); showToast('Ошибка сохранения'); return; }
-
-  delete saveBtn.dataset.editId;
-  resetHwModalTitle();
-  closeHwModal();
-  await loadHwItemsFromCloud();
-  renderHomework();
-  showToast(isEdit ? 'Задание обновлено' : 'Задание добавлено');
-}
-
-const hwModalCloseEl = document.getElementById('hwModalClose');
-if (hwModalCloseEl) hwModalCloseEl.addEventListener('click', closeHwModal);
-
-const hwCancelEl = document.getElementById('hwCancel');
-if (hwCancelEl) hwCancelEl.addEventListener('click', closeHwModal);
-
-const hwSaveEl = document.getElementById('hwSave');
-if (hwSaveEl) hwSaveEl.addEventListener('click', saveHwItem);
-
-if (hwModal) {
-  hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
-}
-
-document.addEventListener('keydown', e => {
-  if (!hwModal || !hwModal.classList.contains('active')) return;
-  if (e.key === 'Escape') closeHwModal();
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveHwItem();
 });
 
-// ===== Кнопка «Показать важное» =====
-const hwImportantBtn = document.getElementById('hwImportantBtn');
-if (hwImportantBtn) {
-  hwImportantBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    hwImportantOnly = !hwImportantOnly;
-    hwImportantBtn.classList.toggle('active', hwImportantOnly);
-    hwImportantBtn.textContent = hwImportantOnly ? 'Показать все' : 'Показать важное';
+// ===== КНОПКИ В ШАПКЕ =====
+document.getElementById('hwClearAllBtn').addEventListener('click', async () => {
+  if (!state.currentUser) { showToast('Войдите, чтобы очистить'); openAuthModal(); return; }
+  const own = state.hw.items.filter(h => h.user_login === state.currentUser);
+  if (own.length === 0) { showToast('Нет ваших заданий'); return; }
+  if (!confirm(`Удалить ВСЕ ваши задания (${own.length})?`)) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('homework')
+      .delete()
+      .eq('user_login', state.currentUser);
+    if (error) throw error;
+    state.hw.items = state.hw.items.filter(h => h.user_login !== state.currentUser);
     renderHomework();
-  });
-}
+    showToast('Все ваши задания удалены');
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + (err.message || 'неизвестная'));
+  }
+});
 
-// ===== Кнопка «Очистить всё дз» =====
-const hwClearAllBtn = document.getElementById('hwClearAllBtn');
-if (hwClearAllBtn) {
-  hwClearAllBtn.addEventListener('click', async e => {
-    e.stopPropagation();
-    if (!state.currentUser) {
-      showToast('Войдите, чтобы очистить задания');
-      if (typeof openAuthModal === 'function') openAuthModal();
-      return;
-    }
-    if (state.hw.items.length === 0) {
-      showToast('Нет заданий для удаления');
-      return;
-    }
-    if (!confirm(`Очистить всё дз?\n\nБудет удалено: ${state.hw.items.length} заданий. Это действие нельзя отменить.`)) return;
-
-    const oldText = hwClearAllBtn.textContent;
-    hwClearAllBtn.disabled = true;
-    hwClearAllBtn.textContent = 'Удаляю…';
-
-    try {
-      const { error } = await supabaseClient
-        .from('homework')
-        .delete()
-        .eq('user_id', state.currentUserId);
-
-      if (error) throw error;
-
-      state.hw.items.forEach(item => localStorage.removeItem('hw-done-' + item.id));
-      state.hw.items = [];
-
-      renderHomework();
-      showToast('Все задания удалены');
-    } catch (err) {
-      console.error(err);
-      showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
-    } finally {
-      hwClearAllBtn.disabled = false;
-      hwClearAllBtn.textContent = oldText;
-    }
-  });
-}
+document.getElementById('hwImportantBtn').addEventListener('click', () => {
+  state.hw.onlyImportant = !state.hw.onlyImportant;
+  document.getElementById('hwImportantBtn').classList.toggle('active', state.hw.onlyImportant);
+  renderHomework();
+});
 
 // ===== REALTIME =====
-function subscribeHwRealtime() {
-  if (state.hwRealtimeChannel) return;
-  if (!state.currentUserId) return;
+let hwChannel = null;
 
-  state.hwRealtimeChannel = supabaseClient
-    .channel('homework-user-' + state.currentUserId)
-    .on('postgres_changes', {
-      event: '*', schema: 'public', table: 'homework',
-      filter: `user_id=eq.${state.currentUserId}`
-    }, async () => {
-      await loadHwItemsFromCloud();
-      if (state.currentView === 'homework') renderHomework();
-    })
-    .subscribe();
+function subscribeHwRealtime() {
+  if (hwChannel) return;
+  if (!supabaseClient) return;
+  try {
+    hwChannel = supabaseClient
+      .channel('homework-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'homework' }, async () => {
+        await loadHwItemsFromCloud();
+        if (state.currentView === 'homework') renderHomework();
+      })
+      .subscribe();
+  } catch (e) { console.warn('Realtime не подключился:', e); }
 }
 
 function unsubscribeHwRealtime() {
-  if (!state.hwRealtimeChannel) return;
-  supabaseClient.removeChannel(state.hwRealtimeChannel);
-  state.hwRealtimeChannel = null;
+  if (hwChannel && supabaseClient) {
+    try { supabaseClient.removeChannel(hwChannel); } catch (_) {}
+  }
+  hwChannel = null;
 }
