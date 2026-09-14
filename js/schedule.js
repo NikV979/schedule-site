@@ -178,7 +178,6 @@ async function applyView(type) {
     updateNavInfo();
     updateBanner();
     updateSidebarActive('homework');
-    updateHwAddBtnState();
     rememberPage('homework');
     return;
   }
