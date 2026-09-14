@@ -60,6 +60,30 @@ document.addEventListener('visibilitychange', () => {
   refreshAvatarUI();
 });
 
+// ========== ИМЯ ПОЛЬЗОВАТЕЛЯ (хранится в Supabase metadata) ==========
+function displayName(login) {
+  if (!login) return '';
+  return login;
+}
+
+async function getUserName() {
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return '';
+    return (user.user_metadata && user.user_metadata.name) || '';
+  } catch (_) { return ''; }
+}
+
+async function setUserName(name) {
+  const clean = String(name).trim().slice(0, 60);
+  if (!clean) return { ok: false, msg: 'Введите имя' };
+  const { error } = await supabaseClient.auth.updateUser({
+    data: { name: clean }
+  });
+  if (error) return { ok: false, msg: 'Ошибка: ' + error.message };
+  return { ok: true, name: clean };
+}
+
 // ========== ЛОГИН / ЛОГАУТ ==========
 function loginFromEmail(email) {
   if (!email) return null;
@@ -76,21 +100,32 @@ async function refreshUser() {
     state.currentUser = null;
     state.currentUserId = null;
   }
-  updateAuthUI();
-  if (state.currentUserId) subscribeHwRealtime();
-  else unsubscribeHwRealtime();
+  await updateAuthUI();
+
+  if (state.currentUserId) {
+    subscribeHwRealtime();
+    const name = await getUserName();
+    if (!name) openNameModal();
+  } else {
+    unsubscribeHwRealtime();
+  }
   await refreshAvatarUI();
 }
 
-function updateAuthUI() {
+async function updateAuthUI() {
   const btn = document.getElementById('authBtn');
   const sideUser = document.getElementById('sidebarUser');
   if (!btn) return;
+
   if (state.currentUser) {
     btn.classList.add('logged-in');
-    btn.title = 'Вы вошли как ' + displayName(state.currentUser);
+
+    let name = await getUserName();
+    if (!name) name = state.currentUser;
+
+    btn.title = 'Вы вошли как ' + name;
     if (sideUser) {
-      sideUser.textContent = displayName(state.currentUser);
+      sideUser.textContent = name;
       sideUser.classList.add('visible');
     }
   } else {
@@ -130,7 +165,7 @@ async function logout() {
   state.files.searchQuery = '';
 
   await refreshAvatarUI();
-  updateAuthUI();
+  await updateAuthUI();
 
   if (state.currentView === 'homework') renderHomework();
   if (state.currentView === 'files') {
@@ -158,8 +193,14 @@ function closeAuthModal() { authOverlay.classList.remove('active'); }
 async function submitAuth() {
   const login = authLoginInput.value.trim();
   const pass = authPasswordInput.value;
+  const consent = document.getElementById('authConsent');
+
   if (!login) { authError.textContent = 'Введите логин.'; return; }
   if (!pass) { authError.textContent = 'Введите пароль.'; return; }
+  if (consent && !consent.checked) {
+    authError.textContent = 'Отметьте согласие на обработку данных.';
+    return;
+  }
 
   const submitBtn = document.getElementById('authSubmit');
   const skipBtn = document.getElementById('authSkip');
@@ -173,10 +214,16 @@ async function submitAuth() {
 
   if (res.ok) {
     closeAuthModal();
-    updateAuthUI();
+    await updateAuthUI();
     if (state.currentView === 'homework') { await loadHwItemsFromCloud(); renderHomework(); }
     if (state.currentView === 'files') { await loadFilesFromCloud(); renderFiles(); }
-    showToast('Добро пожаловать, ' + displayName(res.login) + '!');
+
+    const name = await getUserName();
+    if (!name) {
+      openNameModal();
+    } else {
+      showToast('Добро пожаловать, ' + name + '!');
+    }
   } else {
     authError.textContent = res.msg;
     authPasswordInput.value = '';
@@ -330,9 +377,6 @@ document.getElementById('avatarLogoutBtn').addEventListener('click', async () =>
 });
 
 // ========== ПОДСТРОЙКА ПОД КЛАВИАТУРУ (мобильные) ==========
-// Записываем реальную высоту видимой области в CSS-переменную --vvh.
-// Когда клавиатура открывается — visualViewport.height уменьшается,
-// и переменная автоматически обновляется.
 if (window.visualViewport) {
   const updateVVH = () => {
     document.documentElement.style.setProperty('--vvh', window.visualViewport.height + 'px');
@@ -343,8 +387,6 @@ if (window.visualViewport) {
 }
 
 // ========== АВТОСКРОЛЛ К ПОЛЮ ПРИ ФОКУСЕ ==========
-// Когда пользователь тапает в поле на телефоне — плавно прокручиваем
-// модалку так, чтобы поле оказалось видно над клавиатурой.
 function attachFocusScroll(input) {
   if (!input) return;
   input.addEventListener('focus', () => {
@@ -358,3 +400,79 @@ attachFocusScroll(authPasswordInput);
 attachFocusScroll(document.getElementById('hwTask'));
 attachFocusScroll(document.getElementById('hwDeadline'));
 attachFocusScroll(document.getElementById('fileDisplayName'));
+
+// ========== МОДАЛКА ВВОДА ИМЕНИ ==========
+const nameModal = document.getElementById('nameModal');
+const userNameInput = document.getElementById('userNameInput');
+
+function openNameModal() {
+  if (!nameModal) return;
+  userNameInput.value = '';
+  nameModal.classList.add('active');
+  setTimeout(() => userNameInput.focus(), 80);
+}
+function closeNameModal() {
+  if (!nameModal) return;
+  nameModal.classList.remove('active');
+}
+
+async function saveUserName() {
+  const name = userNameInput.value.trim();
+  if (!name) { showToast('Введите имя'); userNameInput.focus(); return; }
+
+  const btn = document.getElementById('userNameSave');
+  btn.disabled = true; btn.textContent = 'Сохраняю…';
+
+  const res = await setUserName(name);
+
+  btn.disabled = false; btn.textContent = 'Сохранить';
+
+  if (!res.ok) { showToast(res.msg); return; }
+
+  closeNameModal();
+  await updateAuthUI();
+  showToast('Приятно познакомиться, ' + res.name + '!');
+}
+
+if (nameModal) {
+  document.getElementById('userNameSave').addEventListener('click', saveUserName);
+  userNameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveUserName();
+  });
+  nameModal.addEventListener('click', e => {
+    if (e.target === nameModal) closeNameModal();
+  });
+}
+
+// ========== СОГЛАСИЕ И ПОЛИТИКА ПДН ==========
+const privacyModal = document.getElementById('privacyModal');
+
+function openPrivacyModal() {
+  if (!privacyModal) return;
+  privacyModal.classList.add('active');
+}
+function closePrivacyModal() {
+  if (!privacyModal) return;
+  privacyModal.classList.remove('active');
+}
+
+const privacyLink = document.getElementById('privacyLink');
+if (privacyLink) {
+  privacyLink.addEventListener('click', e => {
+    e.preventDefault();
+    openPrivacyModal();
+  });
+}
+const privacyModalClose = document.getElementById('privacyModalClose');
+if (privacyModalClose) {
+  privacyModalClose.addEventListener('click', closePrivacyModal);
+}
+const privacyOkBtn = document.getElementById('privacyOkBtn');
+if (privacyOkBtn) {
+  privacyOkBtn.addEventListener('click', closePrivacyModal);
+}
+if (privacyModal) {
+  privacyModal.addEventListener('click', e => {
+    if (e.target === privacyModal) closePrivacyModal();
+  });
+}
