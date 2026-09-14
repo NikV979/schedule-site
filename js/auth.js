@@ -84,7 +84,7 @@ async function setUserName(name) {
   return { ok: true, name: clean };
 }
 
-// ========== ИМЯ В ШАПКЕ (показываем на 5 секунд) ==========
+// ========== ИМЯ В ШАПКЕ (показываем на 5 секунд, только на десктопе) ==========
 let headerNameTimer = null;
 
 function setHeaderUserName(name) {
@@ -269,6 +269,16 @@ document.getElementById('authBtn').addEventListener('click', () => {
   if (state.currentUser) openAvatarModal();
   else openAuthModal();
 });
+
+// Аватарка в сайдбаре — открывает профиль / вход
+const sidebarAvatarEl = document.getElementById('sidebarAvatar');
+if (sidebarAvatarEl) {
+  sidebarAvatarEl.addEventListener('click', () => {
+    if (state.currentUser) openAvatarModal();
+    else openAuthModal();
+  });
+}
+
 document.getElementById('authClose').addEventListener('click', closeAuthModal);
 document.getElementById('authSkip').addEventListener('click', closeAuthModal);
 document.getElementById('authSubmit').addEventListener('click', submitAuth);
