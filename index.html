@@ -86,6 +86,7 @@
       <div class="tab" data-view="bell">Расписание звонков</div>
     </div>
 
+    <!-- Заголовок для вкладки «Домашка» -->
     <div class="tabs-title" id="tabsTitle">
       <span class="tabs-title-icon">
         <svg viewBox="0 0 24 24">
@@ -97,6 +98,22 @@
       <span class="tabs-badge" id="hwTabBadge">0</span>
       <button class="hw-important-btn" id="hwImportantBtn" type="button" title="Показать только важное">Показать важное</button>
       <button class="hw-clear-all-btn" id="hwClearAllBtn" type="button" title="Удалить все задания">Очистить всё дз</button>
+    </div>
+
+    <!-- Заголовок для вкладки «Файлы» -->
+    <div class="tabs-title files-tabs-title" id="filesTabsTitle">
+      <span class="tabs-title-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </span>
+      <span class="tabs-title-text">Файлы</span>
+      <span class="tabs-badge" id="filesTabBadge">0</span>
+      <button class="hw-clear-all-btn" id="filesClearAllBtn" type="button" title="Удалить все файлы">Очистить всё</button>
+      <button class="files-upload-btn-top" id="filesUploadTopBtn" type="button">
+        <span>+</span> Загрузить файл
+      </button>
+      <span class="files-tabs-hint">PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT · до 25 МБ</span>
     </div>
 
     <div class="top-actions">
@@ -169,29 +186,6 @@
 
     <div class="diary-wrap" data-view="files">
       <div class="files-page">
-        <div class="files-toolbar">
-          <div class="files-title">
-            <span class="title-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </span>
-            Файлы
-            <span class="files-title-count" id="filesTotalCount">0 файлов</span>
-            <span class="files-title-size" id="filesTotalSize">0 МБ</span>
-          </div>
-          <div class="files-actions">
-            <button class="files-clear-btn" id="filesClearBtn" type="button">Очистить всё</button>
-            <button class="files-upload-btn" id="filesUploadBtn" type="button">
-              <span>+</span> Загрузить файл
-            </button>
-          </div>
-        </div>
-        <div class="files-hint">
-          Можно загружать PDF, DOC, DOCX, PPT, PPTX, JPG, PNG, TXT. Максимум 25 МБ на файл.<br>
-          Файлы видны только вам. Кликните по имени файла, чтобы открыть его в просмотрщике.
-        </div>
-
         <div class="files-controls">
           <input type="search" id="filesSearchInput" class="files-search"
                  placeholder="Поиск по названию файла…" autocomplete="off">
