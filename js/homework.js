@@ -72,7 +72,6 @@ function isDeadlineSoon(iso) {
   return diff <= 2;
 }
 
-// Группа срочности: 'overdue' | 'soon' | 'week' | 'later' | 'nodate'
 function getUrgencyGroup(item) {
   if (!item.deadline) return 'nodate';
   const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
@@ -126,42 +125,24 @@ async function loadHwItemsFromCloud() {
   updateHwAddBtnState();
 }
 
-// ===== ДАШБОРД =====
-function updateHwDashboard() {
-  const elTotal = document.getElementById('hwStatTotal');
-  const elUrgent = document.getElementById('hwStatUrgent');
-  const elWeek = document.getElementById('hwStatWeek');
-  if (!elTotal || !elUrgent || !elWeek) return;
-
-  let urgent = 0, week = 0;
-  for (const item of state.hw.items) {
-    const g = getUrgencyGroup(item);
-    if (g === 'overdue' || g === 'soon') urgent++;
-    else if (g === 'week') week++;
-  }
-
-  elTotal.textContent = state.hw.items.length;
-  elUrgent.textContent = urgent;
-  elWeek.textContent = week;
+// ===== Счётчик в шапке =====
+function updateTabBadge() {
+  const badge = document.getElementById('hwTabBadge');
+  if (!badge) return;
+  const n = state.hw.items.length;
+  badge.textContent = n;
+  badge.style.display = 'inline-flex';
 }
 
 function renderHomework() {
   const grid = document.getElementById('hwGrid');
   const empty = document.getElementById('hwEmpty');
-  const countEl = document.getElementById('hwTotalCount');
   if (!grid || !empty) return;
 
   if (state.hw.loading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
-  if (countEl) {
-    const n = state.hw.items.length;
-    let word = 'заданий';
-    if (n % 10 === 1 && n % 100 !== 11) word = 'задание';
-    else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'задания';
-    countEl.textContent = `${n} ${word}`;
-  }
-
-  updateHwDashboard();
+  // Обновляем счётчик в шапке
+  updateTabBadge();
 
   if (state.hw.items.length === 0) {
     grid.innerHTML = '';
@@ -318,10 +299,7 @@ function fillSubjectSelect() {
 }
 
 function openHwModal() {
-  if (!hwModal) {
-    console.error('Модалка #hwModal не найдена в index.html');
-    return;
-  }
+  if (!hwModal) { console.error('Модалка #hwModal не найдена'); return; }
   if (!state.currentUser) {
     showToast('Войдите, чтобы добавлять задания');
     if (typeof openAuthModal === 'function') openAuthModal();
@@ -410,10 +388,17 @@ if (hwAddBtn) {
   });
 }
 
-document.getElementById('hwClearBtn').addEventListener('click', clearAllHw);
-document.getElementById('hwModalClose').addEventListener('click', closeHwModal);
-document.getElementById('hwCancel').addEventListener('click', closeHwModal);
-document.getElementById('hwSave').addEventListener('click', saveHwItem);
+const hwClearBtnEl = document.getElementById('hwClearBtn');
+if (hwClearBtnEl) hwClearBtnEl.addEventListener('click', clearAllHw);
+
+const hwModalCloseEl = document.getElementById('hwModalClose');
+if (hwModalCloseEl) hwModalCloseEl.addEventListener('click', closeHwModal);
+
+const hwCancelEl = document.getElementById('hwCancel');
+if (hwCancelEl) hwCancelEl.addEventListener('click', closeHwModal);
+
+const hwSaveEl = document.getElementById('hwSave');
+if (hwSaveEl) hwSaveEl.addEventListener('click', saveHwItem);
 
 if (hwModal) {
   hwModal.addEventListener('click', e => { if (e.target === hwModal) closeHwModal(); });
