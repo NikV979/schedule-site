@@ -72,14 +72,36 @@ function isDeadlineSoon(iso) {
   return diff <= 2;
 }
 
+// Определяет группу срочности: 'overdue' | 'soon' | 'week' | 'later' | 'nodate'
+function getUrgencyGroup(item) {
+  if (!item.deadline) return 'nodate';
+  const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return 'nodate';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dl = new Date(y, m - 1, d);
+  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
+  if (diff < 0) return 'overdue';
+  if (diff <= 1) return 'soon';
+  if (diff <= 7) return 'week';
+  return 'later';
+}
+
+const URGENCY_META = {
+  overdue: { title: 'Просрочено',  emoji: '🔴', order: 0 },
+  soon:    { title: 'Срочно',       emoji: '🟡', order: 1 },
+  week:    { title: 'На неделе',    emoji: '📅', order: 2 },
+  later:   { title: 'Позже',        emoji: '🕐', order: 3 },
+  nodate:  { title: 'Без даты',     emoji: '📝', order: 4 },
+};
+
 function isHwDone(id) { return localStorage.getItem('hw-done-' + id) === '1'; }
 
 function updateHwAddBtnState() {
   const btn = document.getElementById('hwAddBtn');
   const clearBtn = document.getElementById('hwClearBtn');
   if (btn) {
-    btn.disabled = false;
-    btn.title = state.currentUser ? 'Добавить задание' : 'Войдите, чтобы добавлять задания';
+    if (state.currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
+    else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
   }
   if (clearBtn) {
     if (state.currentUser && state.hw.items.length > 0) { clearBtn.disabled = false; clearBtn.title = 'Удалить все задания'; }
@@ -104,6 +126,27 @@ async function loadHwItemsFromCloud() {
   updateHwAddBtnState();
 }
 
+// ===== ДАШБОРД =====
+function updateHwDashboard() {
+  const elTotal = document.getElementById('hwStatTotal');
+  const elUrgent = document.getElementById('hwStatUrgent');
+  const elWeek = document.getElementById('hwStatWeek');
+  if (!elTotal || !elUrgent || !elWeek) return;
+
+  const now = new Date(); now.setHours(0,0,0,0);
+  let urgent = 0, week = 0;
+
+  for (const item of state.hw.items) {
+    const g = getUrgencyGroup(item);
+    if (g === 'overdue' || g === 'soon') urgent++;
+    else if (g === 'week') week++;
+  }
+
+  elTotal.textContent = state.hw.items.length;
+  elUrgent.textContent = urgent;
+  elWeek.textContent = week;
+}
+
 function renderHomework() {
   const grid = document.getElementById('hwGrid');
   const empty = document.getElementById('hwEmpty');
@@ -112,6 +155,7 @@ function renderHomework() {
 
   if (state.hw.loading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
 
+  // Счётчик в заголовке
   if (countEl) {
     const n = state.hw.items.length;
     let word = 'заданий';
@@ -119,6 +163,8 @@ function renderHomework() {
     else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'задания';
     countEl.textContent = `${n} ${word}`;
   }
+
+  updateHwDashboard();
 
   if (state.hw.items.length === 0) {
     grid.innerHTML = '';
@@ -128,62 +174,90 @@ function renderHomework() {
   }
   empty.classList.remove('active');
 
-  const groups = {};
+  // Группируем по срочности
+  const byUrgency = { overdue: [], soon: [], week: [], later: [], nodate: [] };
   for (const item of state.hw.items) {
-    if (!groups[item.subject]) groups[item.subject] = [];
-    groups[item.subject].push(item);
+    byUrgency[getUrgencyGroup(item)].push(item);
   }
-  const subjects = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'ru'));
 
   let html = '';
-  for (const subj of subjects) {
-    const items = groups[subj];
-    items.sort((a, b) => {
-      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
-      if (a.deadline) return -1;
-      if (b.deadline) return 1;
-      return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
-    });
+  const groups = ['overdue', 'soon', 'week', 'later', 'nodate'];
 
-    const style = getSubjectStyle(subj);
-    const light = isLightColor(style.bg);
-    const expandedClass = state.hw.expandedSubjects.has(subj) ? ' expanded' : '';
-    const lightClass = light ? ' light' : '';
+  for (const groupKey of groups) {
+    const groupItems = byUrgency[groupKey];
+    if (groupItems.length === 0) continue;
 
-    let itemsHtml = '';
-    for (const item of items) {
-      const dlText = formatDeadline(item.deadline);
-      const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
-      const canDelete = state.currentUser && item.user_login === state.currentUser;
-      const isDone = isHwDone(item.id);
-      const doneClass = isDone ? ' done' : '';
-      const checkDoneClass = isDone ? ' done' : '';
+    const meta = URGENCY_META[groupKey];
 
-      itemsHtml += `
-        <div class="hw-item${doneClass}" data-id="${item.id}" style="border-left-color: ${style.bg};">
-          <div class="hw-check${checkDoneClass}" data-check-id="${item.id}"></div>
-          <div class="hw-item-main">
-            <div class="hw-item-task">${escapeHtml(item.task)}</div>
-            <div class="hw-item-meta">${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}</div>
+    // Внутри группы — сортировка по предметам, потом по дате
+    const bySubject = {};
+    for (const item of groupItems) {
+      if (!bySubject[item.subject]) bySubject[item.subject] = [];
+      bySubject[item.subject].push(item);
+    }
+    const subjects = Object.keys(bySubject).sort((a, b) => a.localeCompare(b, 'ru'));
+
+    html += `<div class="hw-group">
+      <div class="hw-group-head">
+        <span class="hw-group-emoji">${meta.emoji}</span>
+        <span class="hw-group-title">${meta.title}</span>
+        <span class="hw-group-count">${groupItems.length}</span>
+      </div>
+      <div class="hw-group-body">`;
+
+    for (const subj of subjects) {
+      const items = bySubject[subj];
+      items.sort((a, b) => {
+        if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+        if (a.deadline) return -1;
+        if (b.deadline) return 1;
+        return (new Date(b.created_at || 0)) - (new Date(a.created_at || 0));
+      });
+
+      const style = getSubjectStyle(subj);
+      const light = isLightColor(style.bg);
+      const expandedClass = state.hw.expandedSubjects.has(subj) ? ' expanded' : '';
+      const lightClass = light ? ' light' : '';
+
+      let itemsHtml = '';
+      for (const item of items) {
+        const dlText = formatDeadline(item.deadline);
+        const dlClass = isDeadlineSoon(item.deadline) ? ' soon' : '';
+        const canDelete = state.currentUser && item.user_login === state.currentUser;
+        const isDone = isHwDone(item.id);
+        const doneClass = isDone ? ' done' : '';
+        const checkDoneClass = isDone ? ' done' : '';
+
+        itemsHtml += `
+          <div class="hw-item${doneClass}" data-id="${item.id}" style="border-left-color: ${style.bg};">
+            <div class="hw-check${checkDoneClass}" data-check-id="${item.id}"></div>
+            <div class="hw-item-main">
+              <div class="hw-item-task">${escapeHtml(item.task)}</div>
+              <div class="hw-item-meta">${dlText ? `<span class="hw-item-deadline${dlClass}">⏰ ${escapeHtml(dlText)}</span>` : ''}</div>
+            </div>
+            ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" type="button">✕</button>` : ''}
+          </div>`;
+      }
+
+      html += `
+        <div class="hw-card${expandedClass}" data-subject="${escapeHtml(subj)}" style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
+          <div class="hw-card-head${lightClass}">
+            <div class="hw-card-head-left">
+              <span class="hw-card-arrow">▸</span>
+              <span class="hw-card-subject">${escapeHtml(subj)}</span>
+            </div>
+            <span class="hw-card-count">${items.length}</span>
           </div>
-          ${canDelete ? `<button class="hw-item-del" data-id="${item.id}" type="button">✕</button>` : ''}
+          <div class="hw-card-list">${itemsHtml}</div>
         </div>`;
     }
 
-    html += `
-      <div class="hw-card${expandedClass}" data-subject="${escapeHtml(subj)}" style="--hw-accent: ${style.bg}; --hw-text: ${style.text};">
-        <div class="hw-card-head${lightClass}">
-          <div class="hw-card-head-left">
-            <span class="hw-card-arrow">▸</span>
-            <span class="hw-card-subject">${escapeHtml(subj)}</span>
-          </div>
-          <span class="hw-card-count">${items.length}</span>
-        </div>
-        <div class="hw-card-list">${itemsHtml}</div>
-      </div>`;
+    html += `</div></div>`;
   }
+
   grid.innerHTML = html;
 
+  // Обработчики — как раньше
   grid.querySelectorAll('.hw-card-head').forEach(head => {
     head.addEventListener('click', () => {
       const card = head.closest('.hw-card');
@@ -217,11 +291,7 @@ function renderHomework() {
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      if (!state.currentUser) {
-        showToast('Войдите, чтобы удалять задания');
-        if (typeof openAuthModal === 'function') openAuthModal();
-        return;
-      }
+      if (!state.currentUser) { showToast('Войдите, чтобы удалять'); return; }
       const id = btn.dataset.id;
       const item = state.hw.items.find(x => String(x.id) === String(id));
       if (!item) return;
@@ -248,13 +318,8 @@ function fillSubjectSelect() {
   const subjects = getAllSubjects();
   hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 }
-
 function openHwModal() {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы добавлять задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
+  if (!state.currentUser) { showToast('Войдите, чтобы добавлять'); openAuthModal(); return; }
   fillSubjectSelect();
   hwTaskEl.value = '';
   hwDeadlineEl.value = '';
@@ -264,11 +329,7 @@ function openHwModal() {
 function closeHwModal() { hwModal.classList.remove('active'); }
 
 async function saveHwItem() {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы добавлять задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
+  if (!state.currentUser) { showToast('Войдите'); return; }
   const subject = hwSubjectEl.value.trim();
   const task = hwTaskEl.value.trim();
   const deadline = hwDeadlineEl.value || null;
@@ -276,12 +337,7 @@ async function saveHwItem() {
   if (!task) { showToast('Введите текст'); hwTaskEl.focus(); return; }
 
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session || !session.user) {
-    showToast('Сессия истекла, войдите заново');
-    closeHwModal();
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
+  if (!session || !session.user) { showToast('Сессия истекла'); closeHwModal(); openAuthModal(); return; }
 
   const saveBtn = document.getElementById('hwSave');
   saveBtn.disabled = true; saveBtn.textContent = 'Сохраняю…';
@@ -301,11 +357,7 @@ async function saveHwItem() {
 }
 
 async function clearAllHw() {
-  if (!state.currentUser) {
-    showToast('Войдите, чтобы очистить задания');
-    if (typeof openAuthModal === 'function') openAuthModal();
-    return;
-  }
+  if (!state.currentUser) { showToast('Войдите'); openAuthModal(); return; }
   if (state.hw.items.length === 0) { showToast('Нет заданий'); return; }
   if (!confirm(`Удалить ВСЕ задания (${state.hw.items.length})?\n\nНельзя отменить.`)) return;
 
@@ -337,7 +389,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveHwItem();
 });
 
-// ===== REALTIME для домашки =====
+// ===== REALTIME =====
 function subscribeHwRealtime() {
   if (state.hwRealtimeChannel) return;
   if (!state.currentUserId) return;
