@@ -18,13 +18,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Стили -->
 <link rel="stylesheet" href="css/style.css">
-
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Модули приложения -->
 <script defer src="js/config.js"></script>
 <script defer src="js/utils.js"></script>
 <script defer src="js/data.js"></script>
@@ -304,6 +299,11 @@
         <label class="auth-label" for="authPassword">Пароль</label>
         <input class="auth-input" id="authPassword" type="password" autocomplete="current-password" spellcheck="false" placeholder="10 символов">
 
+        <label class="auth-consent">
+          <input type="checkbox" id="authConsent">
+          <span>Согласен с <a href="#" id="privacyLink">обработкой персональных данных</a></span>
+        </label>
+
         <div class="auth-error" id="authError"></div>
       </div>
       <div class="auth-foot">
@@ -335,6 +335,78 @@
           <button class="avatar-btn avatar-btn-remove" id="avatarRemoveBtn" type="button" style="display:none">Удалить</button>
         </div>
         <button class="avatar-btn" id="avatarLogoutBtn" type="button" style="background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border-light); margin-top: 4px;">Выйти из аккаунта</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== МОДАЛКА: ВВОД ИМЕНИ ============== -->
+  <div class="hw-modal-overlay" id="nameModal">
+    <div class="hw-modal" style="max-width: 420px;">
+      <div class="hw-modal-head">
+        <h2>Как вас зовут?</h2>
+      </div>
+      <div class="hw-modal-body">
+        <p class="auth-desc">Введите имя — оно будет показываться в вашем профиле и рядом с вашими заданиями.</p>
+        <label class="hw-field-label" for="userNameInput">Имя</label>
+        <input class="hw-input" id="userNameInput" type="text" maxlength="40" placeholder="Например: Мария" autocomplete="given-name">
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-save" id="userNameSave" type="button">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== МОДАЛКА: ПОЛИТИКА ПДН ============== -->
+  <div class="hw-modal-overlay" id="privacyModal">
+    <div class="hw-modal" style="max-width: 560px;">
+      <div class="hw-modal-head">
+        <h2>Персональные данные</h2>
+        <button class="hw-modal-close" id="privacyModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="hw-modal-body">
+        <p class="auth-desc" style="margin-bottom: 14px;">Коротко о том, какие данные мы обрабатываем и зачем.</p>
+
+        <div class="privacy-block">
+          <h3>Что мы храним</h3>
+          <ul>
+            <li><strong>Логин и пароль</strong> — чтобы вы могли войти.</li>
+            <li><strong>Имя</strong> — чтобы показывать его в профиле.</li>
+            <li><strong>Фото профиля</strong> (по желанию) — для аватара.</li>
+            <li><strong>Домашку и файлы</strong>, которые вы добавляете.</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h3>Зачем</h3>
+          <ul>
+            <li>Чтобы работал вход на сайт.</li>
+            <li>Чтобы ваши файлы и задания сохранялись и были доступны только вам.</li>
+            <li>Чтобы отображать ваше имя в интерфейсе.</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h3>Насколько это безопасно</h3>
+          <ul>
+            <li>Пароли хранятся в зашифрованном виде — их не видит даже администратор.</li>
+            <li>Данные передаются по HTTPS (защищённое соединение).</li>
+            <li>Файлы, домашка и фото доступны <strong>только вам</strong> — это гарантируется на уровне сервера.</li>
+            <li>Мы не передаём данные третьим лицам и не используем для рекламы.</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h3>Что от вас требуется</h3>
+          <p>Ничего сложного. Просто не сообщайте свой пароль другим. Если забудете его — напишите администратору, он выдаст новый.</p>
+        </div>
+
+        <div class="privacy-block" style="margin-bottom: 0;">
+          <h3>Переживать не стоит</h3>
+          <p>Сайт сделан для удобства группы. Никаких скрытых действий не делается: всё, что мы храним, перечислено выше.</p>
+        </div>
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-save" id="privacyOkBtn" type="button">Понятно</button>
       </div>
     </div>
   </div>
