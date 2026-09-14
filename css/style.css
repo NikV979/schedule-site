@@ -159,6 +159,48 @@ html, body {
   white-space: nowrap;
 }
 
+/* ============== ИМЯ В ШАПКЕ ============== */
+.header-user-name {
+  display: none;
+  align-items: center;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-right: 6px;
+  padding: 0 4px;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  background: linear-gradient(135deg, var(--accent-even) 0%, var(--accent-odd) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+.header-user-name.visible {
+  display: inline-block;
+}
+
+@media (max-width: 900px) {
+  .header-user-name {
+    font-size: 13px;
+    max-width: 110px;
+    margin-right: 4px;
+  }
+}
+@media (max-width: 500px) {
+  .header-user-name {
+    font-size: 12px;
+    max-width: 80px;
+  }
+}
+
 /* Кнопка «Показать важное» */
 .hw-important-btn {
   margin-left: 6px;
@@ -379,6 +421,7 @@ body.view-homework .tabs-title.tabs-title-files { display: none; }
 
 .top-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   margin-left: auto;
   flex-shrink: 0;
@@ -1671,7 +1714,6 @@ tr:last-child td { border-bottom: none; }
   font-weight: 500;
 }
 
-/* Карточка-группа файлов */
 .files-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -1740,7 +1782,6 @@ tr:last-child td { border-bottom: none; }
   opacity: 0.7;
 }
 
-/* Плитка файла внутри группы */
 .file-tile {
   display: flex;
   align-items: center;
@@ -1801,7 +1842,6 @@ tr:last-child td { border-bottom: none; }
   margin-top: 2px;
 }
 
-/* Старые кнопки в плитке — отключены */
 .file-tile-actions,
 .file-tile-btn { display: none !important; }
 
@@ -1878,7 +1918,6 @@ tr:last-child td { border-bottom: none; }
   text-align: center;
 }
 
-/* Загрузка / пусто */
 .files-loading {
   display: flex;
   flex-direction: column;
@@ -1925,7 +1964,6 @@ tr:last-child td { border-bottom: none; }
 .files-empty-text { font-size: 16px; font-weight: 600; color: var(--text-primary); }
 .files-empty-hint { font-size: 13px; max-width: 380px; line-height: 1.5; font-weight: 500; }
 
-/* Модалка загрузки */
 .file-input-hidden { display: none; }
 
 .file-pick-area {
@@ -2541,49 +2579,4 @@ tr:last-child td { border-bottom: none; }
     font-size: 13px;
     border-radius: 9px;
   }
-}
-/* ============== ПРИВЕТСТВИЕ ============== */
-.welcome-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 850;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: calc(80px + env(safe-area-inset-top));
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.welcome-overlay.active {
-  opacity: 1;
-}
-
-.welcome-text {
-  font-family: inherit;
-  font-size: 56px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  text-align: center;
-  padding: 0 20px;
-  background: linear-gradient(135deg, var(--accent-even) 0%, var(--accent-odd) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  transform: translateY(-12px);
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-  text-shadow: 0 8px 40px rgba(91, 75, 214, 0.15);
-  word-break: break-word;
-}
-.welcome-overlay.active .welcome-text {
-  transform: translateY(0);
-}
-
-@media (max-width: 900px) {
-  .welcome-text { font-size: 40px; }
-}
-@media (max-width: 500px) {
-  .welcome-text { font-size: 30px; }
 }
