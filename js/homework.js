@@ -15,6 +15,20 @@ const SUBJECT_PALETTE = [
   '#C7A05B', '#5B9A8E', '#8E7B5B', '#8F6BA5', '#7B8FA1',
 ];
 
+// ===== Флаг «Показать важное» =====
+let hwImportantOnly = false;
+
+// «Важное» = дедлайн сегодня или завтра и не сделано
+function isHwImportant(item) {
+  if (!item.deadline) return false;
+  const [y, m, d] = String(item.deadline).slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return false;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dl = new Date(y, m - 1, d);
+  const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
+  return diff >= 0 && diff <= 1; // сегодня или завтра
+}
+
 function getAllSubjects() {
   const set = new Set();
   ['even','odd'].forEach(w => {
@@ -162,9 +176,33 @@ function renderHomework() {
 
   const subjectsSorted = [...allSubjects].sort((a, b) => a.localeCompare(b, 'ru'));
 
+  // === Фильтр «Показать важное» ===
+  let visibleSubjects = subjectsSorted;
+  if (hwImportantOnly) {
+    visibleSubjects = subjectsSorted.filter(subj => {
+      return (bySubject[subj] || []).some(item => isHwImportant(item) && !isHwDone(item.id));
+    });
+
+    if (visibleSubjects.length === 0) {
+      grid.innerHTML = `<div class="hw-empty active" style="grid-column:1/-1;">
+        <div class="hw-empty-icon">✅</div>
+        <div class="hw-empty-text">Нет важных заданий</div>
+        <div class="hw-empty-hint">На сегодня и завтра ничего не задано.</div>
+      </div>`;
+      empty.classList.remove('active');
+      return;
+    }
+  }
+
   let html = '';
-  for (const subj of subjectsSorted) {
-    const items = bySubject[subj] || [];
+  for (const subj of visibleSubjects) {
+    let items = bySubject[subj] || [];
+
+    // Если режим «важное» — оставляем только важные и несделанные
+    if (hwImportantOnly) {
+      items = items.filter(item => isHwImportant(item) && !isHwDone(item.id));
+    }
+
     const hasItems = items.length > 0;
     const style = getSubjectStyle(subj);
     const light = isLightColor(style.bg);
@@ -176,10 +214,12 @@ function renderHomework() {
       for (const item of items) {
         const dlText = formatDeadline(item.deadline);
         const isDone = isHwDone(item.id);
+        const important = isHwImportant(item) && !isDone;
         const doneClass = isDone ? ' done' : '';
+        const importantClass = important ? ' important' : '';
 
         itemsHtml += `
-          <div class="hw-item${doneClass}" data-id="${item.id}" draggable="true">
+          <div class="hw-item${doneClass}${importantClass}" data-id="${item.id}" draggable="${isDone ? 'false' : 'true'}">
             <span class="hw-item-grip" title="Перетащить">⋮⋮</span>
             <div class="hw-item-main">
               <div class="hw-item-task">${escapeHtml(item.task)}</div>
@@ -226,7 +266,7 @@ function renderHomework() {
     });
   });
 
-  // Drag & drop внутри каждого .hw-card-body
+  // Drag & drop
   grid.querySelectorAll('.hw-card-body').forEach(bodyEl => {
     setupHwDragAndDrop(bodyEl);
   });
@@ -238,6 +278,8 @@ function setupHwDragAndDrop(bodyEl) {
   let draggedEl = null;
 
   bodyEl.querySelectorAll('.hw-item').forEach(itemEl => {
+    if (itemEl.classList.contains('done')) return;
+
     itemEl.addEventListener('dragstart', e => {
       draggedEl = itemEl;
       itemEl.classList.add('dragging');
@@ -247,9 +289,7 @@ function setupHwDragAndDrop(bodyEl) {
 
     itemEl.addEventListener('dragend', () => {
       itemEl.classList.remove('dragging');
-      // Снять выделение с остальных
       bodyEl.querySelectorAll('.hw-item').forEach(el => el.classList.remove('drag-over'));
-      // Сохранить порядок
       const ids = [...bodyEl.querySelectorAll('.hw-item')].map(el => el.dataset.id);
       setHwOrder(subject, ids);
       draggedEl = null;
@@ -273,7 +313,6 @@ function setupHwDragAndDrop(bodyEl) {
   bodyEl.addEventListener('dragover', e => {
     e.preventDefault();
     if (!draggedEl) return;
-    // Если перетаскиваем на пустое место — в конец
     if (e.target === bodyEl) {
       bodyEl.appendChild(draggedEl);
     }
@@ -502,6 +541,18 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeHwModal();
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveHwItem();
 });
+
+// ===== Кнопка «Показать важное» =====
+const hwImportantBtn = document.getElementById('hwImportantBtn');
+if (hwImportantBtn) {
+  hwImportantBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    hwImportantOnly = !hwImportantOnly;
+    hwImportantBtn.classList.toggle('active', hwImportantOnly);
+    hwImportantBtn.textContent = hwImportantOnly ? 'Показать все' : 'Показать важное';
+    renderHomework();
+  });
+}
 
 // ===== REALTIME =====
 function subscribeHwRealtime() {
