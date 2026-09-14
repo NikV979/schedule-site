@@ -1399,6 +1399,24 @@
   .files-upload-btn:active { transform: scale(0.96); }
   .files-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 
+  .files-clear-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: transparent;
+    color: #E17055;
+    border: 2px solid #E17055;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .files-clear-btn:hover { background: #FFF0EB; }
+  .files-clear-btn:active { transform: scale(0.96); }
+  .files-clear-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  [data-theme="dark"] .files-clear-btn:hover { background: #3A2A22; }
+
   .files-hint {
     font-size: 12px;
     color: var(--text-secondary);
@@ -1599,19 +1617,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    background: var(--bg-surface-2);
+    padding: 14px 18px;
+    background: var(--fs-accent, #6C5CE7);
+    color: var(--fs-text, #fff);
     cursor: pointer;
     user-select: none;
-    border-bottom: 2px solid var(--border-light);
+    border-bottom: 2px solid rgba(0,0,0,0.12);
+    transition: filter 0.15s;
   }
-  .files-subject-head:hover { filter: brightness(0.98); }
+  .files-subject-head:hover { filter: brightness(1.05); }
+  .files-subject-head.light { border-bottom: 2px solid rgba(0,0,0,0.12); }
 
   .files-subject-arrow {
     font-size: 14px;
     font-weight: 900;
-    color: var(--text-secondary);
-    transition: transform 0.2s;
+    line-height: 1;
+    color: currentColor;
+    opacity: 0.85;
+    transition: transform 0.25s ease;
     flex-shrink: 0;
   }
   .files-subject-group.expanded .files-subject-arrow { transform: rotate(90deg); }
@@ -1620,20 +1643,22 @@
     flex: 1;
     font-size: 15px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: currentColor;
     word-break: break-word;
   }
 
   .files-subject-count {
     font-size: 12px;
     font-weight: 800;
-    color: var(--text-secondary);
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    padding: 3px 10px;
+    color: currentColor;
+    background: rgba(0,0,0,0.15);
+    padding: 3px 11px;
     border-radius: 20px;
     flex-shrink: 0;
+    min-width: 28px;
+    text-align: center;
   }
+  .files-subject-head.light .files-subject-count { background: rgba(0,0,0,0.1); }
 
   .files-subject-list {
     display: flex;
@@ -1880,6 +1905,7 @@
     .files-page { padding: 12px; gap: 12px; }
     .files-title { font-size: 20px; }
     .files-upload-btn { padding: 9px 14px; font-size: 13px; }
+    .files-clear-btn { padding: 9px 14px; font-size: 12px; }
     .file-card { padding: 10px 12px; gap: 10px; }
     .file-icon { width: 40px; height: 40px; font-size: 11px; }
     .file-name { font-size: 14px; }
@@ -2033,6 +2059,7 @@
             <span class="files-title-size" id="filesTotalSize">0 МБ</span>
           </div>
           <div class="files-actions">
+            <button class="files-clear-btn" id="filesClearBtn" type="button">Очистить всё</button>
             <button class="files-upload-btn" id="filesUploadBtn" type="button">
               <span>+</span> Загрузить файл
             </button>
@@ -3246,6 +3273,13 @@ function getFileSubject(item) {
   return s || 'Без предмета';
 }
 
+function updateFilesClearBtnState() {
+  const btn = document.getElementById('filesClearBtn');
+  if (!btn) return;
+  const hasOwn = currentUser && filesItems.some(f => f.user_login === currentUser);
+  btn.disabled = !hasOwn;
+}
+
 function renderFiles() {
   const grid = document.getElementById('filesGrid');
   const empty = document.getElementById('filesEmpty');
@@ -3253,7 +3287,7 @@ function renderFiles() {
   const sizeEl = document.getElementById('filesTotalSize');
   if (!grid || !empty) return;
 
-  if (filesLoading) { grid.innerHTML = ''; empty.classList.remove('active'); return; }
+  if (filesLoading) { grid.innerHTML = ''; empty.classList.remove('active'); updateFilesClearBtnState(); return; }
 
   const totalSize = filesItems.reduce((s, f) => s + (f.size || 0), 0);
   if (countEl) {
@@ -3268,6 +3302,7 @@ function renderFiles() {
   if (filesItems.length === 0) {
     grid.innerHTML = '';
     empty.classList.add('active');
+    updateFilesClearBtnState();
     return;
   }
   empty.classList.remove('active');
@@ -3282,12 +3317,14 @@ function renderFiles() {
       <div class="files-empty-text">Ничего не найдено</div>
       <div class="files-empty-hint">Попробуйте изменить запрос.</div>
     </div>`;
+    updateFilesClearBtnState();
     return;
   }
 
   if (!filesGroupEnabled) {
     grid.innerHTML = `<div class="files-list-flat">${filtered.map(renderFileCard).join('')}</div>`;
     bindFileCardEvents(grid);
+    updateFilesClearBtnState();
     return;
   }
 
@@ -3308,9 +3345,17 @@ function renderFiles() {
   for (const subj of subjects) {
     const items = groups.get(subj);
     const isExpanded = expandedFileSubjects.has(subj) || q.length > 0;
+
+    // Цвет — как в Домашке
+    const style = getSubjectStyle(subj);
+    const light = isLightColor(style.bg);
+    const lightClass = light ? ' light' : '';
+    const headBorder = light ? 'border-bottom: 2px solid rgba(0,0,0,0.12);' : '';
+
     html += `
-      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(subj)}">
-        <div class="files-subject-head">
+      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(subj)}"
+           style="--fs-accent: ${style.bg}; --fs-text: ${style.text};">
+        <div class="files-subject-head${lightClass}" style="${headBorder}">
           <span class="files-subject-arrow">▸</span>
           <span class="files-subject-name">📚 ${escapeHtml(subj)}</span>
           <span class="files-subject-count">${items.length}</span>
@@ -3334,6 +3379,7 @@ function renderFiles() {
   });
 
   bindFileCardEvents(grid);
+  updateFilesClearBtnState();
 }
 
 async function downloadFileById(id) {
@@ -3380,6 +3426,46 @@ async function deleteFileById(id) {
   } catch (err) {
     console.error(err);
     showToast('Ошибка удаления: ' + err.message);
+  }
+}
+
+async function clearAllFiles() {
+  if (!currentUser) { showToast('Войдите, чтобы очистить файлы'); openAuthModal(); return; }
+  const ownFiles = filesItems.filter(f => f.user_login === currentUser);
+  if (ownFiles.length === 0) { showToast('Нет файлов для удаления'); return; }
+  if (!confirm(`Удалить ВСЕ ваши файлы (${ownFiles.length})?\n\nЭто действие нельзя отменить.`)) return;
+
+  const btn = document.getElementById('filesClearBtn');
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Удаляю…';
+
+  try {
+    const paths = ownFiles.map(f => f.storage_path);
+
+    if (paths.length > 0) {
+      const { error: storageErr } = await supabaseClient.storage
+        .from(FILES_BUCKET)
+        .remove(paths);
+      if (storageErr) console.warn('Storage cleanup warning:', storageErr);
+    }
+
+    const { error } = await supabaseClient
+      .from('files')
+      .delete()
+      .eq('user_login', currentUser);
+
+    if (error) throw error;
+
+    filesItems = filesItems.filter(f => f.user_login !== currentUser);
+    renderFiles();
+    showToast('Все ваши файлы удалены');
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
+  } finally {
+    btn.textContent = oldText;
+    updateFilesClearBtnState();
   }
 }
 
@@ -3611,6 +3697,7 @@ async function uploadPickedFile() {
 }
 
 document.getElementById('filesUploadBtn').addEventListener('click', openFileModal);
+document.getElementById('filesClearBtn').addEventListener('click', clearAllFiles);
 document.getElementById('fileModalClose').addEventListener('click', closeFileModal);
 document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
@@ -4029,6 +4116,7 @@ function updateAuthUI() {
     if (sideUser) { sideUser.textContent = ''; sideUser.classList.remove('visible'); }
   }
   updateHwAddBtnState();
+  if (typeof updateFilesClearBtnState === 'function') updateFilesClearBtnState();
 }
 
 function openAuthModal() {
