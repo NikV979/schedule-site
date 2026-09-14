@@ -1433,6 +1433,26 @@
     gap: 10px;
   }
 
+  /* Индикатор загрузки списка файлов */
+  .files-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .files-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-light);
+    border-top-color: #6C5CE7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
   .file-card {
     background: var(--bg-surface);
     border: 2px solid var(--border-main);
@@ -2218,6 +2238,19 @@ let currentUser = null;
 let currentUserId = null;
 let hwRealtimeChannel = null;
 
+// ================== УТИЛИТЫ ==================
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function rememberPage(page) {
+  try { localStorage.setItem('r144s-page', page); } catch (_) {}
+}
+
 // ================== ИМЕНА ПОЛЬЗОВАТЕЛЕЙ ==================
 const USER_NAMES = {
   'user01': 'Мария',
@@ -2309,9 +2342,16 @@ async function refreshAvatarUI() {
   if (sideImg) { sideImg.src = currentAvatarUrl; sideImg.style.display = 'block'; }
 
   avatarSignedUrlTimer = setTimeout(() => {
-    refreshAvatarUI();
+    if (!document.hidden) refreshAvatarUI();
   }, (3600 - 300) * 1000);
 }
+
+// Обновляем аватар при возврате на вкладку, если пользователь вошёл
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (!currentUserId) return;
+  refreshAvatarUI();
+});
 
 const avatarModal = document.getElementById('avatarModal');
 const avatarFileInput = document.getElementById('avatarFileInput');
@@ -2875,16 +2915,24 @@ function navigateMobileDay(delta) {
 function goToTodayMobile() {
   initMobileDate();
   syncWeekOffsetFromMobileDate();
-  currentView = 'mobile';
-  renderMobileDay();
-  setViewUI('mobile');
+  if (isMobileLayout()) {
+    currentView = 'mobile';
+    renderMobileDay();
+    setViewUI('mobile');
+    rememberPage('schedule');
+  } else {
+    currentView = getCurrentType();
+    renderActiveDiary();
+    setViewUI(currentView);
+    rememberPage('schedule');
+  }
   updateNavInfo();
   updateBanner();
 }
 
 function ensureTodayButton() {
   const existing = document.getElementById('tabToday');
-  const shouldShow = isTouchPrimary();
+  const shouldShow = isMobileLayout();
   if (shouldShow && !existing) {
     const tabsCenter = document.querySelector('.tabs-center');
     const btn = document.createElement('button');
@@ -2893,7 +2941,7 @@ function ensureTodayButton() {
     btn.type = 'button';
     btn.textContent = 'Сегодня';
     tabsCenter.appendChild(btn);
-    btn.addEventListener('click', () => { if (!isMobileLayout()) return; goToTodayMobile(); });
+    btn.addEventListener('click', () => goToTodayMobile());
     updateTabTodayState();
   } else if (!shouldShow && existing) existing.remove();
 }
@@ -2990,6 +3038,7 @@ async function applyView(type) {
     updateBanner();
     updateSidebarActive('homework');
     updateHwAddBtnState();
+    rememberPage('homework');
     return;
   }
 
@@ -3002,6 +3051,7 @@ async function applyView(type) {
     updateNavInfo();
     updateBanner();
     updateSidebarActive('files');
+    rememberPage('files');
     return;
   }
 
@@ -3020,6 +3070,7 @@ async function applyView(type) {
     }
     updateNavInfo();
     updateBanner();
+    rememberPage('schedule');
     return;
   }
 
@@ -3031,6 +3082,7 @@ async function applyView(type) {
   updateNavInfo();
   updateBanner();
   fitAll();
+  rememberPage(type === 'bell' ? 'bell' : 'schedule');
 }
 
 function switchTab(view) {
@@ -3209,6 +3261,8 @@ function formatFileDate(iso) {
 
 async function loadFilesFromCloud() {
   filesLoading = true;
+  showFilesLoading();
+
   const { data, error } = await supabaseClient
     .from('files')
     .select('id, user_id, user_login, name, size, mime_type, storage_path, subject, created_at')
@@ -3222,6 +3276,18 @@ async function loadFilesFromCloud() {
     filesItems = data || [];
   }
   filesLoading = false;
+}
+
+function showFilesLoading() {
+  const grid = document.getElementById('filesGrid');
+  const empty = document.getElementById('filesEmpty');
+  if (!grid) return;
+  if (empty) empty.classList.remove('active');
+  grid.innerHTML = `
+    <div class="files-loading">
+      <div class="files-loading-spinner"></div>
+      <div>Загружаю файлы…</div>
+    </div>`;
 }
 
 function renderFileCard(item) {
@@ -3287,7 +3353,7 @@ function renderFiles() {
   const sizeEl = document.getElementById('filesTotalSize');
   if (!grid || !empty) return;
 
-  if (filesLoading) { grid.innerHTML = ''; empty.classList.remove('active'); updateFilesClearBtnState(); return; }
+  if (filesLoading) { updateFilesClearBtnState(); return; }
 
   const totalSize = filesItems.reduce((s, f) => s + (f.size || 0), 0);
   if (countEl) {
@@ -3346,7 +3412,6 @@ function renderFiles() {
     const items = groups.get(subj);
     const isExpanded = expandedFileSubjects.has(subj) || q.length > 0;
 
-    // Цвет — как в Домашке
     const style = getSubjectStyle(subj);
     const light = isLightColor(style.bg);
     const lightClass = light ? ' light' : '';
@@ -3517,8 +3582,19 @@ async function openFileViewer(id) {
 
     if (mime === 'text/plain') {
       const resp = await fetch(url);
-      if (!resp.ok) throw new Error('Не удалось прочитать файл');
+      if (!resp.ok) throw new Error('Не удалось прочитать файл (' + resp.status + ')');
+
+      const ct = (resp.headers.get('content-type') || '').toLowerCase();
+      if (ct && !ct.startsWith('text/') && !ct.includes('plain') && !ct.includes('octet-stream')) {
+        throw new Error('Сервер вернул не текстовый файл: ' + ct);
+      }
+
       const text = await resp.text();
+
+      if (/^\s*<!DOCTYPE\s+html/i.test(text) || /^\s*<html[\s>]/i.test(text)) {
+        throw new Error('Файл повреждён или недоступен');
+      }
+
       const pre = document.createElement('pre');
       pre.textContent = text;
       fileViewerBody.innerHTML = '';
@@ -3602,6 +3678,8 @@ function openFileModal() {
   filePickText.textContent = 'Нажмите, чтобы выбрать файл';
   filePickArea.classList.remove('has-file', 'error');
   fillFileSubjectSelect();
+  const subjSel = document.getElementById('fileSubject');
+  if (subjSel) subjSel.value = '';
   fileModal.classList.add('active');
 }
 function closeFileModal() {
@@ -3794,10 +3872,6 @@ function isDeadlineSoon(iso) {
   const dl = new Date(y, m - 1, d);
   const diff = Math.round((dl - now) / (24 * 60 * 60 * 1000));
   return diff <= 2;
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function isHwDone(id) {
@@ -4149,10 +4223,24 @@ async function logout() {
   currentUser = null;
   currentUserId = null;
   expandedSubjects.clear();
+  expandedFileSubjects.clear();
+
+  // Чистим кэш данных в любом случае
+  hwItems = [];
+  filesItems = [];
+  filesSearchQuery = '';
+
   await refreshAvatarUI();
   updateAuthUI();
-  if (currentView === 'homework') { hwItems = []; renderHomework(); }
-  if (currentView === 'files') { filesItems = []; renderFiles(); }
+
+  // Перерисовываем то, что сейчас открыто
+  if (currentView === 'homework') renderHomework();
+  if (currentView === 'files') {
+    const inp = document.getElementById('filesSearchInput');
+    if (inp) inp.value = '';
+    renderFiles();
+  }
+
   showToast('Вы вышли из аккаунта');
 }
 
@@ -4227,6 +4315,7 @@ window.addEventListener('resize', () => {
   const nowMobile = isMobileLayout();
   if (nowMobile !== lastMobileState) {
     lastMobileState = nowMobile;
+    ensureTodayButton();
     if (currentView === 'homework' || currentView === 'files') {}
     else if (nowMobile) { if (!mobileDate) initMobileDate(); applyView('mobile'); }
     else applyView(getCurrentType());
@@ -4266,6 +4355,7 @@ window.addEventListener('load', async () => {
   const savedPage = localStorage.getItem('r144s-page') || 'schedule';
   if (savedPage === 'homework') applyView('homework');
   else if (savedPage === 'files') applyView('files');
+  else if (savedPage === 'bell') applyView('bell');
   else {
     if (isMobileLayout()) applyView('mobile');
     else applyView(getCurrentType());
