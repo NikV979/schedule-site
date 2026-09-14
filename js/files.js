@@ -90,26 +90,22 @@ function showFilesLoading() {
     </div>`;
 }
 
-// ===== РЕНДЕР =====
+// ===== ПЛИТКА ФАЙЛА (карточка-плитка для сетки) =====
 function renderFileCard(item) {
   const cls = getFileIconClass(item.mime_type);
   const iconText = getFileIconText(item.mime_type, item.name);
   const canDelete = state.currentUser && item.user_login === state.currentUser;
   const safeName = escapeHtml(item.name);
   return `
-    <div class="file-card" data-id="${item.id}">
-      <div class="file-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
-      <div class="file-info">
-        <div class="file-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
-        <div class="file-meta">
-          <span>${formatSize(item.size)}</span>
-          <span>·</span>
-          <span>${formatFileDate(item.created_at)}</span>
-        </div>
+    <div class="file-tile" data-id="${item.id}">
+      <div class="file-tile-icon ${cls}" data-open-id="${item.id}" title="Открыть">${iconText}</div>
+      <div class="file-tile-info">
+        <div class="file-tile-name" data-open-id="${item.id}" title="Открыть">${safeName}</div>
+        <div class="file-tile-meta">${formatSize(item.size)}</div>
       </div>
-      <div class="file-actions">
-        <button class="file-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
-        ${canDelete ? `<button class="file-btn file-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
+      <div class="file-tile-actions">
+        <button class="file-tile-btn" data-download-id="${item.id}" title="Скачать">⬇</button>
+        ${canDelete ? `<button class="file-tile-btn file-tile-btn-del" data-delete-id="${item.id}" title="Удалить">✕</button>` : ''}
       </div>
     </div>`;
 }
@@ -188,13 +184,15 @@ function renderFiles() {
     return;
   }
 
+  // Без группировки — просто сетка плиток
   if (!state.files.groupEnabled) {
-    grid.innerHTML = `<div class="files-list-flat">${filtered.map(renderFileCard).join('')}</div>`;
+    grid.innerHTML = `<div class="files-tiles-grid">${filtered.map(renderFileCard).join('')}</div>`;
     bindFileCardEvents(grid);
     updateFilesClearBtnState();
     return;
   }
 
+  // С группировкой по предметам
   const groups = new Map();
   for (const item of filtered) {
     const subj = getFileSubject(item);
@@ -226,7 +224,7 @@ function renderFiles() {
           <span class="files-subject-count">${items.length}</span>
         </div>
         <div class="files-subject-list">
-          ${items.map(renderFileCard).join('')}
+          <div class="files-tiles-grid">${items.map(renderFileCard).join('')}</div>
         </div>
       </div>`;
   }
