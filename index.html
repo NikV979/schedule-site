@@ -39,7 +39,7 @@
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
-      <div class="sidebar-logo" id="sidebarAvatar">
+      <div class="sidebar-logo" id="sidebarAvatar" title="Профиль">
         <span class="sidebar-logo-fallback">Р144С</span>
         <img class="sidebar-logo-img" id="sidebarAvatarImg" alt="" style="display:none">
       </div>
@@ -48,6 +48,7 @@
         <div class="sidebar-subtitle">Группа Р144С</div>
         <div class="sidebar-user" id="sidebarUser"></div>
       </div>
+      <button class="sidebar-theme-btn" id="sidebarThemeBtn" type="button" title="Переключить тему">🌙</button>
     </div>
     <nav class="sidebar-nav">
       <button class="sidebar-item" data-page="schedule" type="button">
@@ -96,8 +97,14 @@
       </span>
       <span class="tabs-title-text">Домашка</span>
       <span class="tabs-badge" id="hwTabBadge">0</span>
-      <button class="hw-important-btn" id="hwImportantBtn" type="button" title="Показать только важное">Показать важное</button>
-      <button class="hw-clear-all-btn" id="hwClearAllBtn" type="button" title="Удалить все задания">Очистить всё дз</button>
+      <button class="hw-important-btn" id="hwImportantBtn" type="button" title="Показать только важное">
+        <span class="btn-text">Показать важное</span>
+        <span class="btn-icon">★</span>
+      </button>
+      <button class="hw-clear-all-btn" id="hwClearAllBtn" type="button" title="Удалить все задания">
+        <span class="btn-text">Очистить всё дз</span>
+        <span class="btn-icon">🗑</span>
+      </button>
     </div>
 
     <!-- ======== Шапка «Файлы» ======== -->
@@ -119,10 +126,15 @@
         <option value="none">Без группировки</option>
       </select>
 
-      <button class="hw-clear-all-btn" id="filesClearAllBtn" type="button" title="Удалить все файлы">Очистить всё</button>
+      <button class="hw-clear-all-btn" id="filesClearAllBtn" type="button" title="Удалить все файлы">
+        <span class="btn-text">Очистить всё</span>
+        <span class="btn-icon">🗑</span>
+      </button>
 
-      <button class="files-upload-btn-top" id="filesUploadTopBtn" type="button">
-        <span>+</span> Загрузить файл
+      <button class="files-upload-btn-top" id="filesUploadTopBtn" type="button" title="Загрузить файл">
+        <span class="btn-text-plus">+</span>
+        <span class="btn-text">Загрузить файл</span>
+        <span class="btn-icon">⬆</span>
       </button>
     </div>
 
