@@ -151,8 +151,21 @@ function getFileSubject(item) {
   return s || 'Без предмета';
 }
 
+// ===== БЕЙДЖ В ШАПКЕ: «3 · 9.2 МБ» =====
+function updateFilesTabBadge() {
+  const badge = document.getElementById('filesTabBadge');
+  if (!badge) return;
+  const n = state.files.items.length;
+  const totalSize = state.files.items.reduce((s, f) => s + (f.size || 0), 0);
+  if (n === 0) {
+    badge.textContent = '0';
+  } else {
+    badge.textContent = `${n} · ${formatSize(totalSize)}`;
+  }
+}
+
 function updateFilesClearBtnState() {
-  const btn = document.getElementById('filesClearBtn');
+  const btn = document.getElementById('filesClearAllBtn');
   if (!btn) return;
   const hasOwn = state.currentUser && state.files.items.some(f => f.user_login === state.currentUser);
   btn.disabled = !hasOwn;
@@ -161,21 +174,15 @@ function updateFilesClearBtnState() {
 function renderFiles() {
   const grid = document.getElementById('filesGrid');
   const empty = document.getElementById('filesEmpty');
-  const countEl = document.getElementById('filesTotalCount');
-  const sizeEl = document.getElementById('filesTotalSize');
   if (!grid || !empty) return;
 
-  if (state.files.loading) { updateFilesClearBtnState(); return; }
-
-  const totalSize = state.files.items.reduce((s, f) => s + (f.size || 0), 0);
-  if (countEl) {
-    const n = state.files.items.length;
-    let word = 'файлов';
-    if (n % 10 === 1 && n % 100 !== 11) word = 'файл';
-    else if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) word = 'файла';
-    countEl.textContent = `${n} ${word}`;
+  if (state.files.loading) {
+    updateFilesClearBtnState();
+    updateFilesTabBadge();
+    return;
   }
-  if (sizeEl) sizeEl.textContent = formatSize(totalSize);
+
+  updateFilesTabBadge();
 
   if (state.files.items.length === 0) {
     grid.innerHTML = '';
@@ -351,10 +358,12 @@ async function clearAllFiles() {
   if (ownFiles.length === 0) { showToast('Нет файлов для удаления'); return; }
   if (!confirm(`Удалить ВСЕ ваши файлы (${ownFiles.length})?\n\nЭто действие нельзя отменить.`)) return;
 
-  const btn = document.getElementById('filesClearBtn');
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Удаляю…';
+  const btn = document.getElementById('filesClearAllBtn');
+  const oldText = btn ? btn.textContent : 'Очистить всё';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Удаляю…';
+  }
 
   try {
     const paths = ownFiles.map(f => f.storage_path);
@@ -380,7 +389,7 @@ async function clearAllFiles() {
     console.error(err);
     showToast('Ошибка удаления: ' + (err.message || 'неизвестная'));
   } finally {
-    btn.textContent = oldText;
+    if (btn) btn.textContent = oldText;
     updateFilesClearBtnState();
   }
 }
@@ -636,8 +645,13 @@ async function uploadPickedFile() {
   }
 }
 
-document.getElementById('filesUploadBtn').addEventListener('click', openFileModal);
-document.getElementById('filesClearBtn').addEventListener('click', clearAllFiles);
+// ===== НАВЕШИВАЕМ ОБРАБОТЧИКИ НА КНОПКИ В ШАПКЕ =====
+const filesUploadTopBtn = document.getElementById('filesUploadTopBtn');
+if (filesUploadTopBtn) filesUploadTopBtn.addEventListener('click', openFileModal);
+
+const filesClearAllBtn = document.getElementById('filesClearAllBtn');
+if (filesClearAllBtn) filesClearAllBtn.addEventListener('click', clearAllFiles);
+
 document.getElementById('fileModalClose').addEventListener('click', closeFileModal);
 document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
