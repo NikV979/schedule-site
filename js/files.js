@@ -84,7 +84,7 @@ function showFilesLoading() {
   if (!grid) return;
   if (empty) empty.classList.remove('active');
   grid.innerHTML = `
-    <div class="files-loading">
+    <div class="files-loading" style="grid-column:1/-1;">
       <div class="files-loading-spinner"></div>
       <div>Загружаю файлы…</div>
     </div>`;
@@ -96,13 +96,18 @@ function getFileTypeGroup(item) {
   const name = item.name || '';
   const ext = name.split('.').pop().toLowerCase();
 
-  if (mime === 'application/pdf' || ext === 'pdf') return { key: 'pdf', title: 'PDF', emoji: '📄' };
-  if (mime.includes('word') || ['doc','docx'].includes(ext)) return { key: 'doc', title: 'Документы', emoji: '📝' };
-  if (mime.includes('presentation') || mime.includes('powerpoint') || ['ppt','pptx'].includes(ext)) return { key: 'ppt', title: 'Презентации', emoji: '📊' };
-  if (mime.startsWith('image/') || ['jpg','jpeg','png','webp'].includes(ext)) return { key: 'img', title: 'Изображения', emoji: '🖼' };
-  if (mime.startsWith('text/') || ext === 'txt') return { key: 'txt', title: 'Тексты', emoji: '📃' };
+  if (mime === 'application/pdf' || ext === 'pdf')
+    return { key: 'pdf', title: 'PDF', short: 'PDF' };
+  if (mime.includes('word') || ['doc','docx'].includes(ext))
+    return { key: 'doc', title: 'Документы', short: 'DOC' };
+  if (mime.includes('presentation') || mime.includes('powerpoint') || ['ppt','pptx'].includes(ext))
+    return { key: 'ppt', title: 'Презентации', short: 'PPT' };
+  if (mime.startsWith('image/') || ['jpg','jpeg','png','webp'].includes(ext))
+    return { key: 'img', title: 'Изображения', short: 'IMG' };
+  if (mime.startsWith('text/') || ext === 'txt')
+    return { key: 'txt', title: 'Тексты', short: 'TXT' };
 
-  return { key: 'other', title: 'Другое', emoji: '📎' };
+  return { key: 'other', title: 'Другое', short: 'FILE' };
 }
 
 // ===== ПЛИТКА ФАЙЛА =====
@@ -171,6 +176,30 @@ function updateFilesClearBtnState() {
   btn.disabled = !hasOwn;
 }
 
+// ===== СОБИРАЕМ СПИСОК ВСЕХ ПРЕДМЕТОВ ДЛЯ ОТОБРАЖЕНИЯ ВСЕГДА 9 КАРТОЧЕК =====
+function getAllSubjectsForFiles() {
+  let subjects = [];
+  try {
+    if (typeof getAllSubjects === 'function') subjects = getAllSubjects();
+  } catch (_) {}
+  if (!subjects || subjects.length === 0) {
+    // Заглушка — чтобы не было пустого экрана
+    subjects = [
+      'КОНЦ. СОВР. ЕСТ-ЗН',
+      'ОСН. МЕНЕДЖМЕНТ',
+      'ПЕД. ПСИХОЛОГИЯ',
+      'ПСИХ. ЛИЧНОСТИ',
+      'ПСИХ. ЭКСТРЕМ И ЧС',
+      'ПСИХОДИАГНОСТИКА',
+      'УПР. ЧЕЛ. РЕС.',
+      'ЭК ПО ФК И СПОРТУ',
+      'ЭКОНОМИЧ. ТЕОРИЯ'
+    ];
+  }
+  return subjects;
+}
+
+// ===== ОСНОВНОЙ РЕНДЕР =====
 function renderFiles() {
   const grid = document.getElementById('filesGrid');
   const empty = document.getElementById('filesEmpty');
@@ -184,7 +213,10 @@ function renderFiles() {
 
   updateFilesTabBadge();
 
-  if (state.files.items.length === 0) {
+  const q = state.files.searchQuery.trim().toLowerCase();
+
+  // Если ничего нет — показываем empty
+  if (state.files.items.length === 0 && !q) {
     grid.innerHTML = '';
     empty.classList.add('active');
     updateFilesClearBtnState();
@@ -192,13 +224,12 @@ function renderFiles() {
   }
   empty.classList.remove('active');
 
-  const q = state.files.searchQuery.trim().toLowerCase();
   const filtered = q
     ? state.files.items.filter(f => (f.name || '').toLowerCase().includes(q))
     : state.files.items;
 
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="files-empty active" style="padding:40px 20px;">
+  if (filtered.length === 0 && q) {
+    grid.innerHTML = `<div class="files-empty active" style="padding:40px 20px;grid-column:1/-1;">
       <div class="files-empty-text">Ничего не найдено</div>
       <div class="files-empty-hint">Попробуйте изменить запрос.</div>
     </div>`;
@@ -206,56 +237,60 @@ function renderFiles() {
     return;
   }
 
-  // Режим "без группировки" — просто сетка
+  // ===== РЕЖИМ "БЕЗ ГРУППИРОВКИ" =====
   if (state.files.groupMode === 'none') {
-    grid.innerHTML = `<div class="files-tiles-grid">${filtered.map(renderFileCard).join('')}</div>`;
+    grid.innerHTML = filtered.length
+      ? filtered.map(renderFileCard).join('')
+      : `<div class="files-empty active" style="padding:40px 20px;grid-column:1/-1;">
+           <div class="files-empty-text">Файлов нет</div>
+         </div>`;
     bindFileCardEvents(grid);
     updateFilesClearBtnState();
     return;
   }
 
-  // Собираем группы
+  // ===== ГРУППИРОВКА =====
   const groups = new Map();
 
   if (state.files.groupMode === 'subject') {
+    // Показываем ВСЕ предметы (даже пустые) — как в домашке
+    const allSubjects = getAllSubjectsForFiles();
+    for (const subj of allSubjects) {
+      const style = getSubjectStyle(subj);
+      groups.set(subj, { title: subj, style, items: [], emoji: getFileEmojiBySubject(subj) });
+    }
+    // Файлы без предмета — отдельная группа
     for (const item of filtered) {
       const subj = getFileSubject(item);
       if (!groups.has(subj)) {
+        // Файл с предметом, которого нет в списке (например, "Без предмета")
         const style = getSubjectStyle(subj);
-        groups.set(subj, { title: subj, emoji: '📚', style, items: [] });
+        groups.set(subj, { title: subj, style, items: [], emoji: getFileEmojiBySubject(subj) });
       }
       groups.get(subj).items.push(item);
     }
   } else if (state.files.groupMode === 'type') {
+    const allTypes = [
+      { key: 'pdf',  title: 'PDF',          short: 'PDF',  color: { bg: '#C75B5B', text: '#FFFFFF' } },
+      { key: 'doc',  title: 'Документы',    short: 'DOC',  color: { bg: '#4A6FA5', text: '#FFFFFF' } },
+      { key: 'ppt',  title: 'Презентации',  short: 'PPT',  color: { bg: '#C77E5B', text: '#FFFFFF' } },
+      { key: 'img',  title: 'Изображения',  short: 'IMG',  color: { bg: '#6E9E7C', text: '#FFFFFF' } },
+      { key: 'txt',  title: 'Тексты',       short: 'TXT',  color: { bg: '#7B8FA1', text: '#FFFFFF' } },
+      { key: 'other',title: 'Другое',       short: 'FILE', color: { bg: '#5B4BD6', text: '#FFFFFF' } }
+    ];
+    for (const t of allTypes) {
+      groups.set(t.key, { title: t.title, style: t.color, items: [], emoji: t.short });
+    }
     for (const item of filtered) {
       const t = getFileTypeGroup(item);
       if (!groups.has(t.key)) {
-        const typeColor = {
-          pdf:  { bg: '#C75B5B', text: '#FFFFFF' },
-          doc:  { bg: '#4A6FA5', text: '#FFFFFF' },
-          ppt:  { bg: '#C77E5B', text: '#FFFFFF' },
-          img:  { bg: '#6E9E7C', text: '#FFFFFF' },
-          txt:  { bg: '#7B8FA1', text: '#FFFFFF' },
-          other:{ bg: '#5B4BD6', text: '#FFFFFF' },
-        }[t.key];
-        groups.set(t.key, { title: t.title, emoji: t.emoji, style: typeColor, items: [] });
+        groups.set(t.key, { title: t.title, style: { bg: '#5B4BD6', text: '#FFF' }, items: [], emoji: t.short });
       }
       groups.get(t.key).items.push(item);
     }
   }
 
-  // Порядок групп
-  let sortedKeys;
-  if (state.files.groupMode === 'type') {
-    const order = ['pdf', 'doc', 'ppt', 'img', 'txt', 'other'];
-    sortedKeys = order.filter(k => groups.has(k));
-  } else {
-    sortedKeys = [...groups.keys()].sort((a, b) => {
-      if (a === 'Без предмета') return 1;
-      if (b === 'Без предмета') return -1;
-      return a.localeCompare(b, 'ru');
-    });
-  }
+  const sortedKeys = [...groups.keys()];
 
   let html = '';
   for (const key of sortedKeys) {
@@ -263,27 +298,36 @@ function renderFiles() {
     if (!group) continue;
 
     const isExpanded = state.files.expandedSubjects.has(key) || q.length > 0;
+    const isEmpty = group.items.length === 0;
     const light = isLightColor(group.style.bg);
     const lightClass = light ? ' light' : '';
 
+    const emojiShort = group.emoji || group.title.slice(0, 3).toUpperCase();
+
     html += `
-      <div class="files-subject-group${isExpanded ? ' expanded' : ''}" data-subject="${escapeHtml(key)}"
+      <div class="files-card${isExpanded ? ' expanded' : ''}${isEmpty ? ' files-card-empty' : ''}"
+           data-subject="${escapeHtml(key)}"
            style="--fs-accent: ${group.style.bg}; --fs-text: ${group.style.text};">
-        <div class="files-subject-head${lightClass}">
-          <span class="files-subject-arrow">▸</span>
-          <span class="files-subject-name">${group.emoji} ${escapeHtml(group.title)}</span>
-          <span class="files-subject-count">${group.items.length}</span>
+        <div class="files-card-head${lightClass}">
+          <span class="files-card-arrow">▸</span>
+          <span class="files-card-emoji">${escapeHtml(emojiShort)}</span>
+          <span class="files-card-name">${escapeHtml(group.title)}</span>
+          <span class="files-card-count">${group.items.length}</span>
         </div>
-        <div class="files-subject-list">
-          <div class="files-tiles-grid">${group.items.map(renderFileCard).join('')}</div>
+        <div class="files-card-body">
+          ${isEmpty
+            ? `<div class="files-card-noitems" style="grid-column:1/-1;text-align:center;padding:14px 0;color:var(--text-secondary);font-style:italic;font-size:12px;opacity:0.7;">Нет файлов</div>`
+            : group.items.map(renderFileCard).join('')}
         </div>
       </div>`;
   }
   grid.innerHTML = html;
 
-  grid.querySelectorAll('.files-subject-head').forEach(head => {
+  // Клики по шапкам — раскрыть/свернуть
+  grid.querySelectorAll('.files-card-head').forEach(head => {
     head.addEventListener('click', () => {
-      const grp = head.closest('.files-subject-group');
+      const grp = head.closest('.files-card');
+      if (grp.classList.contains('files-card-empty')) return;
       const subj = grp.dataset.subject;
       const expanded = grp.classList.toggle('expanded');
       if (expanded) state.files.expandedSubjects.add(subj);
@@ -294,6 +338,20 @@ function renderFiles() {
 
   bindFileCardEvents(grid);
   updateFilesClearBtnState();
+}
+
+// ===== ЭМОДЗИ-АББРЕВИАТУРА ПО ПРЕДМЕТУ =====
+function getFileEmojiBySubject(subj) {
+  if (!subj || subj === 'Без предмета') return 'FILE';
+  const s = subj.toUpperCase();
+  if (s.includes('ПСИХ')) return 'ПСИХ';
+  if (s.includes('МЕНЕДЖ')) return 'МЕН';
+  if (s.includes('ЭКОН')) return 'ЭКОН';
+  if (s.includes('ПЕД')) return 'ПЕД';
+  if (s.includes('ЕСТ')) return 'ЕСТ';
+  if (s.includes('СПОРТ') || s.includes('ФК')) return 'СПОРТ';
+  if (s.includes('УПР')) return 'УПР';
+  return s.slice(0, 4).replace(/[^А-ЯA-Z0-9]/g, '') || 'FILE';
 }
 
 // ===== СКАЧИВАНИЕ / УДАЛЕНИЕ =====
@@ -645,7 +703,7 @@ async function uploadPickedFile() {
   }
 }
 
-// ===== НАВЕШИВАЕМ ОБРАБОТЧИКИ НА КНОПКИ В ШАПКЕ =====
+// ===== ОБРАБОТЧИКИ =====
 const filesUploadTopBtn = document.getElementById('filesUploadTopBtn');
 if (filesUploadTopBtn) filesUploadTopBtn.addEventListener('click', openFileModal);
 
@@ -657,7 +715,7 @@ document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
 fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
 
-// Поиск по файлам
+// Поиск по файлам (в шапке)
 const filesSearchInput = document.getElementById('filesSearchInput');
 if (filesSearchInput) {
   filesSearchInput.addEventListener('input', e => {
@@ -666,7 +724,7 @@ if (filesSearchInput) {
   });
 }
 
-// Переключатель способа группировки
+// Группировка (в шапке)
 const filesGroupModeEl = document.getElementById('filesGroupMode');
 if (filesGroupModeEl) {
   filesGroupModeEl.value = state.files.groupMode || 'subject';
