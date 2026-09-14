@@ -78,8 +78,8 @@ function updateHwAddBtnState() {
   const btn = document.getElementById('hwAddBtn');
   const clearBtn = document.getElementById('hwClearBtn');
   if (btn) {
-    if (state.currentUser) { btn.disabled = false; btn.title = 'Добавить задание'; }
-    else { btn.disabled = true; btn.title = 'Войдите, чтобы добавлять задания'; }
+    btn.disabled = false;
+    btn.title = state.currentUser ? 'Добавить задание' : 'Войдите, чтобы добавлять задания';
   }
   if (clearBtn) {
     if (state.currentUser && state.hw.items.length > 0) { clearBtn.disabled = false; clearBtn.title = 'Удалить все задания'; }
@@ -217,7 +217,11 @@ function renderHomework() {
   grid.querySelectorAll('.hw-item-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      if (!state.currentUser) { showToast('Войдите, чтобы удалять'); return; }
+      if (!state.currentUser) {
+        showToast('Войдите, чтобы удалять задания');
+        if (typeof openAuthModal === 'function') openAuthModal();
+        return;
+      }
       const id = btn.dataset.id;
       const item = state.hw.items.find(x => String(x.id) === String(id));
       if (!item) return;
@@ -244,8 +248,13 @@ function fillSubjectSelect() {
   const subjects = getAllSubjects();
   hwSubjectEl.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 }
+
 function openHwModal() {
-  if (!state.currentUser) { showToast('Войдите, чтобы добавлять'); openAuthModal(); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы добавлять задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
   fillSubjectSelect();
   hwTaskEl.value = '';
   hwDeadlineEl.value = '';
@@ -255,7 +264,11 @@ function openHwModal() {
 function closeHwModal() { hwModal.classList.remove('active'); }
 
 async function saveHwItem() {
-  if (!state.currentUser) { showToast('Войдите'); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы добавлять задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
   const subject = hwSubjectEl.value.trim();
   const task = hwTaskEl.value.trim();
   const deadline = hwDeadlineEl.value || null;
@@ -263,7 +276,12 @@ async function saveHwItem() {
   if (!task) { showToast('Введите текст'); hwTaskEl.focus(); return; }
 
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session || !session.user) { showToast('Сессия истекла'); closeHwModal(); openAuthModal(); return; }
+  if (!session || !session.user) {
+    showToast('Сессия истекла, войдите заново');
+    closeHwModal();
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
 
   const saveBtn = document.getElementById('hwSave');
   saveBtn.disabled = true; saveBtn.textContent = 'Сохраняю…';
@@ -283,7 +301,11 @@ async function saveHwItem() {
 }
 
 async function clearAllHw() {
-  if (!state.currentUser) { showToast('Войдите'); openAuthModal(); return; }
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы очистить задания');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return;
+  }
   if (state.hw.items.length === 0) { showToast('Нет заданий'); return; }
   if (!confirm(`Удалить ВСЕ задания (${state.hw.items.length})?\n\nНельзя отменить.`)) return;
 
