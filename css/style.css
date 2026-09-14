@@ -204,6 +204,12 @@ html, body {
   }
 }
 
+/* Кнопки со значками по умолчанию: показываем текст, скрываем иконку */
+.btn-icon,
+.btn-text-plus {
+  display: none;
+}
+
 /* Кнопка «Показать важное» */
 .hw-important-btn {
   margin-left: 6px;
@@ -284,7 +290,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(91, 75, 214, 0.35);
 }
 .files-upload-btn-top:active { transform: translateY(0); }
-.files-upload-btn-top > span { font-size: 14px; line-height: 1; }
+.files-upload-btn-top > .btn-text-plus { font-size: 14px; line-height: 1; }
 
 /* Хинт в шапке «Файлы» */
 .files-tabs-hint {
@@ -328,7 +334,7 @@ html, body {
   box-shadow: 0 0 0 3px rgba(143, 132, 245, 0.15);
 }
 
-/* Селект группировки в шапке — с текстом, скруглённый */
+/* Селект группировки в шапке */
 .files-group-select-top {
   height: 32px;
   padding: 0 30px 0 14px;
@@ -363,6 +369,9 @@ html, body {
   background-color: var(--bg-surface);
   box-shadow: 0 0 0 3px rgba(91, 75, 214, 0.12);
 }
+
+/* Кнопка темы в сайдбаре — только на мобилке */
+.sidebar-theme-btn { display: none; }
 
 body.view-homework .tabs-center { display: none; }
 body.view-homework .tabs-title { display: flex; }
@@ -1140,8 +1149,9 @@ tr:last-child td { border-bottom: none; }
   font-size: 15px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.15s;
 }
-.sidebar-title-wrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sidebar-title-wrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .sidebar-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
 .sidebar-subtitle { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 1px; text-transform: uppercase; }
 .sidebar-user { margin-top: 6px; font-size: 12px; font-weight: 600; color: #00876A; display: none; }
@@ -1848,7 +1858,6 @@ tr:last-child td { border-bottom: none; }
 .file-tile-actions,
 .file-tile-btn { display: none !important; }
 
-/* ===== РЕЖИМ «БЕЗ ГРУППИРОВКИ» — квадратные мини-плитки ===== */
 .files-flat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -2330,6 +2339,112 @@ tr:last-child td { border-bottom: none; }
   .week-nav { display: none !important; }
   .banner { display: none !important; }
 
+  /* 1. Приветствие — убрать */
+  .header-user-name { display: none !important; }
+
+  /* 2. Фото профиля из шапки — убрать */
+  .btn-auth { display: none !important; }
+
+  /* 3. Кнопка темы из шапки — убрать, показать в сайдбаре */
+  .btn-theme { display: none !important; }
+  .sidebar-theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--tab-bg);
+    color: var(--tab-text);
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+    transition: all 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .sidebar-theme-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* Аватарка в сайдбаре кликабельная */
+  .sidebar-logo { cursor: pointer; }
+  .sidebar-logo:active { transform: scale(0.96); }
+
+  /* 4. Шапка «Файлы» — только значки */
+  .tabs-title-files .tabs-title-text { display: none; }
+  .tabs-title-files { gap: 6px; }
+
+  .files-search-top {
+    width: 90px;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+    border-radius: 16px;
+  }
+  .files-search-top:focus { width: 130px; }
+
+  .files-group-select-top {
+    height: 30px;
+    padding: 0 24px 0 10px;
+    font-size: 11px;
+    min-width: 90px;
+    background-size: 8px 5px;
+    background-position: right 9px center;
+    border-radius: 16px;
+  }
+
+  .hw-clear-all-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+  .hw-clear-all-btn .btn-text { display: none; }
+  .hw-clear-all-btn .btn-icon { display: inline-block; font-size: 14px; }
+
+  .files-upload-btn-top {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    box-shadow: none;
+  }
+  .files-upload-btn-top .btn-text,
+  .files-upload-btn-top .btn-text-plus { display: none; }
+  .files-upload-btn-top .btn-icon { display: inline-block; font-size: 14px; }
+  .files-upload-btn-top:hover,
+  .files-upload-btn-top:active { transform: none; }
+
+  /* 5. Шапка «Домашка» — только значки */
+  .tabs-title-hw .tabs-title-text { display: none; }
+  .tabs-title-hw { gap: 6px; }
+
+  .hw-important-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+  .hw-important-btn .btn-text { display: none; }
+  .hw-important-btn .btn-icon { display: inline-block; font-size: 14px; }
+
   .auth-overlay,
   .avatar-modal-overlay,
   .hw-modal-overlay {
@@ -2391,37 +2506,11 @@ tr:last-child td { border-bottom: none; }
   .tabs-title-icon { width: 18px; height: 18px; }
   .tabs-title-icon svg { width: 16px; height: 16px; }
 
-  .hw-important-btn {
-    font-size: 11px;
-    padding: 4px 9px;
-    margin-left: 6px;
-  }
-  .hw-clear-all-btn {
-    font-size: 11px;
-    padding: 4px 9px;
-    margin-left: 6px;
-  }
-  .files-upload-btn-top {
-    font-size: 11px;
-    padding: 5px 10px;
-    margin-left: 6px;
-  }
-  .files-tabs-hint { display: none; }
-
-  .files-search-top {
-    width: 90px;
-    height: 28px;
-    padding: 0 10px;
-    font-size: 11px;
-  }
-  .files-search-top:focus { width: 130px; }
-  .files-group-select-top {
-    height: 28px;
-    padding: 0 24px 0 10px;
-    font-size: 11px;
-    min-width: 100px;
-    background-size: 8px 5px;
-    background-position: right 9px center;
+  /* Табы по центру — на мобилке возвращаем в поток */
+  .tabs-center {
+    position: static;
+    transform: none;
+    flex: 1;
   }
 
   .viewport {
@@ -2523,7 +2612,7 @@ tr:last-child td { border-bottom: none; }
   .files-search-top { width: 70px; }
   .files-search-top:focus { width: 110px; }
   .files-group-select-top {
-    min-width: 90px;
+    min-width: 80px;
     font-size: 10px;
     padding: 0 22px 0 8px;
   }
