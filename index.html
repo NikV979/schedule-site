@@ -99,7 +99,7 @@
       <span class="tabs-badge" id="hwTabBadge">0</span>
       <button class="hw-important-btn" id="hwImportantBtn" type="button" title="Показать только важное">
         <span class="btn-text">Показать важное</span>
-        <span class="btn-icon">★</span>
+        <span class="btn-icon">!</span>
       </button>
       <button class="hw-clear-all-btn" id="hwClearAllBtn" type="button" title="Удалить все задания">
         <span class="btn-text">Очистить всё дз</span>
@@ -117,8 +117,11 @@
       <span class="tabs-title-text">Файлы</span>
       <span class="tabs-badge" id="filesTabBadge">0</span>
 
-      <input type="search" id="filesSearchInput" class="files-search-top"
-             placeholder="Поиск" autocomplete="off">
+      <div class="files-search-wrap">
+        <span class="files-search-icon">🔍</span>
+        <input type="search" id="filesSearchInput" class="files-search-top"
+               placeholder="Поиск" autocomplete="off">
+      </div>
 
       <select class="files-group-select-top" id="filesGroupMode" title="Группировка">
         <option value="subject">По предметам</option>
