@@ -141,7 +141,7 @@
       </div>
     </div>
 
-        <div class="diary-wrap" data-view="homework">
+    <div class="diary-wrap" data-view="homework">
       <div class="homework-page">
         <div class="hw-dashboard" id="hwDashboard">
           <div class="hw-stat">
@@ -212,10 +212,12 @@
         <div class="files-controls">
           <input type="search" id="filesSearchInput" class="files-search"
                  placeholder="Поиск по названию файла…" autocomplete="off">
-          <label class="files-group-toggle">
-            <input type="checkbox" id="filesGroupToggle" checked>
-            <span>Группировать по предметам</span>
-          </label>
+          <label class="files-group-label" for="filesGroupMode">Группировать:</label>
+          <select class="files-group-select" id="filesGroupMode">
+            <option value="subject">По предметам</option>
+            <option value="type">По типам файлов</option>
+            <option value="none">Без группировки</option>
+          </select>
         </div>
 
         <div class="files-grid" id="filesGrid"></div>
@@ -378,34 +380,46 @@
         <button class="hw-modal-close" id="privacyModalClose" type="button" title="Закрыть">✕</button>
       </div>
       <div class="hw-modal-body">
-        <p class="auth-desc" style="margin-bottom: 14px;">Если коротко.</p>
+        <p class="auth-desc" style="margin-bottom: 14px;">Коротко о том, какие данные мы обрабатываем и зачем.</p>
 
         <div class="privacy-block">
           <h3>Что мы храним</h3>
           <ul>
-            <li><strong>Логин и пароль, фото, имя, домашку, файлы</strong></li>
+            <li><strong>Логин и пароль</strong> — чтобы вы могли войти.</li>
+            <li><strong>Имя</strong> — чтобы показывать его в профиле.</li>
+            <li><strong>Фото профиля</strong> (по желанию) — для аватара.</li>
+            <li><strong>Домашку и файлы</strong>, которые вы добавляете.</li>
           </ul>
         </div>
 
         <div class="privacy-block">
-          <h3>Если что</h3>
+          <h3>Зачем</h3>
           <ul>
-            <li>Ваши файлы, задания, имя и фотка доступны только вам</li>
+            <li>Чтобы работал вход на сайт.</li>
+            <li>Чтобы ваши файлы и задания сохранялись и были доступны только вам.</li>
+            <li>Чтобы отображать ваше имя в интерфейсе.</li>
           </ul>
         </div>
 
         <div class="privacy-block">
           <h3>Насколько это безопасно</h3>
           <ul>
-            <li>Мы не передаём данные третьим лицам и не используем для рекламы, честно</li>
+            <li>Пароль хранится в зашифрованном виде. Прочитать его нельзя — ни вам, ни администратору. Если пароль забудется, его можно только сбросить (заменить на новый).</li>
+            <li>Данные передаются по HTTPS (защищённое соединение).</li>
+            <li>Файлы, домашка и фото доступны <strong>только вам</strong> — это гарантируется на уровне сервера.</li>
+            <li>Мы не передаём данные третьим лицам и не используем для рекламы.</li>
           </ul>
         </div>
 
         <div class="privacy-block">
-          <h3>От вас что требуется?</h3>
-          <p>Если забудете пароль — напишите администратору</p>
+          <h3>Что от вас требуется</h3>
+          <p>Ничего сложного. Просто не сообщайте свой пароль другим. Если забудете его — напишите администратору, он выдаст новый.</p>
         </div>
 
+        <div class="privacy-block" style="margin-bottom: 0;">
+          <h3>Переживать не стоит</h3>
+          <p>Сайт сделан для удобства группы. Никаких скрытых действий не делается: всё, что мы храним, перечислено выше.</p>
+        </div>
       </div>
       <div class="hw-modal-foot">
         <button class="hw-btn hw-btn-save" id="privacyOkBtn" type="button">Понятно</button>
