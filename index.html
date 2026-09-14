@@ -296,6 +296,8 @@
         <button class="auth-close" id="authClose" type="button" title="Закрыть">✕</button>
       </div>
       <div class="auth-body">
+        <p class="auth-desc">Войдите, чтобы добавлять домашку и загружать файлы. Расписание доступно без входа.</p>
+
         <label class="auth-label" for="authLogin">Логин</label>
         <input class="auth-input" id="authLogin" type="text" autocomplete="username" spellcheck="false" placeholder="Например: user01">
 
@@ -305,7 +307,7 @@
         <div class="auth-error" id="authError"></div>
       </div>
       <div class="auth-foot">
-        <button class="auth-btn auth-btn-skip" id="authSkip" type="button">Смотреть без входа</button>
+        <button class="auth-btn auth-btn-skip" id="authSkip" type="button">Продолжить без входа</button>
         <button class="auth-btn auth-btn-submit" id="authSubmit" type="button">Войти</button>
       </div>
     </div>
@@ -323,10 +325,7 @@
           <span class="avatar-preview-placeholder" id="avatarPreviewPlaceholder">👤</span>
         </div>
 
-        <div class="avatar-modal-hint">
-          JPG, PNG, WebP · до 2 МБ<br>
-               Только для вас
-        </div>
+        <div class="avatar-modal-hint">JPG, PNG, WebP · до 2 МБ</div>
 
         <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="avatar-file-input">
 
