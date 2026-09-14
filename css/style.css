@@ -103,7 +103,10 @@ html, body {
   align-items: center;
   min-width: 0;
   overflow: hidden;
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
 }
 
 .tabs-title {
