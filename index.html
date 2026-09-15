@@ -437,6 +437,25 @@
     </div>
   </div>
 
+    <!-- ============== МОДАЛКА ПЕРЕМЕЩЕНИЯ ФАЙЛА ============== -->
+  <div class="hw-modal-overlay" id="moveModal">
+    <div class="hw-modal" style="max-width: 420px;">
+      <div class="hw-modal-head">
+        <h2>Переместить файл</h2>
+        <button class="hw-modal-close" id="moveModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="hw-modal-body">
+        <p class="auth-desc" id="moveFileLabel" style="margin-bottom: 12px;">—</p>
+        <label class="hw-field-label" for="moveSubject">Новый предмет</label>
+        <select class="hw-select" id="moveSubject"></select>
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-cancel" id="moveCancel" type="button">Отмена</button>
+        <button class="hw-btn hw-btn-save" id="moveSave" type="button">Переместить</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </body>
