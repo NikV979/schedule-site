@@ -3028,3 +3028,139 @@ tr:last-child td { border-bottom: none; }
     padding: 0 12px;
   }
 }
+/* ============================================================ */
+/* ===== УНИФИКАЦИЯ: КАРТОЧКИ ДОМАШКИ = КАРТОЧКИ ФАЙЛОВ ======= */
+/* ============================================================ */
+@media (max-width: 900px) {
+
+  /* Общий контейнер */
+  .diary-wrap[data-view="homework"] .hw-grid,
+  .diary-wrap[data-view="files"] .hw-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* Одинаковая карточка */
+  .diary-wrap[data-view="homework"] .hw-card,
+  .diary-wrap[data-view="files"] .files-card {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-light) !important;
+    box-shadow: var(--shadow-soft) !important;
+  }
+
+  /* Одинаковая шапка */
+  .diary-wrap[data-view="homework"] .hw-card-head,
+  .diary-wrap[data-view="files"] .files-card-head {
+    padding: 14px 16px !important;
+    min-height: 52px;
+    flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  /* Одинаковое название */
+  .diary-wrap[data-view="homework"] .hw-card-subject,
+  .diary-wrap[data-view="files"] .files-card-name {
+    flex: 1 !important;
+    min-width: 0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
+    -webkit-line-clamp: initial !important;
+    -webkit-box-orient: initial !important;
+    word-break: normal !important;
+  }
+
+  /* Убираем обёртку head-left, чтобы название занимало всю ширину */
+  .diary-wrap[data-view="homework"] .hw-card-head-left {
+    display: contents !important;
+  }
+
+  /* Одинаковый счётчик */
+  .diary-wrap[data-view="homework"] .hw-card-count,
+  .diary-wrap[data-view="files"] .files-card-count {
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+    min-width: 24px !important;
+    background: rgba(0,0,0,0.15) !important;
+    border-radius: 20px !important;
+    flex-shrink: 0 !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+  }
+  .diary-wrap[data-view="homework"] .hw-card-head.light .hw-card-count,
+  .diary-wrap[data-view="files"] .files-card-head.light .files-card-count {
+    background: rgba(0,0,0,0.1) !important;
+  }
+
+  /* Одинаковое тело — раскрытие */
+  .diary-wrap[data-view="homework"] .hw-card-body,
+  .diary-wrap[data-view="files"] .files-card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 8px 12px 10px !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transition: max-height 0.35s ease, padding 0.2s ease !important;
+    flex: initial !important;
+  }
+  .diary-wrap[data-view="homework"] .hw-card.expanded .hw-card-body,
+  .diary-wrap[data-view="files"] .files-card.expanded .files-card-body {
+    max-height: 20000px !important;
+    padding: 8px 12px 10px !important;
+  }
+  .diary-wrap[data-view="homework"] .hw-card:not(.expanded) .hw-card-body,
+  .diary-wrap[data-view="files"] .files-card:not(.expanded) .files-card-body {
+    padding: 0 12px !important;
+  }
+
+  /* Кнопка «Добавить задание» внутри домашки */
+  .hw-card .hw-add-item-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(91, 75, 214, 0.08);
+    color: var(--accent-even);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px dashed rgba(91, 75, 214, 0.3);
+    transition: all 0.15s;
+  }
+  .hw-card .hw-add-item-btn::before {
+    content: '+';
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .hw-card .hw-add-item-btn:active {
+    background: rgba(91, 75, 214, 0.16);
+    transform: scale(0.98);
+  }
+
+  /* На ПК кнопку «+ Добавить задание» не показываем */
+}
+
+/* На ПК кнопка «+» внутри карточки — скрыта */
+@media (min-width: 901px) {
+  .hw-add-item-btn { display: none !important; }
+}
