@@ -98,3 +98,13 @@ window.addEventListener('load', () => {
 
 // Подстраховка: если через 4 секунды ничего не произошло — тоже прячем
 setTimeout(hideAppLoader, 4000);
+// ===== КНОПКА ОБНОВЛЕНИЯ =====
+const refreshBtn = document.getElementById('refreshBtn');
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', () => {
+    refreshBtn.classList.add('spinning');
+    setTimeout(() => {
+      location.reload();
+    }, 400);
+  });
+}
