@@ -80,7 +80,7 @@ function renderHomework() {
   const empty = document.getElementById('hwEmpty');
   if (!grid || !empty) return;
 
-  // Защита на случай, если state.hw.expandedSubjects не создан
+  // Защита state
   if (!state.hw.expandedSubjects) state.hw.expandedSubjects = new Set();
   if (typeof state.hw.onlyImportant !== 'boolean') state.hw.onlyImportant = false;
 
@@ -88,6 +88,7 @@ function renderHomework() {
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
   let html = '';
+  let totalItems = 0;
 
   for (const subject of subjects) {
     const items = state.hw.items.filter(it => it.subject === subject);
@@ -96,6 +97,8 @@ function renderHomework() {
       : items;
 
     if (state.hw.onlyImportant && filteredItems.length === 0) continue;
+
+    totalItems += items.length;
 
     const style = getSubjectStyle(subject);
     const light = isLightColor(style.bg);
@@ -118,37 +121,37 @@ function renderHomework() {
           ${filteredItems.length
             ? filteredItems.map(renderHwItem).join('')
             : `<div class="hw-card-noitems">Нет заданий</div>`}
-          <div class="hw-add-item-btn" data-add-subject="${escapeHtml(subject)}">Добавить задание</div>
+          <div class="hw-add-item-btn" data-add-subject="${escapeHtml(subject)}">
+            <span>Добавить задание</span>
+          </div>
         </div>
       </div>`;
   }
 
   grid.innerHTML = html;
 
-  // ===== Клик по шапке карточки =====
+  // ===== Обработчики =====
+
+  // Клик по шапке карточки
   grid.querySelectorAll('.hw-card-head').forEach(head => {
     head.addEventListener('click', () => {
       const card = head.closest('.hw-card');
       const subj = card.dataset.subject;
 
       if (isMobile) {
-        // Пустая — модалка. С заданиями — раскрыть/свернуть.
-        if (card.classList.contains('hw-card-empty')) {
-          openHwModal(subj);
-          return;
-        }
+        // Мобилка: клик по шапке = раскрыть/свернуть (как в файлах)
         const expanded = card.classList.toggle('expanded');
         if (expanded) state.hw.expandedSubjects.add(subj);
         else state.hw.expandedSubjects.delete(subj);
         return;
       }
 
-      // Десктоп — модалка
+      // ПК: клик по шапке = модалка добавления
       openHwModal(subj);
     });
   });
 
-  // ===== Кнопка «+ Добавить задание» внутри карточки =====
+  // Клик по кнопке «+ Добавить задание» (внутри раскрытой карточки)
   grid.querySelectorAll('.hw-add-item-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -156,7 +159,7 @@ function renderHomework() {
     });
   });
 
-  // ===== Клик по заданию — контекстное меню =====
+  // Клик по заданию — контекстное меню
   grid.querySelectorAll('.hw-item').forEach(item => {
     item.addEventListener('click', e => {
       e.stopPropagation();
@@ -169,9 +172,14 @@ function renderHomework() {
     });
   });
 
-  // ===== Бейдж =====
+  // Бейдж
   const badge = document.getElementById('hwTabBadge');
-  if (badge) badge.textContent = state.hw.items.length;
+  if (badge) badge.textContent = totalItems;
+
+  // Пусто?
+  if (totalItems === 0 && state.hw.onlyImportant === false) {
+    // показываем все карточки (пустые) — пользователь может добавлять
+  }
 }
 
 function renderHwItem(it) {
@@ -368,6 +376,9 @@ document.getElementById('hwSave').addEventListener('click', async () => {
   if (ok) {
     closeHwModal();
     showToast('Задание добавлено');
+    // Раскрываем карточку, в которую добавили
+    state.hw.expandedSubjects.add(subj);
+    renderHomework();
   }
 });
 
