@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Генератор иконок</title>
+<style>
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #0D0D18;
+    color: #F0F0FA;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    gap: 20px;
+  }
+  h1 { font-size: 20px; margin: 0; }
+  p { font-size: 14px; opacity: 0.7; margin: 0; text-align: center; max-width: 400px; }
+  canvas { display: none; }
+  .preview {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin: 10px 0;
+  }
+  .preview img {
+    border-radius: 22%;
+    box-shadow: 0 8px 30px rgba(91, 75, 214, 0.4);
+  }
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #5B4BD6, #D9644A);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s;
+  }
+  button:hover { transform: scale(1.05); }
+  button:active { transform: scale(0.98); }
+  .done { color: #4FE0B8; font-size: 13px; height: 18px; }
+</style>
+</head>
+<body>
+
+  <h1>Генератор иконок «Дневник»</h1>
+  <p>Нажми на кнопку — скачается PNG-файл. Оба файла закинь в корень проекта рядом с index.html.</p>
+
+  <div class="preview" id="preview"></div>
+
+  <button onclick="downloadIcon(512)">Скачать icon-512.png</button>
+  <button onclick="downloadIcon(192)">Скачать icon-192.png</button>
+
+  <div class="done" id="doneMsg"></div>
+
+<script>
+  // Рисуем иконку на canvas
+  function drawIcon(size) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Градиент
+    const grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0, '#5B4BD6');
+    grad.addColorStop(1, '#D9644A');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+
+    // Буква Р
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${Math.round(size * 0.5)}px -apple-system, 'Inter', 'Segoe UI', Arial, sans-serif`;
+    ctx.fillText('Р', size / 2, size * 0.44);
+
+    // 144С снизу
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = `700 ${Math.round(size * 0.115)}px -apple-system, 'Inter', 'Segoe UI', Arial, sans-serif`;
+    ctx.fillText('144С', size / 2, size * 0.78);
+
+    return canvas;
+  }
+
+  // Показать превью
+  function showPreview() {
+    const wrap = document.getElementById('preview');
+    [512, 192].forEach(size => {
+      const c = drawIcon(size);
+      const img = new Image();
+      img.src = c.toDataURL('image/png');
+      img.style.width = Math.min(size, 120) + 'px';
+      img.style.height = Math.min(size, 120) + 'px';
+      wrap.appendChild(img);
+    });
+  }
+
+  // Скачать PNG
+  function downloadIcon(size) {
+    const c = drawIcon(size);
+    c.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'icon-' + size + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      document.getElementById('doneMsg').textContent = '✓ Скачано: icon-' + size + '.png';
+    }, 'image/png');
+  }
+
+  showPreview();
+</script>
+
+</body>
+</html>
