@@ -133,7 +133,6 @@ function bindFileCardEvents(root) {
     });
   });
 
-  // Правый клик по файлу — контекстное меню (на телефоне = долгое нажатие)
   root.querySelectorAll('.file-tile').forEach(tile => {
     tile.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -174,7 +173,7 @@ function openFileContextMenu(fileId, x, y) {
   });
   menu.appendChild(downloadBtn);
 
-  // 2) Переименовать (только для своих файлов)
+  // 2) Переименовать
   if (canEdit) {
     const renameBtn = document.createElement('button');
     renameBtn.className = 'file-ctx-btn';
@@ -186,7 +185,19 @@ function openFileContextMenu(fileId, x, y) {
     menu.appendChild(renameBtn);
   }
 
-  // 3) Удалить (только для своих файлов)
+  // 3) Переместить
+  if (canEdit) {
+    const moveBtn = document.createElement('button');
+    moveBtn.className = 'file-ctx-btn';
+    moveBtn.innerHTML = '📂 Переместить';
+    moveBtn.addEventListener('click', () => {
+      closeFileContextMenu();
+      openMoveModal(fileId);
+    });
+    menu.appendChild(moveBtn);
+  }
+
+  // 4) Удалить
   if (canEdit) {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'file-ctx-btn danger';
@@ -203,7 +214,6 @@ function openFileContextMenu(fileId, x, y) {
   document.body.appendChild(menu);
   fileCtxMenuEl = menu;
 
-  // Позиционирование внутри экрана
   const rect = menu.getBoundingClientRect();
   let left = x;
   let top = y;
@@ -230,7 +240,7 @@ function getFileSubject(item) {
   return s || 'Без предмета';
 }
 
-// ===== БЕЙДЖ В ШАПКЕ: «3 · 9.2 МБ» =====
+// ===== БЕЙДЖ В ШАПКЕ =====
 function updateFilesTabBadge() {
   const badge = document.getElementById('filesTabBadge');
   if (!badge) return;
@@ -451,7 +461,7 @@ async function renameFileById(id, newName) {
 
   const clean = String(newName).trim().slice(0, 120);
   if (!clean) { showToast('Введите название'); return false; }
-  if (clean === item.name) return true; // ничего не изменилось
+  if (clean === item.name) return true;
 
   try {
     const { error } = await supabaseClient
@@ -497,6 +507,111 @@ if (renameModal) {
     btn.textContent = oldText;
 
     if (ok) closeRenameModal();
+  });
+}
+
+// ================== МОДАЛКА ПЕРЕМЕЩЕНИЯ ==================
+const moveModal = document.getElementById('moveModal');
+const moveSubject = document.getElementById('moveSubject');
+const moveFileLabel = document.getElementById('moveFileLabel');
+let moveFileId = null;
+
+function fillMoveSubjects(currentSubject) {
+  if (!moveSubject) return;
+  const subjects = getAllSubjectsForFiles();
+  moveSubject.innerHTML = subjects
+    .map(s => `<option value="${escapeHtml(s)}"${s === currentSubject ? ' selected' : ''}>${escapeHtml(s)}</option>`)
+    .join('');
+}
+
+function openMoveModal(fileId) {
+  const item = state.files.items.find(f => String(f.id) === String(fileId));
+  if (!item) return;
+  if (!state.currentUser || item.user_login !== state.currentUser) {
+    showToast('Можно перемещать только свои файлы');
+    return;
+  }
+
+  moveFileId = fileId;
+  moveFileLabel.textContent = '«' + item.name + '»';
+  fillMoveSubjects(item.subject || '');
+
+  moveModal.classList.add('active');
+  setTimeout(() => moveSubject.focus(), 80);
+}
+
+function closeMoveModal() {
+  if (!moveModal) return;
+  moveModal.classList.remove('active');
+  moveFileId = null;
+}
+
+async function moveFileById(id, newSubject) {
+  const item = state.files.items.find(f => String(f.id) === String(id));
+  if (!item) return false;
+
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы перемещать');
+    openAuthModal();
+    return false;
+  }
+  if (item.user_login !== state.currentUser) {
+    showToast('Можно перемещать только свои файлы');
+    return false;
+  }
+
+  const clean = String(newSubject || '').trim();
+  const currentSubject = (item.subject || '').trim();
+  if (clean === currentSubject) return true; // ничего не изменилось
+
+  try {
+    const { error } = await supabaseClient
+      .from('files')
+      .update({ subject: clean || null })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    item.subject = clean || null;
+
+    // Раскрываем целевую группу, чтобы сразу увидеть файл
+    if (clean) state.files.expandedSubjects.add(clean);
+    // Сворачиваем старую группу
+    if (currentSubject) state.files.expandedSubjects.delete(currentSubject);
+
+    localStorage.setItem('files-expanded-subjects', JSON.stringify([...state.files.expandedSubjects]));
+
+    renderFiles();
+    showToast('Файл перемещён');
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + (err.message || 'неизвестная'));
+    return false;
+  }
+}
+
+if (moveModal) {
+  document.getElementById('moveModalClose').addEventListener('click', closeMoveModal);
+  document.getElementById('moveCancel').addEventListener('click', closeMoveModal);
+
+  moveModal.addEventListener('click', e => {
+    if (e.target === moveModal) closeMoveModal();
+  });
+
+  document.getElementById('moveSave').addEventListener('click', async () => {
+    if (!moveFileId) return;
+    const btn = document.getElementById('moveSave');
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Перемещаю…';
+
+    const ok = await moveFileById(moveFileId, moveSubject.value);
+
+    btn.disabled = false;
+    btn.textContent = oldText;
+
+    if (ok) closeMoveModal();
   });
 }
 
