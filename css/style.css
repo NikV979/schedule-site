@@ -3238,3 +3238,15 @@ tr:last-child td { border-bottom: none; }
 @media (min-width: 901px) {
   .hw-add-item-btn { display: none !important; }
 }
+/* Увеличенная зона нажатия для кнопки меню на мобилке */
+@media (max-width: 900px) {
+  .menu-btn {
+    position: relative;
+  }
+  .menu-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 14px;
+  }
+}
