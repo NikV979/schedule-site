@@ -133,7 +133,7 @@ function bindFileCardEvents(root) {
     });
   });
 
-  // Правый клик по файлу — контекстное меню
+  // Правый клик по файлу — контекстное меню (на телефоне = долгое нажатие)
   root.querySelectorAll('.file-tile').forEach(tile => {
     tile.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -159,11 +159,12 @@ function openFileContextMenu(fileId, x, y) {
   const item = state.files.items.find(f => String(f.id) === String(fileId));
   if (!item) return;
 
-  const canDelete = state.currentUser && item.user_login === state.currentUser;
+  const canEdit = state.currentUser && item.user_login === state.currentUser;
 
   const menu = document.createElement('div');
   menu.className = 'file-ctx-menu';
 
+  // 1) Скачать
   const downloadBtn = document.createElement('button');
   downloadBtn.className = 'file-ctx-btn';
   downloadBtn.innerHTML = '⬇ Скачать';
@@ -173,7 +174,20 @@ function openFileContextMenu(fileId, x, y) {
   });
   menu.appendChild(downloadBtn);
 
-  if (canDelete) {
+  // 2) Переименовать (только для своих файлов)
+  if (canEdit) {
+    const renameBtn = document.createElement('button');
+    renameBtn.className = 'file-ctx-btn';
+    renameBtn.innerHTML = '✏ Переименовать';
+    renameBtn.addEventListener('click', () => {
+      closeFileContextMenu();
+      openRenameModal(fileId);
+    });
+    menu.appendChild(renameBtn);
+  }
+
+  // 3) Удалить (только для своих файлов)
+  if (canEdit) {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'file-ctx-btn danger';
     deleteBtn.innerHTML = '✕ Удалить';
@@ -189,6 +203,7 @@ function openFileContextMenu(fileId, x, y) {
   document.body.appendChild(menu);
   fileCtxMenuEl = menu;
 
+  // Позиционирование внутри экрана
   const rect = menu.getBoundingClientRect();
   let left = x;
   let top = y;
@@ -272,7 +287,6 @@ function renderFiles() {
   updateFilesTabBadge();
 
   const q = state.files.searchQuery.trim().toLowerCase();
-  const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
   if (state.files.items.length === 0 && !q) {
     grid.innerHTML = '';
@@ -390,6 +404,100 @@ function renderFiles() {
 
   bindFileCardEvents(grid);
   updateFilesClearBtnState();
+}
+
+// ================== МОДАЛКА ПЕРЕИМЕНОВАНИЯ ==================
+const renameModal = document.getElementById('renameModal');
+const renameInput = document.getElementById('renameInput');
+let renameFileId = null;
+
+function openRenameModal(fileId) {
+  const item = state.files.items.find(f => String(f.id) === String(fileId));
+  if (!item) return;
+  if (!state.currentUser || item.user_login !== state.currentUser) {
+    showToast('Можно переименовывать только свои файлы');
+    return;
+  }
+
+  renameFileId = fileId;
+  renameInput.value = item.name || '';
+  renameModal.classList.add('active');
+
+  setTimeout(() => {
+    renameInput.focus();
+    renameInput.select();
+  }, 80);
+}
+
+function closeRenameModal() {
+  if (!renameModal) return;
+  renameModal.classList.remove('active');
+  renameFileId = null;
+}
+
+async function renameFileById(id, newName) {
+  const item = state.files.items.find(f => String(f.id) === String(id));
+  if (!item) return false;
+
+  if (!state.currentUser) {
+    showToast('Войдите, чтобы переименовывать');
+    openAuthModal();
+    return false;
+  }
+  if (item.user_login !== state.currentUser) {
+    showToast('Можно переименовывать только свои файлы');
+    return false;
+  }
+
+  const clean = String(newName).trim().slice(0, 120);
+  if (!clean) { showToast('Введите название'); return false; }
+  if (clean === item.name) return true; // ничего не изменилось
+
+  try {
+    const { error } = await supabaseClient
+      .from('files')
+      .update({ name: clean })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    item.name = clean;
+    renderFiles();
+    showToast('Файл переименован');
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + (err.message || 'неизвестная'));
+    return false;
+  }
+}
+
+if (renameModal) {
+  document.getElementById('renameModalClose').addEventListener('click', closeRenameModal);
+  document.getElementById('renameCancel').addEventListener('click', closeRenameModal);
+
+  renameModal.addEventListener('click', e => {
+    if (e.target === renameModal) closeRenameModal();
+  });
+
+  renameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('renameSave').click();
+  });
+
+  document.getElementById('renameSave').addEventListener('click', async () => {
+    if (!renameFileId) return;
+    const btn = document.getElementById('renameSave');
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Сохраняю…';
+
+    const ok = await renameFileById(renameFileId, renameInput.value);
+
+    btn.disabled = false;
+    btn.textContent = oldText;
+
+    if (ok) closeRenameModal();
+  });
 }
 
 // ===== СКАЧИВАНИЕ / УДАЛЕНИЕ =====
@@ -753,7 +861,7 @@ document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
 fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
 
-// Поиск по файлам (работает, но на мобилке скрыт через CSS)
+// Поиск по файлам
 const filesSearchInput = document.getElementById('filesSearchInput');
 if (filesSearchInput) {
   filesSearchInput.addEventListener('input', e => {
@@ -762,7 +870,7 @@ if (filesSearchInput) {
   });
 }
 
-// Группировка (работает, но на мобилке скрыт через CSS)
+// Группировка
 const filesGroupModeEl = document.getElementById('filesGroupMode');
 if (filesGroupModeEl) {
   filesGroupModeEl.value = state.files.groupMode || 'subject';
