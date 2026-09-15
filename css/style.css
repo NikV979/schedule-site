@@ -3250,3 +3250,132 @@ tr:last-child td { border-bottom: none; }
     border-radius: 14px;
   }
 }
+/* ============================================================ */
+/* ===== ЗАГРУЗОЧНЫЙ ЭКРАН ==================================== */
+/* ============================================================ */
+.app-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-page);
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.app-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: appLoaderFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes appLoaderFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Логотип */
+.app-loader-logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--accent-even) 0%, var(--accent-odd) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 40px rgba(91, 75, 214, 0.35);
+  animation: appLoaderPulse 2s ease-in-out infinite;
+}
+[data-theme="dark"] .app-loader-logo {
+  box-shadow: 0 12px 40px rgba(143, 132, 245, 0.35);
+}
+
+@keyframes appLoaderPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+.app-loader-logo-text {
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* Заголовок */
+.app-loader-title {
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--accent-even) 0%, var(--accent-odd) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  margin-top: 4px;
+}
+
+.app-loader-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  margin-top: -6px;
+}
+
+/* Три точки-спиннер */
+.app-loader-spinner {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.app-loader-spinner span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-even);
+  animation: appLoaderBounce 1.2s ease-in-out infinite;
+}
+.app-loader-spinner span:nth-child(2) {
+  background: var(--accent-odd);
+  animation-delay: 0.15s;
+}
+.app-loader-spinner span:nth-child(3) {
+  background: var(--accent-even);
+  animation-delay: 0.3s;
+}
+
+@keyframes appLoaderBounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+/* Мобильная версия */
+@media (max-width: 900px) {
+  .app-loader-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+  }
+  .app-loader-logo-text { font-size: 22px; }
+  .app-loader-title { font-size: 24px; }
+  .app-loader-subtitle { font-size: 12px; }
+}
