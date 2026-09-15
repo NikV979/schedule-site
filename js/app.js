@@ -79,3 +79,22 @@ else {
   setTimeout(fitAll, 100);
   setTimeout(fitAll, 400);
 });
+// ===== СКРЫТИЕ ЗАГРУЗОЧНОГО ЭКРАНА =====
+function hideAppLoader() {
+  const loader = document.getElementById('appLoader');
+  if (!loader) return;
+  loader.classList.add('hidden');
+  // Удаляем из DOM через 600ms, чтобы не мешал кликам
+  setTimeout(() => {
+    if (loader.parentNode) loader.parentNode.removeChild(loader);
+  }, 600);
+}
+
+// Скрываем после полной загрузки страницы + небольшой задержки,
+// чтобы пользователь успел увидеть красивую анимацию
+window.addEventListener('load', () => {
+  setTimeout(hideAppLoader, 700);
+});
+
+// Подстраховка: если через 4 секунды ничего не произошло — тоже прячем
+setTimeout(hideAppLoader, 4000);
