@@ -2520,10 +2520,26 @@ tr:last-child td { border-bottom: none; }
     overflow: visible;
     max-width: calc(100vw - 96px);
   }
-  /* Скрываем иконку и текст, оставляем только кнопки/бейдж */
-  body.view-homework .tabs-title-hw .tabs-title-icon,
+  /* Изменяем шапку на телефоне*/
+   body.view-homework .tabs-title-hw .tabs-title-icon,
   body.view-files .tabs-title-files .tabs-title-icon {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-primary);
+  }
+  body.view-homework .tabs-title-hw .tabs-title-icon svg,
+  body.view-files .tabs-title-files .tabs-title-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   body.view-homework .tabs-title-hw .tabs-title-text,
   body.view-files .tabs-title-files .tabs-title-text {
