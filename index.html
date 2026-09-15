@@ -418,6 +418,25 @@
     </div>
   </div>
 
+  <!-- ============== МОДАЛКА ПЕРЕИМЕНОВАНИЯ ФАЙЛА ============== -->
+  <div class="hw-modal-overlay" id="renameModal">
+    <div class="hw-modal" style="max-width: 420px;">
+      <div class="hw-modal-head">
+        <h2>Переименовать файл</h2>
+        <button class="hw-modal-close" id="renameModalClose" type="button" title="Закрыть">✕</button>
+      </div>
+      <div class="hw-modal-body">
+        <label class="hw-field-label" for="renameInput">Новое название</label>
+        <input class="hw-input" id="renameInput" type="text" maxlength="120"
+               placeholder="Например: Конспект по матану, лекция 4" autocomplete="off">
+      </div>
+      <div class="hw-modal-foot">
+        <button class="hw-btn hw-btn-cancel" id="renameCancel" type="button">Отмена</button>
+        <button class="hw-btn hw-btn-save" id="renameSave" type="button">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </body>
