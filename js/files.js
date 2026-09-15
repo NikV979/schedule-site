@@ -189,26 +189,19 @@ function openFileContextMenu(fileId, x, y) {
   document.body.appendChild(menu);
   fileCtxMenuEl = menu;
 
-  // Позиционируем с учётом размеров
   const rect = menu.getBoundingClientRect();
   let left = x;
   let top = y;
-  if (left + rect.width > window.innerWidth - 8) {
-    left = window.innerWidth - rect.width - 8;
-  }
-  if (top + rect.height > window.innerHeight - 8) {
-    top = window.innerHeight - rect.height - 8;
-  }
+  if (left + rect.width > window.innerWidth - 8) left = window.innerWidth - rect.width - 8;
+  if (top + rect.height > window.innerHeight - 8) top = window.innerHeight - rect.height - 8;
   if (left < 8) left = 8;
   if (top < 8) top = 8;
   menu.style.left = left + 'px';
   menu.style.top = top + 'px';
 }
 
-// Глобальные обработчики закрытия контекстного меню
 document.addEventListener('click', () => closeFileContextMenu());
 document.addEventListener('contextmenu', e => {
-  // если клик не по файлу — закрываем
   if (!e.target.closest('.file-tile')) closeFileContextMenu();
 });
 window.addEventListener('scroll', () => closeFileContextMenu(), true);
@@ -242,7 +235,7 @@ function updateFilesClearBtnState() {
   btn.disabled = !hasOwn;
 }
 
-// ===== СПИСОК ВСЕХ ПРЕДМЕТОВ (для сетки как в домашке) =====
+// ===== СПИСОК ВСЕХ ПРЕДМЕТОВ =====
 function getAllSubjectsForFiles() {
   let subjects = [];
   try {
@@ -279,6 +272,7 @@ function renderFiles() {
   updateFilesTabBadge();
 
   const q = state.files.searchQuery.trim().toLowerCase();
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
   if (state.files.items.length === 0 && !q) {
     grid.innerHTML = '';
@@ -301,7 +295,7 @@ function renderFiles() {
     return;
   }
 
-  // ===== БЕЗ ГРУППИРОВКИ — квадратные мини-плитки =====
+  // ===== БЕЗ ГРУППИРОВКИ =====
   if (state.files.groupMode === 'none') {
     grid.innerHTML = filtered.length
       ? `<div class="files-flat-grid">
@@ -759,7 +753,7 @@ document.getElementById('fileCancel').addEventListener('click', closeFileModal);
 document.getElementById('fileSave').addEventListener('click', uploadPickedFile);
 fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
 
-// Поиск по файлам (в шапке)
+// Поиск по файлам (работает, но на мобилке скрыт через CSS)
 const filesSearchInput = document.getElementById('filesSearchInput');
 if (filesSearchInput) {
   filesSearchInput.addEventListener('input', e => {
@@ -768,7 +762,7 @@ if (filesSearchInput) {
   });
 }
 
-// Группировка (в шапке)
+// Группировка (работает, но на мобилке скрыт через CSS)
 const filesGroupModeEl = document.getElementById('filesGroupMode');
 if (filesGroupModeEl) {
   filesGroupModeEl.value = state.files.groupMode || 'subject';
