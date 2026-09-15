@@ -3395,3 +3395,7 @@ tr:last-child td { border-bottom: none; }
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+/* Кнопка обновления — только на мобилке */
+@media (min-width: 901px) {
+  .btn-refresh { display: none !important; }
+}
