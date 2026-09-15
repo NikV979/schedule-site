@@ -2835,3 +2835,196 @@ tr:last-child td { border-bottom: none; }
     border-radius: 9px;
   }
 }
+/* ============================================================ */
+/* ===== МОБИЛЬНАЯ ВЕРСИЯ — НОВЫЕ ШАПКИ И СПИСКИ ============== */
+/* ============================================================ */
+
+/* Текст для мобильных кнопок по умолчанию скрыт */
+.btn-mobile-text {
+  display: none;
+}
+
+@media (max-width: 900px) {
+
+  /* ===== ШАПКИ ДОМАШКИ И ФАЙЛОВ — БЕЗ БЕЙДЖА ===== */
+  body.view-homework .tabs-title-hw .tabs-badge,
+  body.view-files .tabs-title-files .tabs-badge {
+    display: none !important;
+  }
+
+  /* ===== КНОПКИ В ШАПКАХ — С ТЕКСТОМ, НЕ КРУГЛЫЕ ===== */
+  .hw-important-btn,
+  .hw-clear-all-btn,
+  .files-upload-btn-top {
+    height: 32px;
+    width: auto;
+    min-width: 0;
+    padding: 0 12px;
+    border-radius: 16px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 4px;
+  }
+
+  /* Скрываем иконки и десктопный текст, показываем мобильный */
+  .hw-important-btn .btn-icon,
+  .hw-clear-all-btn .btn-icon,
+  .files-upload-btn-top .btn-icon,
+  .files-upload-btn-top .btn-text-plus {
+    display: none !important;
+  }
+  .hw-important-btn .btn-text,
+  .hw-clear-all-btn .btn-text,
+  .files-upload-btn-top .btn-text {
+    display: none !important;
+  }
+  .hw-important-btn .btn-mobile-text,
+  .hw-clear-all-btn .btn-mobile-text,
+  .files-upload-btn-top .btn-mobile-text {
+    display: inline-block !important;
+  }
+
+  /* Стили кнопок */
+  .hw-important-btn {
+    border: 1.5px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+  .hw-important-btn.active {
+    background: var(--accent-even);
+    border-color: var(--accent-even);
+    color: #fff;
+  }
+
+  .hw-clear-all-btn {
+    border: 1.5px solid var(--accent-odd);
+    background: transparent;
+    color: var(--accent-odd);
+    font-weight: 700;
+  }
+
+  .files-upload-btn-top {
+    border: none;
+    background: var(--accent-even);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(91, 75, 214, 0.25);
+  }
+  .files-upload-btn-top:hover,
+  .files-upload-btn-top:active { transform: none; }
+
+  /* ===== В ШАПКЕ ФАЙЛОВ — СКРЫТЬ ПОИСК И СОРТИРОВКУ ===== */
+  .files-search-wrap,
+  .files-group-select-top {
+    display: none !important;
+  }
+
+  /* ===== ЗНАЧКИ В ШАПКАХ ПО ЦЕНТРУ ===== */
+  body.view-homework .tabs-title-hw,
+  body.view-files .tabs-title-files {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    flex: initial;
+    overflow: visible;
+    max-width: calc(100vw - 80px);
+  }
+  body.view-homework .tabs-title-hw .tabs-title-icon,
+  body.view-files .tabs-title-files .tabs-title-icon {
+    display: none;
+  }
+  body.view-homework .tabs-title-hw .tabs-title-text,
+  body.view-files .tabs-title-files .tabs-title-text {
+    display: none;
+  }
+
+  /* ===== СПИСОК ФАЙЛОВ — КАК В ДОМАШКЕ (вертикальные карточки) ===== */
+  .diary-wrap[data-view="files"] .hw-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .diary-wrap[data-view="files"] .files-card {
+    display: flex !important;
+    flex-direction: column;
+    height: auto !important;
+    min-height: 0 !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-soft);
+    transition: box-shadow 0.18s;
+  }
+
+  .diary-wrap[data-view="files"] .files-card-head {
+    padding: 12px 14px !important;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--fs-accent, #5B4BD6);
+    color: var(--fs-text, #fff);
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.15s;
+  }
+  .diary-wrap[data-view="files"] .files-card-head:hover {
+    filter: brightness(1.06);
+  }
+
+  .diary-wrap[data-view="files"] .files-card-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px !important;
+    font-weight: 700;
+    -webkit-line-clamp: 1;
+    word-break: break-word;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .diary-wrap[data-view="files"] .files-card-count {
+    font-size: 11px !important;
+    padding: 2px 8px !important;
+    min-width: 22px !important;
+    background: rgba(0,0,0,0.15);
+    border-radius: 20px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .diary-wrap[data-view="files"] .files-card-head.light .files-card-count {
+    background: rgba(0,0,0,0.08);
+  }
+
+  /* Тело карточки — раскрытие по клику, как в домашке */
+  .diary-wrap[data-view="files"] .files-card-body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.2s ease;
+    flex: initial !important;
+  }
+  .diary-wrap[data-view="files"] .files-card.expanded .files-card-body {
+    max-height: 20000px;
+    padding: 8px 12px 10px;
+  }
+  .diary-wrap[data-view="files"] .files-card:not(.expanded) .files-card-body {
+    padding: 0 12px;
+  }
+}
